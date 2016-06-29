@@ -54,22 +54,9 @@ type = input.coordinates(:,3);
 % Recalculate size of boxes used to cut out parts of the original image
 % size/2 of the box selected around the position of an atom column position in pixels 
 Box = round(FP.dist/input.dx/2)*ones(max(type),1); %calcBoxSize(FP.obs_bs,input.coordinates,input.dx);
-% % ISTEM
-% Box = [30;30;15];
-% % ABF Dimi
-% Box = [8;5;8];
-
-%% Zeta columnwise
-if FP.widthtype == 0
-    obs_back = 0;
-else
-%     obs_back = smoothBack(Box,FP.K,FP.L,FP.X,FP.Y,input.obs,input.dx);
-    obs_back = 0;
-end
 
 %% startmodel
-input_obs_bs = input.obs-obs_back;
-reshape_obs_bs = reshape(input_obs_bs,FP.K*FP.L,1);
+reshape_obs_bs = reshape(input.obs,FP.K*FP.L,1);
 Ga = sparse(FP.K*FP.L,FP.n_c+FP.fitzeta);
 % Ga2 = sparse(FP.K*FP.L,FP.n_c+FP.fitzeta);
 job = cell(FP.numWorkers,1);
@@ -136,7 +123,7 @@ else
     Estimated_eta = thetalin;
     Estimated_zeta = FP.zeta;
 end
-obs_bs = input_obs_bs - Estimated_zeta;
+obs_bs = input.obs - Estimated_zeta;
 eta_estimatedbackground = Estimated_eta;
 
 %% options for lsqnonlin
@@ -294,7 +281,7 @@ for j_iter = 1:FP.maxIter % maximum number of iterations for convergence
     if FP.fitzeta
         Estimated_eta = thetalin(1:end-1);
         Estimated_zeta = thetalin(end);
-        obs_bs = input_obs_bs - Estimated_zeta;
+        obs_bs = input.obs - Estimated_zeta;
     else
         Estimated_eta = thetalin;
     end
