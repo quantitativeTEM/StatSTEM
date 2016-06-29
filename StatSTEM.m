@@ -24,7 +24,7 @@ pathG = [path,filesep,'GUI'];       % Path for loading GUI functions
 addpath([path,';',genpath(pathF),';',genpath(pathG)])
 
 % Start a splash screen
-splashImg = imread([pathG,filesep,'splash.png']);
+splashImg = imread('splash.png');
 spl = splash(splashImg);
 
 % Check matlab version, and switch opengl
@@ -33,7 +33,7 @@ v = str2double(v(1:4));
 opengl hardware
 
 % Load the standard pathname
-h.startPath = [pathG,filesep,'startPath.txt'];
+h.startPath = 'startPath.txt';
 if exist(h.startPath, 'file')==0
     if ispc
         h.PathName = getenv('USERPROFILE'); 
@@ -77,7 +77,7 @@ h.left.loadStore.load = uicontrol('Parent',h.left.loadStore.panel,'units','norma
 h.left.loadStore.save = uicontrol('Parent',h.left.loadStore.panel,'units','normalized','Position',[0.49 0.2 0.47 0.75],'String','Save','FontSize',10,'Enable','off');
 
 % Create image of StatSTEM
-imgPan = imread([pathG,filesep,'imgGUI.png']);
+imgPan = imread('imgGUI.png');
 h = panelStatSTEM(h,imgPan);
 
 %% Create right panels
