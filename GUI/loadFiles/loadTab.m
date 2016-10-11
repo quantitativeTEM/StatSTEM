@@ -25,7 +25,7 @@ if length(tabs)==1
 else
     % Load tab
     v = version('-release');
-    if strcmp(v(1:4),'2015');
+    if str2double(v(1:4))>=2015
         tab = get(h.right.tabgroup,'SelectedTab');
     else
         tab = tabs(get(h.right.tabgroup,'SelectedIndex'));
