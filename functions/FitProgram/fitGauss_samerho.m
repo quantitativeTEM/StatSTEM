@@ -50,19 +50,7 @@ rho_estimatedbackground = FP.rho;
 type = input.coordinates(:,3);
 
 %% Recalculate size of boxes used to cut out parts of the original image
-Box = round(FP.dist/input.dx)/2*ones(max(type),1); %calcBoxSize(FP.obs_bs,input.coordinates,input.dx);
-% % ISTEM
-% Box = [30;30;15];
-% % ABF Dimi
-% Box = [8;5;8];
-% % ABF DF4 Nico Armand
-% Box = [12;12;4];
-% % ABF HAADF Nico Armand
-% Box = [23.5;23.5;16];
-% % LAADF Nico Armand
-% Box = [17.5;17.5;9];
-% % IDPC
-% Box(3) = Box(1)/2;
+Box = round(FP.dist/input.dx)/2*ones(max(type),1); 
 
 %% startmodel
 reshape_obs_bs = reshape(input.obs,FP.K*FP.L,1);
