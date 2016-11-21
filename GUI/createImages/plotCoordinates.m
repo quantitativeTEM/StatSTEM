@@ -1,11 +1,12 @@
-function plotCoordinates(ax,coor,name,marker)
+function plotCoordinates(ax,coor,name,pathColor,marker,scaleMarker)
 % plotCoordinates - plot coordinates in image
 %
 %   syntax - plotCoordinates(ax,coor,name,marker)
-%       ax     - handle to axes
-%       coor   - coordinates
-%       name   - name of object
-%       marker - marker
+%       ax        - handle to axes
+%       coor      - coordinates
+%       pathColor - location of text file with marker colors
+%       name      - name of object
+%       marker    - marker
 %
 
 %--------------------------------------------------------------------------
@@ -21,18 +22,23 @@ if isempty(coor)
     return
 end
 
-if nargin<4
+if nargin<5
     marker = '.';
 end
 
-msize = coorMarkerSize(ax,marker);
+if nargin<6
+    scaleMarker = 1;
+end
+
+msize = coorMarkerSize(ax,marker,scaleMarker);
 hold(ax, 'on')
 if ~isempty(coor)
     h = zeros(max(coor(:,3)),1);
+    clor = colorAtoms(pathColor,1:max(coor(:,3)));
     for k=1:max(coor(:,3))
         indices = find(coor(:,3)==k);
         if ~isempty(indices)
-            h(k) = plot(ax,coor(indices,1),coor(indices,2),marker,'Color',colorAtoms(k),'MarkerSize',msize,'Tag',name);
+            h(k) = plot(ax,coor(indices,1),coor(indices,2),marker,'Color',clor(k,:),'MarkerSize',msize,'Tag',name);
         end
     end
 end

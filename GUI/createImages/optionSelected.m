@@ -1,10 +1,11 @@
-function optionSelected(hObject,event,tab)
+function optionSelected(hObject,event,tab,h)
 % optionSelected - Callback to show or hide figure option
 %
 %   syntax: optionSelected(hObject,event,tab)
 %       hObject - Reference to button
 %       event   - structure recording button events
 %       tab     - reference to the selected tab
+%       h       - structure holding references to StatSTEM interface
 %
 
 %--------------------------------------------------------------------------
@@ -31,5 +32,5 @@ if ~isempty(event.Indices)
     value = get(handle.figOptions.selImg.listbox,'Value');
 
     % Now update figure
-    showHideFigOptions(tab,value,data{row,2},data{row,1})
+    showHideFigOptions(tab,value,data{row,2},data{row,1},h,1)
 end

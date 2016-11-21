@@ -24,7 +24,7 @@ usr = get(tab,'Userdata');
 value = get(usr.figOptions.selImg.listbox,'Value');
 str = get(usr.figOptions.selImg.listbox,'String');
 
-%% First delete all references to the atom counting
+%% First delete all references to the atom counting (restore figure if necessary)
 for n=1:length(str)
     data = get(usr.figOptions.selOpt.(['optionsImage',num2str(n)]),'Data');
     if isempty(data)
@@ -41,7 +41,7 @@ for n=1:length(str)
             elseif strcmp(str{n},'Model')
                 obs = usr.file.output.model;
             end
-            deleteAtomCounts(tab,obs)
+            deleteAtomCounts(h,tab,obs,'Atom Counts')
             usr = get(tab,'Userdata');
         end
         data = data(~ind,:);

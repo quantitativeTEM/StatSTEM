@@ -1,12 +1,12 @@
-function plotAtomCounts(ax,ax2,coor,counts,nameTag,scaleMarker,range,cmap)
-% plotAtomCounts - plot the atom counts
+function showStrainMap(ax,ax2,coor,eps,name,scaleMarker,sColBar,range,cmap)
+% showStrainMap - make a strain map in image
 %
-%   syntax: plotAtomCounts(ax1,ax2,coor,counts,nameTag,scaleMarker,sColBar,range)
-%       ax      - handle to axes
-%       ax2     - handle to 2nd axes
-%       coor    - array with the coordinates
-%       counts  - array with the atom counts
-%       sColBar - Show colorbar
+%   syntax - showStrainMap(ax,coor,eps,name,scaleMarker)
+%       ax        - handle to axes
+%       ax2       - handle to 2nd axes
+%       coor      - coordinates
+%       eps       - the strain values
+%       name      - name of object
 %       range   - colormap limits of axes (optional)
 %       cmap    - colormap (optional)
 %
@@ -20,19 +20,26 @@ function plotAtomCounts(ax,ax2,coor,counts,nameTag,scaleMarker,range,cmap)
 %--------------------------------------------------------------------------
 
 if nargin<5
-    nameTag = 'Atom Counts';
+    name = [char(949),'_xx'];
 end
 if nargin<6
     scaleMarker = 1;
 end
 if nargin<7
-    range = [0,max(counts)];
-else
-    if isempty(range)
-        range = [0,max(counts)];
-    end
+    sColBar = 1;
 end
 if nargin<8
+    % Determine range of strain values
+    range = max( [max(eps),-min(eps)] );
+    range = [-range,range];
+else
+    if isempty(range)
+        % Determine range of strain values
+        range = max( [max(eps),-min(eps)] );
+        range = [-range,range];
+    end
+end
+if nargin<9
     cmap = colormap('jet');
 else
     if isempty(cmap)
@@ -41,14 +48,12 @@ else
 end
 
 c_x = linspace(range(1),range(2),size(cmap,1));
-RGBvec = getRGBvec(cmap,c_x,counts,'exact');
-
+RGBvec = getRGBvec(cmap,c_x,eps,'int');
 % Plot
-msize = coorMarkerSize(ax,'s',scaleMarker);
+msize = coorMarkerSize(ax,'.',scaleMarker);
 hold(ax, 'on')
-h = scatter(ax,coor(:,1),coor(:,2),msize,RGBvec,'filled','Marker','s','ZData',counts,'Tag','atom counts');
+h = scatter(ax,coor(:,1),coor(:,2),msize,RGBvec,'filled','Tag','Strain','Userdata',eps);
 hold(ax,'off')
-
 
 % Add colorbar in second axes
 % Check matlab version, and switch opengl
@@ -77,6 +82,7 @@ end
 colormap(ax2,'jet')
 caxis(ax2,range);
 
-% Store reference to histogram
+% Store reference to coordinates
 data = get(ax,'Userdata');
-set(ax,'Userdata',[data;{nameTag h}])
+set(ax,'Userdata',[data;{name h}])
+

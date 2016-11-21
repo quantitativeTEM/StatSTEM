@@ -51,7 +51,7 @@ else
 end
 usr.figOptions.selOpt.(['optionsImage',num2str(num)]) = uitable('Parent',usr.figOptions.selOpt.main,'units','normalized',...
     'Position',[0 0 1 1],'ColumnFormat',columnformat,'Data',options,'ColumnEditable',[true false],'RowName',[],'ColumnName',[],...
-    'ColumnWidth',{15 110},'CellSelectionCallback',{@optionSelected,tab},'Enable','off','Visible','off');
+    'ColumnWidth',{15 110},'CellSelectionCallback',{@optionSelected,tab,h},'Enable','off','Visible','off');
 
 % Depending on status, show or hide figure
 if show

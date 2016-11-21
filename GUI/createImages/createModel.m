@@ -1,4 +1,4 @@
-function createModel(tab,show)
+function createModel(tab,h,show)
 % createModel - Created an image and option to show the fitting model
 %
 %   In this function all necessary steps are taken to show the fitted model
@@ -7,6 +7,7 @@ function createModel(tab,show)
 %
 %       syntax: createModel(tab,show)
 %           tab  - reference to the tab in the StatSTEM interface
+%           h    - structure holding references to StatSTEM interface
 %           show - Logical value indicating whether the image must be shown
 %
 
@@ -24,6 +25,7 @@ end
 
 % Get handle to panels in tab
 usr = get(tab,'Userdata');
+userdata = get(get(tab,'Parent'),'Userdata');
 
 % Define nameTag
 nameTag = 'Fitted coordinates';
@@ -51,7 +53,7 @@ options = [num2cell(false(s,1)) optionsObs(:,2)];
 options = [options;{true,nameTag}];
 usr.figOptions.selOpt.(['optionsImage',num2str(num)]) = uitable('Parent',usr.figOptions.selOpt.main,'units','normalized',...
     'Position',[0 0 1 1],'ColumnFormat',columnformat,'Data',options,'ColumnEditable',[true false],'RowName',[],'ColumnName',[],...
-    'ColumnWidth',{15 110},'CellSelectionCallback',{@optionSelected,tab},'Enable','off','Visible','off');
+    'ColumnWidth',{15 110},'CellSelectionCallback',{@optionSelected,tab,h},'Enable','off','Visible','off');
 
 % Add option to observation
 valObs = strcmp(str,'Observation');
@@ -59,6 +61,9 @@ set(usr.figOptions.selOpt.(['optionsImage',num2str(valObs)]),'Data',[optionsObs;
 
 % Depending on status, show or hide figure
 if show
+    % Get scale of marker size
+    scaleMarker = str2double(get(usr.figOptions.optFig.msval,'String'));
+    
     % Show new panel and hide previous panel
     set(usr.figOptions.selOpt.(['optionsImage',num2str(num)]),'Enable','on','Visible','on')
     set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Enable','off','Visible','off')
@@ -66,7 +71,7 @@ if show
     % Show model with fitted coordinates
     showObservation(usr.images.ax,usr.file.output.model,usr.file.input.dx,usr.file.input.dx,usr.file.input.obs)
     % Plot fitted coordintes
-    plotCoordinates(usr.images.ax,[usr.file.output.coordinates(:,1) usr.file.output.coordinates(:,2) usr.file.input.coordinates(:,3)],nameTag,'+');
+    plotCoordinates(usr.images.ax,[usr.file.output.coordinates(:,1) usr.file.output.coordinates(:,2) usr.file.input.coordinates(:,3)],nameTag,userdata.pathColor,'+',scaleMarker);
 end
 
 % Update parameters

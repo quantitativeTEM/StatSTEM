@@ -18,7 +18,7 @@ function plotThickSI(ax,val,offset)
 set(ax,'units','normalized','Position',[0.1300 0.1100 0.7750 0.8150])
 plot(ax,(1:length(val))+offset,val,'r*', 'MarkerSize', 10)
 xlabel(ax,'Component number')
-ylabel(ax,'Mean scattering cross-section (e^-Å^2)')
+ylabel(ax,['Mean scattering cross-section (e^-',char(197),'^2)'])
 xlim(ax,[0,length(val)+offset])
 ylim(ax,[0,max(val)])
 

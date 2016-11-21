@@ -15,6 +15,7 @@ function msize = coorMarkerSize(ax,marker,rescale)
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
+
 if nargin<3
     rescale = 1;
 end
@@ -46,6 +47,8 @@ switch marker
     case '+'
         val = 50;
     case 's'
+        val = 3000*min(pos(3:4))/L*rescale;
+    case 'arrow'
         val = 50;
     otherwise
         val = 30;
