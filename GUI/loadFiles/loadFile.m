@@ -1,5 +1,5 @@
 function loadFile(hObject,event,h)
-% loadFile - Load an file into the StatSTEM interface
+% loadFile - Load a file into the StatSTEM interface
 %
 %   syntax: loadFile(hObject,event,h)
 %       hObject - Reference to button
@@ -58,7 +58,7 @@ end
 
 % Ask for pixel size
 if strcmp(dx,'ask')
-    dx = inputdlg('Please give the pixel size (Å)','Pixel Size',[1 50]);
+    dx = inputdlg(['Please give the pixel size (',char(197),')'],'Pixel Size',[1 50]);
     drawnow; pause(0.05); % MATLAB hang 2013 version
     if ~isempty(dx)
         dx = str2double(dx{1});
@@ -74,6 +74,7 @@ end
 %% The empty tab will be used to load the file to
 % Create an axes and panel to show images
 usr.images.img = uipanel('Parent',usr.images.main,'units','normalized','Position',[0 0 1 1],'ShadowColor',[0.8 0.8 0.8],'ForegroundColor',[0.8 0.8 0.8],'HighlightColor',[0.8 0.8 0.8],'BackgroundColor',[0.8 0.8 0.8]);
+usr.images.ax2 = axes('Parent',usr.images.img,'units','normalized');axis off
 usr.images.ax = axes('Parent',usr.images.img,'units','normalized');
 
 % Create listboxs for selecting which figure is shown
@@ -84,17 +85,27 @@ usr.fitOpt.peakfinding = standardPeakOptions(usr.file.input.obs);
 usr.fitOpt.model = standardFitOptions;
 % Load standard atom counting options
 usr.fitOpt.atom = standardAtomOptions;
+% Load standard strainmapping options
+usr.fitOpt.strain = standardStrainOptions;
 % Update userdata of tab
 set(tab,'Userdata',usr);
 
 % Create all possible images
-createObservation(tab);
+createObservation(tab,h);
 usr = get(tab,'Userdata');
 if any(strcmp(fieldnames(usr.file.input),'rho'))
-    types = max(input.coordinates(:,3));
+    types = max(usr.file.input.coordinates(:,3));
     usr.fitOpt.model.rho_start = zeros(types,1);
     for i = 1:types
-        rho_temp = input.rho(input.coordinates(:,3) == i);
+        try
+            rho_temp = usr.file.input.rho(usr.file.input.coordinates(:,3) == i);
+        catch
+            if any(strcmp(fieldnames(usr.file),'output'))
+                rho_temp = usr.file.output.rho(usr.file.input.coordinates(:,3) == i);
+            else
+                rho_temp=0.5;
+            end
+        end
         usr.fitOpt.model.rho_start(i)= median(rho_temp);
     end
     % Update userdata of tab
@@ -103,7 +114,7 @@ end
 
 % Create model if fitted model is available
 if any(strcmp(fieldnames(usr.file),'output'))
-    createModel(tab,0)
+    createModel(tab,h,0)
     createHist(tab,h,0)
     usr = get(tab,'Userdata');
     
@@ -162,6 +173,13 @@ if any(strcmp(fieldnames(usr.file),'atomcounting'))
         set(usr.figOptions.selOpt.(['optionsImage',num2str(value2)]),'Data',data);
     end
     
+    % Update userdata
+    set(tab,'Userdata',usr)
+end
+
+if any(strcmp(fieldnames(usr.file),'strainmapping'))
+    addStrainOpt(tab)
+    usr = get(tab,'Userdata');
 end
 
 % Update the name of the tab and the tooltipstring
@@ -194,6 +212,17 @@ set(h.left.loadStore.save,'Enable','on')
 
 % Add a new empty tab
 createEmptyTab(h.right.tabgroup)
+
+% Enable figure options button
+set(usr.figOptions.optFig.scalebar,'Enable','on')
+set(usr.figOptions.optFig.scaleVal,'Enable','on')
+set(usr.figOptions.optFig.scaleTxt,'Enable','inactive')
+set(usr.figOptions.optFig.mstext,'Enable','inactive')
+set(usr.figOptions.optFig.msval,'Enable','on')
+set(usr.figOptions.optFig.colors,'Enable','on')
+
+% Enable color button
+set(usr.figOptions.optFig.colors,'Callback',{@editColors,h},'Enable','on')
 
 % Enable export button
 set(usr.figOptions.export.but,'Callback',{@exportFigure,h},'Enable','on')
