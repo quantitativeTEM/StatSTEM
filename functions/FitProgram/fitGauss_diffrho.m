@@ -54,6 +54,10 @@ type = input.coordinates(:,3);
 % Recalculate size of boxes used to cut out parts of the original image
 % size/2 of the box selected around the position of an atom column position in pixels 
 Box = round(FP.dist/input.dx/2)*ones(max(type),1); %calcBoxSize(FP.obs_bs,input.coordinates,input.dx);
+% % ISTEM
+% Box = [30;30;15];
+% % ABF Dimi
+% Box = [8;5;8];
 
 %% startmodel
 reshape_obs_bs = reshape(input.obs,FP.K*FP.L,1);

@@ -24,10 +24,18 @@ abort = 0;
 
 %% Fitting options
 FP = prepOpt(input,FP);
+% Check if input coordinates are given within image boundaries
+sImg = size(input.obs)*input.dx;
+sRho = max(FP.rho)*3;
+if any(input.coordinates(:,1)<(-sRho+input.dx)) || any(input.coordinates(:,2)<(-sRho+input.dx)) || ...
+        any(input.coordinates(:,1)>(sImg(2)+sRho)) || any(input.coordinates(:,2)>(sImg(1)+sRho))
+    error('Input coordinates are outside the boundaries of the image')
+end
 
 %% Fitting procedure
 % Select different method
 if FP.newP
+%     FP.patch = 1;
     % Find a good starting value for rho, if necessary
     if FP.findRho==1
         % Fit to get a starting value of the width
@@ -37,6 +45,7 @@ if FP.newP
             rho_temp = FP.rho(input.coordinates(:,3) == i);
             FP.rho_start(i)= median(rho_temp);
         end
+%         FP.rho_start = [0.529614257812499;0.648541259765625;0.5];
         [output,abort] = fitRho(input, FP,0,10^-2,Inf);
         offset = 25; % For progress bar
         if abort
@@ -47,27 +56,50 @@ if FP.newP
         offset = 0;
     end
     
-    % Select the fitting options in terms of different or same width of the Gaussian functions
-    if FP.widthtype == 0
-        % Fit different height and width of gaussians for each column
-        [output,abort] = fitGauss_diffrho(input, FP, offset);
-    else
-        % Fit height of gaussians with same width for each column
-        [output,abort] = fitGauss_samerho(input, FP, offset);
-        if ~abort
-            coor = input.coordinates(:,1:2);
-            input.coordinates(:,1:2) = output.coordinates(:,1:2);
-            if FP.fitRho==1
-                % Fit width of gaussians with same width for each column
-                types = max(input.coordinates(:,3));
-                FP.rho_start = zeros(types,1);
-                for i = 1:types
-                    rho_temp = output.rho(input.coordinates(:,3) == i);
-                    FP.rho_start(i)= median(rho_temp);
+    if ~FP.patch
+        % Select the fitting options in terms of different or same width of the Gaussian functions
+        if FP.widthtype == 0
+            % Fit different height and width of gaussians for each column
+            [output,abort] = fitGauss_diffrho(input, FP, offset);
+        else
+            % Fit height of gaussians with same width for each column
+            [output,abort] = fitGauss_samerho(input, FP, offset);
+%             output.coordinates(:,1:2) = input.coordinates(:,1:2);
+            if ~abort
+                coor = input.coordinates(:,1:2);
+                input.coordinates(:,1:2) = output.coordinates(:,1:2);
+                if FP.fitRho==1
+                    % Fit width of gaussians with same width for each column
+                    types = max(input.coordinates(:,3));
+                    FP.rho_start = zeros(types,1);
+                    for i = 1:types
+                        rho_temp = output.rho(input.coordinates(:,3) == i);
+                        FP.rho_start(i)= median(rho_temp);
+                    end
+                    [output,abort] = fitRho(input, FP, 75);
                 end
-                [output,abort] = fitRho(input, FP, 75);
+                input.coordinates(:,1:2) = coor;
             end
-            input.coordinates(:,1:2) = coor;
+        end
+    else
+        [output,abort] = fitGauss_patch(input, FP);
+        if ~abort && FP.widthtype == 1 
+            types = max(input.coordinates(:,3));
+            FP.rho_start = zeros(types,1);
+            for i = 1:types
+                rho_temp = output.rho(input.coordinates(:,3) == i);
+                FP.rho_start(i)= median(rho_temp);
+            end
+            if ~abort
+                coor = input.coordinates(:,1:2);
+                input.coordinates(:,1:2) = output.coordinates(:,1:2);
+                FP.zeta = output.zeta;
+                if FP.fitRho==1
+                    % Fit width of gaussians with same width for each column
+                    [output,abort] = fitRho(input, FP,75);
+                end
+                input.coordinates(:,1:2) = coor;
+            end
         end
     end
 else
