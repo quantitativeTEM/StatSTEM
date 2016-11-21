@@ -30,21 +30,34 @@ spl = splash(splashImg);
 % Check matlab version, and switch opengl
 v = version('-release');
 v = str2double(v(1:4));
-opengl hardware
+if ispc
+    opengl hardware
+end
 
 % Load the standard pathname
-h.startPath = 'startPath.txt';
+h.startPath = [path,filesep,'startPath.txt'];
 if exist(h.startPath, 'file')==0
     if ispc
         h.PathName = getenv('USERPROFILE'); 
     else
         h.PathName = getenv('HOME');
     end
+    fid = fopen( h.startPath, 'wt' );
+    fprintf( fid, '%s', h.PathName);
+    fclose(fid);
 else
     fileID = fopen(h.startPath);
     h.PathName = textscan(fileID, '%s', 'delimiter', '\n');
     h.PathName = h.PathName{1}{1};
     fclose(fileID);
+end
+
+h.datPath = [path,filesep,'GUI',filesep,'datPath.txt'];
+if exist(h.datPath, 'file')==0
+    pname = [path,filesep,'Database',filesep];
+    fid = fopen( h.datPath, 'wt' );
+    fprintf( fid, '%s', pname);
+    fclose(fid);
 end
 % The structure 'h' will be the main structure containing all the
 % references to all structures of the GUI
@@ -58,9 +71,18 @@ h.fig = figure('units','pixels','outerposition',[screen(3)/2-400 screen(4)/2-300
 h.left.main = uipanel('Parent', h.fig, 'units', 'normalized', 'Position', [0 0 0.25 1],'BackgroundColor',[0.95,0.95,0.95]);
 h.right.main = uipanel('Parent', h.fig, 'units', 'normalized', 'Position', [0.25 0 0.75 1],'BackgroundColor',[0.7 0.7 0.7]);
 
+% Store references for zooming
+a = findall(h.fig);
+h.zoom.in = findall(a,'ToolTipString','Zoom In');
+h.zoom.out = findall(a,'ToolTipString','Zoom Out');
+
 %% Left main panel
 warning('off','all')
-h.left.tabgroup = uitabgroup(h.left.main,'units','normalized','Position',[0 0.35 1 0.65]);
+if isunix
+    h.left.tabgroup = uitabgroup(h.left.main,'units','normalized','Position',[-0.04 0.35 1.07 0.65]);
+else
+    h.left.tabgroup = uitabgroup(h.left.main,'units','normalized','Position',[0 0.35 1 0.65]);
+end
 h.left.peak.tab = uitab(h.left.tabgroup,'Title','Preparation');
 h.left.fit.tab = uitab(h.left.tabgroup,'Title','Fit Model');
 h.left.ana.tab = uitab(h.left.tabgroup,'Title','Analysis');
@@ -77,7 +99,7 @@ h.left.loadStore.load = uicontrol('Parent',h.left.loadStore.panel,'units','norma
 h.left.loadStore.save = uicontrol('Parent',h.left.loadStore.panel,'units','normalized','Position',[0.49 0.2 0.47 0.75],'String','Save','FontSize',10,'Enable','off');
 
 % Create image of StatSTEM
-imgPan = imread('imgGUI.png');
+imgPan = imread([pathG,filesep,'imgGUI.png']);
 h = panelStatSTEM(h,imgPan);
 
 %% Create right panels
@@ -87,7 +109,8 @@ h.right.tabgroup = uitabgroup(h.right.main,'units','normalized','Position',[0 0.
 % Dimensions of panels
 tabs.PathName = h.PathName;
 tabs.dim_x = 150;
-tabs.dim_y = [22;50];
+tabs.dim_y = [50;90];%[22;50];
+tabs.pathColor = [path,filesep,'GUI',filesep,'StatSTEMcolors.txt'];
 set(h.right.tabgroup,'Userdata',tabs);
 createEmptyTab(h.right.tabgroup)
 userdata = get(h.right.tabgroup,'Userdata');
@@ -129,10 +152,11 @@ for n=1:length(tabs)
     % Get handle of tabs
     usr = get(tabs(n),'Userdata');
     set(usr.images.main,'Position',[0 0 1-scale_x(1) 1])
-    set(usr.figOptions.title.main,'Position',[1-scale_x(1) scale_y(2)+scale_y(3) scale_x(1) scale_y(1)]);
-    set(usr.figOptions.selImg.main,'Position',[1-scale_x(1) scale_y(2)+scale_y(3)/2 scale_x(1) scale_y(3)/2]);
-    set(usr.figOptions.selOpt.main,'Position',[1-scale_x(1) scale_y(2) scale_x(1) scale_y(3)/2]);
-    set(usr.figOptions.export.main,'Position',[1-scale_x(1) 0 scale_x(1) scale_y(2)]);
+%     set(usr.figOptions.title.main,'Position',[1-scale_x(1) scale_y(1)+scale_y(2) scale_x(1) scale_y(1)]);
+    set(usr.figOptions.selImg.main,'Position',[1-scale_x(1) scale_y(1)+2*scale_y(2)/3 scale_x(1) scale_y(2)/3]);
+    set(usr.figOptions.selOpt.main,'Position',[1-scale_x(1) scale_y(1)+scale_y(2)/3 scale_x(1) scale_y(2)/3]);
+    set(usr.figOptions.optFig.main,'Position',[1-scale_x(1) scale_y(1) scale_x(1) scale_y(2)/3]);
+    set(usr.figOptions.export.main,'Position',[1-scale_x(1) 0 scale_x(1) scale_y(1)]);
 end
 
 % After the addition of panels, check figure size
@@ -178,9 +202,8 @@ set(b,'Visible','off')
 b = findall(a,'ToolTipString','Show Plot Tools and Dock Figure');
 set(b,'Visible','off')
 b = findall(a,'ToolTipString','Insert Colorbar');
+h.colorbar = b;
 set(b,'ClickedCallback',{@insertColorbar,h})
-h.zoom.in = findall(a,'ToolTipString','Zoom In');
-h.zoom.out = findall(a,'ToolTipString','Zoom Out');
 set(h.zoom.in,'ClickedCallback',{@zoomIn_AxinFig,h,h.zoom.out})
 set(h.zoom.out,'ClickedCallback',{@zoomOut_AxinFig,h,h.zoom.in})
 b = findall(a,'ToolTipString','Data Cursor');
@@ -192,7 +215,7 @@ set(b,'ClickedCallback',{@insertPan,h})
 % For GUI main frame
 if v<2015
     set(h.fig,'ResizeFcn',{@Resize_figure,h});
-    set(h.right.tabgroup,'SelectionChangeCallback',{@fileChanged,h});
+    set(h.right.tabgroup,'SelectionChangeFcn',{@fileChanged,h});
 else
     set(h.fig,'SizeChangedFcn',{@Resize_figure,h});
     set(h.right.tabgroup,'SelectionChangedFcn',{@fileChanged,h});
