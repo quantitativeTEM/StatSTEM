@@ -11,17 +11,23 @@ classdef splash
         image % The shown image (in matrix format)
         window % The window showing the image
         pos = [];% The location of the window in pixels (x,y)
+        maxTime = 60; % Maximum time a splash screen can be shown
     end
 
     methods
-        function obj = splash(img,pos)
+        function obj = splash(img,pos,t)
             % splash - create a splash screen
             %
             %   syntax: obj = splash(img,pos)
             %       img - image (in matlab format)
             %       pos - position on screen (pixels)
             %       obj - reference to splash screen
+            %       t   - maximum time splash screen will be shown (standard 60 second)
             %
+            
+            if nargin>2
+                obj.maxTime = t;
+            end
             
             obj.image = img;
             
@@ -33,7 +39,7 @@ classdef splash
             icon = javax.swing.ImageIcon(splashImg);
             label = javax.swing.JLabel(icon);
             obj.window.getContentPane.add(label);
-            obj.window.setAlwaysOnTop(true);
+            obj.window.setAlwaysOnTop(false);
             obj.window.pack;
             
             if nargin==2
@@ -47,6 +53,7 @@ classdef splash
             % Set location of window
             updateLocation(obj)
             show(obj)
+            obj.window.repaint(1,4000,400,10,10)
         end
         
         function close(obj)

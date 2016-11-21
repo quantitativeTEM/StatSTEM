@@ -31,67 +31,132 @@ if isempty(tab)
 end
 
 usr = get(tab,'Userdata');
+val = get(usr.figOptions.selImg.listbox,'Value');
+str = get(usr.figOptions.selImg.listbox,'String');
 
 state = get(hObject,'State');
-if strcmp(state,'on')
-    if v<2015
-        h_bar = colorbar('peer',usr.images.ax);
-    else
-        h_bar = colorbar(usr.images.ax);
-    end
-    set(hObject,'State','on');
-else
-    a = get(usr.images.img,'Children');
-    for n=1:length(a)
-        if isa(a(n),'matlab.graphics.illustration.ColorBar')
-            c = get(a(1),'UIContextMenu');
-            m = findall(c,'Label','Interactive Colormap Shift');
-            set(m,'Checked','off')
-            break
-        end
-    end
-    if v<2015
-        colorbar('peer',usr.images.ax,state)
-    else
-        colorbar(usr.images.ax,state)
-    end
+if strcmp(state,'off')
+    showImage(tab,str{val},h,0,1)
     return
 end
 
-acounts = 0;
+sAx = 0;
 val = get(usr.figOptions.selImg.listbox,'Value');
 data = get(usr.figOptions.selOpt.(['optionsImage',num2str(val)]),'Data');
 if ~isempty(data)
-    ind = strcmp(data(:,2),'Atom Counts');
-    if any(ind)
-        acounts = data{ind,1};
+    ind = strcmp(data(:,2),'Atom Counts') | strcmp(data(:,2),'Lib Counts');
+    ind2 = strcmp(data(:,2),[char(949),'_xx']) | strcmp(data(:,2),[char(949),'_xy']) | strcmp(data(:,2),[char(949),'_yy']) | strcmp(data(:,2),[char(969),'_xy']);
+    if any(ind) || any(ind2)
+        for n=1:length(ind)
+            k = n;
+            if ind(n) && data{n,1}
+                sAx = 1;
+                state = 'off';
+                ylab = 'Number of atoms';
+                break
+            elseif ind2(n) && data{n,1}
+                sAx = 1;
+                state = 'off';
+                ylab = [data{n,2}(1),'_{',data{n,2}(3:4),'}'];
+                break
+            end
+        end
     end
 end
 
-% Now create uicontextmenu, dependend on plotted atomcounts
+% Redefine limits of axes, if no colorbar is shown
+warning('off','all') % For old versions MATLAB
+child = get(usr.images.img,'Children');
+n1 = 0;
+for i=1:length(child)
+    if strcmp(get(child(i),'Tag'),'Colorbar')
+        n1 = i;
+    end
+end
+if n1~=0
+    % Also remove colorbar if already shown
+    if v<2015
+        colorbar('peer',usr.images.ax2,'Off')
+    else
+        colorbar(usr.images.ax2,'Off')
+    end
+else
+%     posOut = get(usr.images.ax,'OuterPosition');
+%     set(usr.images.ax,'OuterPosition',[-0.1 -0.1 1.1 1.1])
+end
+warning('on','all') % For old versions MATLAB
 
+if v<2015
+    warning('off','all')
+    h_bar = colorbar('peer',usr.images.ax);
+    set(h_bar,'Visible',state,'Tag','Colorbar')
+    if sAx
+        pos = get(h_bar,'Position');
+        h_bar2 = colorbar('peer',usr.images.ax2,'Position',pos);
+        set(h_bar2,'Tag','Colorbar2')
+    end
+    warning('on','all')
+else
+    h_bar = colorbar(usr.images.ax,'Visible',state,'Tag','Colorbar');
+    if sAx
+        pos = get(h_bar,'Position');
+        h_bar2 = colorbar(usr.images.ax2,'Position',pos,'Tag','Colorbar2');
+    end
+end
+set(hObject,'State','on');
+
+% Now create uicontextmenu, dependend on plotted atomcounts
 c = uicontextmenu;
 
 % Create menu items for the uicontextmenu
-m1 = uimenu(c,'Label','Delete','Callback',{@delBar,h_bar});
+m1 = uimenu(c,'Label','Delete','Callback',{@delBar,tab,str{val},h});
 
-if acounts
-    ylabel(h_bar,'Number of atoms')
-else
+if sAx
+    switch data{k,2}
+        case 'Atom Counts'
+            ra = [0,max(usr.file.atomcounting.Counts)];
+            ylab = 'Atom Counts';
+        case 'Lib Counts'
+            ra = [0,max(usr.file.libcounting.Counts)];
+            ylab = 'Atom Counts';
+        case [char(949),'_xx']
+            ra = max( [max(usr.file.strainmapping.eps_xx),-min(usr.file.strainmapping.eps_xx)] );
+            ra = [-ra,ra];
+            ylab = '\epsilon_{xx}';
+        case [char(949),'_xy']
+            ra = max( [max(usr.file.strainmapping.eps_xy),-min(usr.file.strainmapping.eps_xy)] );
+            ra = [-ra,ra];
+            ylab = '\epsilon_{xy}';
+        case [char(949),'_yy']
+            ra = max( [max(usr.file.strainmapping.eps_yy),-min(usr.file.strainmapping.eps_yy)] );
+            ra = [-ra,ra];
+            ylab = '\epsilon_{yy}';
+        case [char(969),'_xy']
+            ra = max( [max(usr.file.strainmapping.omg_xy),-min(usr.file.strainmapping.omg_xy)] );
+            ra = [-ra,ra];
+            ylab = '\omega_{xy}';
+    end
+    ylabel(h_bar2,ylab)
+    m2 = uimenu(c,'Label','Open Colormap Editor','Callback',{@cmEdit,usr.images.ax2,usr.images.ax,h.fig,data(k,:)});
+    m3 = uimenu(c,'Label','Reset Range Colors','Callback',{@resetCrangeAx2,usr.images.ax2,usr.images.ax,ra,data(k,:)});
+    set(h_bar,'UIContextMenu',[])
+    set(h_bar2,'UIContextMenu',c)
+elseif val==1 || val==2
     m2 = uimenu(c,'Label','Location','Separator','on');
     m3 = uimenu(c,'Label','Standard Colormaps','Separator','on');
     m4 = uimenu(c,'Label','Interactive Colormap Shift','Callback',{@shiftCmap,h.fig,h_bar,usr.images.ax,h});
     m5 = uimenu(c,'Label','Open Colormap Editor','Callback',{@cmEdit,usr.images.ax});
+    m6 = uimenu(c,'Label','Reset Range Colors','Callback',{@resetCrange,usr.images.ax,[min(min(usr.file.input.obs)),max(max(usr.file.input.obs))]});
 
     % Locations
-    l1 = uimenu(m2,'Label','Outside North','Callback',{@changeLoc,h_bar});
-    l2 = uimenu(m2,'Label','Outside South','Callback',{@changeLoc,h_bar});
-    l3 = uimenu(m2,'Label','Outside West','Callback',{@changeLoc,h_bar});
-    l4 = uimenu(m2,'Label','Outside East','Callback',{@changeLoc,h_bar});
-    l5 = uimenu(m2,'Label','North','Callback',{@changeLoc,h_bar});
-    l6 = uimenu(m2,'Label','South','Callback',{@changeLoc,h_bar});
-    l7 = uimenu(m2,'Label','West','Callback',{@changeLoc,h_bar});
-    l8 = uimenu(m2,'Label','East','Callback',{@changeLoc,h_bar});
+    l1 = uimenu(m2,'Label','Outside North','Callback',{@changeLoc});
+    l2 = uimenu(m2,'Label','Outside South','Callback',{@changeLoc});
+    l3 = uimenu(m2,'Label','Outside West','Callback',{@changeLoc});
+    l4 = uimenu(m2,'Label','Outside East','Callback',{@changeLoc});
+    l5 = uimenu(m2,'Label','North','Callback',{@changeLoc});
+    l6 = uimenu(m2,'Label','South','Callback',{@changeLoc});
+    l7 = uimenu(m2,'Label','West','Callback',{@changeLoc});
+    l8 = uimenu(m2,'Label','East','Callback',{@changeLoc});
 
     % Standard Colormaps
     sc1 = uimenu(m3,'Label','cool','Callback',{@changeCmap,usr.images.ax});
@@ -100,10 +165,30 @@ else
     sc4 = uimenu(m3,'Label','hsv','Callback',{@changeCmap,usr.images.ax});
     sc5 = uimenu(m3,'Label','jet','Callback',{@changeCmap,usr.images.ax});
     sc6 = uimenu(m3,'Label','parula(default)','Callback',{@changeCmap,usr.images.ax});
+    set(h_bar,'UIContextMenu',c)
+else
+    set(h_bar,'UIContextMenu',c)
 end
 
-set(h_bar,'UIContextMenu',c)
+function resetCrange(hObject,event,ax,limits)
+caxis(ax,limits);
 
+function resetCrangeAx2(hObject,event,ax,ax2,range,data)
+caxis(ax,range);
+axes(ax2)
+cmap = colormap(ax);
+c_x = linspace(range(1),range(2),size(cmap,1));
+usrData = get(ax2,'Userdata');
+ind = strcmp(usrData(:,1),data{2});
+if any(strcmp({'Atom Counts';'Lib Counts'},data{2}))
+    mode = 'exact';
+    values = get(usrData{ind,2},'ZData');
+else
+    mode = 'int';
+    values = get(usrData{ind,2},'Userdata');
+end
+RGBvec = getRGBvec(cmap,c_x,values,mode);
+set(usrData{ind,2},'CData',RGBvec)
 
 function changeLoc(hObject,event,h_bar)
 
@@ -118,12 +203,10 @@ switch loc
     case 'Outside East'
         loc = 'eastoutside';
 end
+set(hObject,'Location',loc)
 
-set(h_bar,'Location',loc)
-
-function delBar(hObject,event,h_bar)
-
-colorbar(h_bar,'off')
+function delBar(hObject,event,tab,name,h)
+showImage(tab,name,h,0)
 
 function changeCmap(hObject,event,ax)
 
@@ -133,9 +216,31 @@ if strcmp(cmap,'parula(default)')
 end
 colormap(ax,cmap)
 
-function cmEdit(~,~,ax)
-axes(ax)
-colormapeditor;
+function cmEdit(~,~,ax,ax2,hfig,data)
+if nargin<4
+    axes(ax)
+    colormapeditor;
+else
+    axes(ax2)
+    range = caxis(ax);
+    cmap = colormap(ax);
+    pos = get(hfig,'Position');
+    range = setRangeUI(range,[pos(1)+pos(3)/2 pos(2)+pos(4)/2]);
+    caxis(ax,range)
+    c_x = linspace(range(1),range(2),size(cmap,1));
+    usrData = get(ax2,'Userdata');
+    ind = strcmp(usrData(:,1),data{2});
+    if any(strcmp({'Atom Counts';'Lib Counts'},data{2}))
+        mode = 'exact';
+        values = get(usrData{ind,2},'ZData');
+    else
+        mode = 'int';
+        values = get(usrData{ind,2},'Userdata');
+    end
+    RGBvec = getRGBvec(cmap,c_x,values,mode);
+    set(usrData{ind,2},'CData',RGBvec)
+end
+
 
 function shiftCmap(hObject,event,hf,hb,ha,h)
 

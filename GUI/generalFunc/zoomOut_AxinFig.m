@@ -140,8 +140,16 @@ end
                 center = [(Ax_xlim(1)+Ax_xlim(2))/2,(Ax_ylim(1)+Ax_ylim(2))/2];
                 dx = (Ax_xlim(2) - Ax_xlim(1))/(2*zfactor^-1);
                 dy = (Ax_ylim(2) - Ax_ylim(1))/(2*zfactor^-1);
-                XLim = [max(center(1)-dx,limits(1)),min(center(1)+dx,limits(2))];
-                YLim = [max(center(2)-dy,limits(3)),min(center(2)+dy,limits(4))];
+                if max(center(1)-dx,limits(1))>min(center(1)+dx,limits(2))
+                    XLim = [center(1)-dx,center(1)+dx];
+                else
+                    XLim = [max(center(1)-dx,limits(1)),min(center(1)+dx,limits(2))];
+                end
+                if max(center(2)-dy,limits(3))>min(center(2)+dy,limits(4))
+                    YLim = [center(2)-dy,center(2)+dy];
+                else
+                    YLim = [max(center(2)-dy,limits(3)),min(center(2)+dy,limits(4))];
+                end
                 axis(ha,[XLim YLim])
             elseif strcmp(button,'extend')
                 % get the axes' x- and y-limits

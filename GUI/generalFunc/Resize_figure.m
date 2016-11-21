@@ -73,64 +73,42 @@ for n=1:length(tabs)
     % Get handle of tabs
     usr = get(tabs(n),'Userdata');
     set(usr.images.main,'Position',[0 0 1-scale_x(1) 1])
-    set(usr.figOptions.title.main,'Position',[1-scale_x(1) scale_y(2)+scale_y(3) scale_x(1) scale_y(1)]);
-    set(usr.figOptions.selImg.main,'Position',[1-scale_x(1) scale_y(2)+scale_y(3)/2 scale_x(1) scale_y(3)/2]);
-    set(usr.figOptions.selOpt.main,'Position',[1-scale_x(1) scale_y(2) scale_x(1) scale_y(3)/2]);
-    set(usr.figOptions.export.main,'Position',[1-scale_x(1) 0 scale_x(1) scale_y(2)]);
+%     set(usr.figOptions.title.main,'Position',[1-scale_x(1) scale_y(2)+scale_y(3) scale_x(1) scale_y(1)]);
+    set(usr.figOptions.selImg.main,'Position',[1-scale_x(1) scale_y(1)+scale_y(2)+scale_y(3)/2 scale_x(1) scale_y(3)/2]);
+    set(usr.figOptions.selOpt.main,'Position',[1-scale_x(1) scale_y(1)+scale_y(2) scale_x(1) scale_y(3)/2]);
+    set(usr.figOptions.optFig.main,'Position',[1-scale_x(1) scale_y(1) scale_x(1) scale_y(2)]);
+    set(usr.figOptions.export.main,'Position',[1-scale_x(1) 0 scale_x(1) scale_y(1)]);
     
     % Update figure
     if n==length(tabs)
         % Make sure addition panel is not updated
         break
     end
-    data = get(usr.images.ax,'Userdata');
-    if ~isempty(data)
-        % Input coordinates
-        ind = strcmp(data(:,1),'Input coordinates');
-        h_peaks = data(ind,2);
-        if ~isempty(h_peaks)
-            msize = coorMarkerSize(usr.images.ax,'.');
-            for i=1:length(h_peaks{1})
-                if h_peaks{1}(i)~=0
-                    set(h_peaks{1}(i),'MarkerSize',msize);
-                end
+    
+    % Resize markers
+    usr.oldMarkerSize = Inf;
+    set(tabs(n),'Userdata',usr)
+    changeMS(usr.figOptions.optFig.msval,event,tabs(n))
+    % Check if colorbar is shown
+    if strcmp(get(h.colorbar(1),'State'),'on');
+        % Find colorbars
+        child = get(usr.images.img,'Children');
+        n1 = 0;
+        n2 = 0;
+        for k=1:length(child)
+            if strcmp(get(child(k),'Tag'),'Colorbar')
+                n1 = k;
+            end
+            if strcmp(get(child(k),'Tag'),'Colorbar2')
+                n2 = k;
             end
         end
-        
-        % Fitted coordinates
-        ind = strcmp(data(:,1),'Fitted coordinates');
-        h_peaks = data(ind,2);
-        if ~isempty(h_peaks)
-            msize = coorMarkerSize(usr.images.ax,'+');
-            for i=1:length(h_peaks{1})
-                if h_peaks{1}(i)~=0
-                    set(h_peaks{1}(i),'MarkerSize',msize);
-                end
+        if n1~=0 && n2~=0
+            if v<2015
+                drawnow
             end
-        end
-        
-        % Coor atomcounting
-        ind = strcmp(data(:,1),'Coor atomcounting');
-        h_peaks = data(ind,2);
-        if ~isempty(h_peaks)
-            msize = coorMarkerSize(usr.images.ax,'d');
-            for i=1:length(h_peaks{1})
-                if h_peaks{1}(i)~=0
-                    set(h_peaks{1}(i),'MarkerSize',msize);
-                end
-            end
-        end
-        
-        % Atom Counts
-        ind = strcmp(data(:,1),'Atom Counts');
-        h_peaks = data(ind,2);
-        if ~isempty(h_peaks)
-            msize = coorMarkerSize(usr.images.ax,'s');
-            for i=1:length(h_peaks{1})
-                if h_peaks{1}(i)~=0
-                    set(h_peaks{1}(i),'MarkerSize',msize);
-                end
-            end
+            pos = get(child(n1),'Position');
+            set(child(n2),'Position',pos)
         end
     end
 end

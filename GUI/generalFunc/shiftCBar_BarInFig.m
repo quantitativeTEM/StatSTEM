@@ -58,6 +58,9 @@ set(hf,'Pointer','arrow')
 set(hf,'WindowButtonMotionFcn',[],'WindowKeyReleaseFcn',[],'WindowButtonUpFcn',[],'WindowButtonDownFcn',[])
 
     function changepointer(hf,~)
+        if ~isvalid(hb)
+            set(menu,'Checked','off')
+        end
         pnt = get(hf,'CurrentPoint');
         if strcmp(h_pan.Enable,'on') || strcmp(h_zoom.Enable,'on') || strcmp(h_cursor.Enable,'on')
             return
