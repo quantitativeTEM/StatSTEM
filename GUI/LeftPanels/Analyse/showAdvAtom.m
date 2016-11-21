@@ -33,7 +33,9 @@ end
 if jObject.isSelected
     % Show advanced panel
     h.left.ana.panel.atomAdv.main.setVisible(1)
+    set(h.left.ana.panel.atom.main,'Border',javax.swing.border.MatteBorder(1,1,0,1,java.awt.Color(0.3,0.3,0.3)))
 else
     % Hide advanced panel
     h.left.ana.panel.atomAdv.main.setVisible(0)
+    set(h.left.ana.panel.atom.main,'Border',javax.swing.border.MatteBorder(1,1,1,1,java.awt.Color(0.3,0.3,0.3)))
 end

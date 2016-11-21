@@ -36,6 +36,13 @@ if ~get(hObject,'Enabled')
     return
 end
 
+% Check if colorbar is shown
+if strcmp(get(h.colorbar(1),'State'),'off')
+    sColBar = 0;
+else
+    sColBar = 1;
+end
+
 % Turn off all editing in the figure
 plotedit(h.fig,'off')
 
@@ -79,9 +86,9 @@ for n=1:length(ind)
     end
     if data{n,1}~=state || state==true
         if state
-            showHideFigOptions(tab,value,data{n,2},~state)
+            showHideFigOptions(tab,value,data{n,2},~state,h,sColBar)
         end
-        showHideFigOptions(tab,value,data{n,2},state)
+        showHideFigOptions(tab,value,data{n,2},state,h,sColBar)
         data{n,1} = state;
     end
 end
@@ -112,8 +119,8 @@ if ~isempty(coor)
     usr.file.input = input;
     set(tab,'Userdata',usr);
     % Update figure
-    showHideFigOptions(tab,value,nameTag,false)
-    showHideFigOptions(tab,value,nameTag,true)
+    showHideFigOptions(tab,value,nameTag,false,h,sColBar)
+    showHideFigOptions(tab,value,nameTag,true,h,sColBar)
 end
 hold off;
 

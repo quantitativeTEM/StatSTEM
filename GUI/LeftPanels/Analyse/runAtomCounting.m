@@ -47,7 +47,7 @@ end
 % Delete previous analysis is necessary
 usr = get(tab,'Userdata');
 if any(strcmp(fieldnames(usr.file),'atomcounting'))
-    quest = questdlg('Running the ICL will remove previous atom counting results, continue?','Warning','Yes','No','No');
+    quest = questdlg('Running the ICL will remove previous statistical atom counting results, continue?','Warning','Yes','No','No');
     drawnow; pause(0.05); % MATLAB hang 2013 version
     switch quest
         case 'Yes'

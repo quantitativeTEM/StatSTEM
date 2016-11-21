@@ -40,12 +40,13 @@ end
 tab = loadTab(h);
 % Load fit options
 usr = get(tab,'Userdata');
+
 if jObject.isSelected
-    set(but2,'Selected',false)
-    set(but3,'Selected',false)
+    but2.setSelected(false)
+    but3.setSelected(false)
 else
-    set(but2,'Selected',true)
-    set(but3,'Selected',false)
+    but2.setSelected(true)
+    but3.setSelected(false)
     if widthtype==1
         widthtype = 0;
     elseif widthtype==0

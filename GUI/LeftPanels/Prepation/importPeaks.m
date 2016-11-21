@@ -42,6 +42,13 @@ if isempty(tab)
     return
 end
 
+% Check if colorbar is shown
+if strcmp(get(h.colorbar(1),'State'),'off')
+    sColBar = 0;
+else
+    sColBar = 1;
+end
+
 % Ask to remove model and analysis if necessary
 string = 'Loading peak locations will erase the fitted model and all analysis, continue?';
 [quest,usr] = removeQuestionPrep(tab,h,string);
@@ -64,7 +71,7 @@ end
 [~, FileName, ext] = fileparts(FileName);
 switch ext
     case '.mat'
-        file = load([userdata.PathName,FileName]);
+        file = load([userdata.PathName,FileName,ext]);
         names = fieldnames(file);
         opt = 1;
         if any(strcmp(names,'input'))
@@ -165,9 +172,9 @@ for n=1:length(ind)
     end
     if data{n,1}~=state || state==true
         if state
-            showHideFigOptions(tab,value,data{n,2},~state)
+            showHideFigOptions(tab,value,data{n,2},~state,h,sColBar)
         end
-        showHideFigOptions(tab,value,data{n,2},state)
+        showHideFigOptions(tab,value,data{n,2},state,h,sColBar)
         data{n,1} = state;
     end
 end

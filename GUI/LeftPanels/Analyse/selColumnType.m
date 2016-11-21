@@ -40,6 +40,13 @@ if ~get(hObject,'Enabled')
     return
 end
 
+% Check if colorbar is shown
+if strcmp(get(h.colorbar(1),'State'),'off')
+    sColBar = 0;
+else
+    sColBar = 1;
+end
+
 % Turn off all editing in the figure
 plotedit(h.fig,'off')
 
@@ -111,9 +118,9 @@ if get(color,'Red')==0
             showImage(tab,'Histogram SCS',h)
         elseif val==value || val==value2
             if ~addOpt
-                showHideFigOptions(tab,val,nameTag,false)
+                showHideFigOptions(tab,val,nameTag,false,h,sColBar)
             end
-            showHideFigOptions(tab,val,nameTag,true)
+            showHideFigOptions(tab,val,nameTag,true,h,sColBar)
         end
         usr = get(tab,'Userdata');
         
@@ -157,7 +164,7 @@ else
             ind = strcmp(data(:,2),nameTag);
             if any(ind)
                 if data{ind,1}
-                    showHideFigOptions(tab,value,nameTag,false)
+                    showHideFigOptions(tab,value,nameTag,false,h,sColBar)
                 end
             end
         end
@@ -179,8 +186,8 @@ else
             ind = strcmp(data(:,2),nameTag);
             if any(ind)
                 if data{ind,1}
-                    showHideFigOptions(tab,value,nameTag,false)
-                    showHideFigOptions(tab,value,nameTag,true)
+                    showHideFigOptions(tab,value,nameTag,false,h,sColBar)
+                    showHideFigOptions(tab,value,nameTag,true,h,sColBar)
                 end
             end
         end

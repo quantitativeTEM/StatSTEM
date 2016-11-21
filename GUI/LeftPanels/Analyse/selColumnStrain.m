@@ -1,10 +1,10 @@
-function selColumnAtom(hObject,event,h)
-% selColumnAtom - Select specific columns for the atomcounting routine
+function selColumnStrain(hObject,event,h)
+% selColumnStrain - Select specific columns for the strainmapping routine
 %
 % This function enables the user to select specific column in the StatSTEM
 % interface which will only be used for the atomcounting routine
 %
-%   syntax: selColumnAtom(hObject,event,h)
+%   syntax: selColumnStrain(hObject,event,h)
 %       hObject - Reference to button
 %       event   - structure recording button events
 %       h       - structure holding references to StatSTEM interface
@@ -63,12 +63,12 @@ if get(color,'Red')==0
     %% Preparation
     % Delete previous analysis is necessary
     usr = get(tab,'Userdata');
-    if any(strcmp(fieldnames(usr.file),'atomcounting'))
-        quest = questdlg('Select a region for atom counting will remove previous atom counting results, continue?','Warning','Yes','No','No');
+    if any(strcmp(fieldnames(usr.file),'strainmapping'))
+        quest = questdlg('Select a region for strain mapping will remove previous results, continue?','Warning','Yes','No','No');
         drawnow; pause(0.05); % MATLAB hang 2013 version
         switch quest
             case 'Yes'
-                deleteAtomCounting(tab,h)
+                deleteStrainMapping(tab,h)
                 usr = get(tab,'Userdata');
             case 'No'
                 return
@@ -89,16 +89,10 @@ if get(color,'Red')==0
         value = value1;
     end
 
-    % Make sure only coordinates atomcounting or fitting coordinates are shown
+    % Make sure only fitted coordinates are shown
     data = get(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data');
-    nameTag = 'Coor atomcounting';
-    nameTag2 = 'Fitted coordinates';
+    nameTag = 'Fitted coordinates';
     ind = strcmp(data(:,2),nameTag);
-    addOpt = 0;
-    if ~any(ind)
-        ind = strcmp(data(:,2),nameTag2);
-        addOpt = 1;
-    end
     N = find(ind);
     for n=1:length(ind)
         if n==N
@@ -125,7 +119,7 @@ if get(color,'Red')==0
     title(usr.images.ax,'Select region, press ESC to exit')
 
     % Get coordinates
-    usr.fitOpt.atom.selCoor = gregion_AxInFig(usr.images.ax,h.fig,h_pan,h_zoom,h_cursor);
+    usr.fitOpt.strain.selCoor = gregion_AxInFig(usr.images.ax,h.fig,h_pan,h_zoom,h_cursor);
 
     title(usr.images.ax,'')
     userdata = get(h.right.tabgroup,'Userdata');
@@ -139,30 +133,26 @@ if get(color,'Red')==0
     focusFields(h,true)
 
     %% Update figure options
-    if ~isempty(usr.fitOpt.atom.selCoor)
-        if addOpt
-            % Add option region atomcounting
-            data(ind,1) = {false};
-            data = [data;{true nameTag}];
-            % Update data
-            set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data',data);
-            % Show selected coordinates and hide fitted coordinates
-            showHideFigOptions(tab,value,nameTag,true,h,sColBar)
-            showHideFigOptions(tab,value,nameTag2,false,h,sColBar)
+    if ~isempty(usr.fitOpt.strain.selCoor)
+        nameTag2 = 'Coor strainmapping';
+        % Add option region strainmapping
+        data(ind,1) = {false};
+        data = [data;{true nameTag2}];
+        % Update data
+        set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data',data);
+        % Show selected coordinates and hide fitted coordinates
+        showHideFigOptions(tab,value,nameTag2,true,h,sColBar)
+        showHideFigOptions(tab,value,nameTag,false,h,sColBar)
 
-            value2 = find(strcmp(str,'Model'));
-            if value==value2
-                value2 = find(strcmp(str,'Observation'));
-            end
-            data = get(usr.figOptions.selOpt.(['optionsImage',num2str(value2)]),'Data');
-            data = [data;{false nameTag}];
-            % Update data
-            set(usr.figOptions.selOpt.(['optionsImage',num2str(value2)]),'Data',data);
-        else
-            % Update shown coordinates
-            showHideFigOptions(tab,value,nameTag,false,h,sColBar)
-            showHideFigOptions(tab,value,nameTag,true,h,sColBar)
+        value2 = find(strcmp(str,'Model'));
+        if value==value2
+            value2 = find(strcmp(str,'Observation'));
         end
+        data = get(usr.figOptions.selOpt.(['optionsImage',num2str(value2)]),'Data');
+        data = [data;{false nameTag2}];
+        % Update data
+        set(usr.figOptions.selOpt.(['optionsImage',num2str(value2)]),'Data',data);
+            
         % Make text button appear red
         hObject.setForeground(java.awt.Color(1,0,0))
         set(hObject,'Text','Delete selected region')
@@ -171,63 +161,36 @@ else
     %% Preparation
     % Delete previous analysis is necessary
     usr = get(tab,'Userdata');
-    if any(strcmp(fieldnames(usr.file),'atomcounting'))
-        quest = questdlg('Deleting the region will remove previous atom counting results, continue?','Warning','Yes','No','No');
+    if any(strcmp(fieldnames(usr.file),'strainmapping'))
+        quest = questdlg('Deleting the region will remove previous strain mapping results, continue?','Warning','Yes','No','No');
         drawnow; pause(0.05); % MATLAB hang 2013 version
         switch quest
             case 'Yes'
-                deleteAtomCounting(tab,h)
+                deleteStrainMapping(tab,h)
                 usr = get(tab,'Userdata');
             case 'No'
                 return
         end
     end
-    usr.fitOpt.atom.selCoor = [];
+    usr.fitOpt.strain.selCoor = [];
     set(tab,'Userdata',usr)
     
     % Update the images
     str = get(usr.figOptions.selImg.listbox,'String');
     value = get(usr.figOptions.selImg.listbox,'Value');
-    val = find(strcmp(str,'Histogram SCS'));
-    if val==value
-        showImage(tab,'Histogram SCS',h)
-        usr = get(tab,'Userdata');
-    end
+    nameTag = 'Coor strainmapping';
     
-    % Image processing
-    data = get(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data');
-    nameTag = 'Coor atomcounting';
-    if isempty(usr.fitOpt.atom.minVol) && isempty(usr.fitOpt.atom.maxVol) && isempty(usr.fitOpt.atom.selType)
-        % Delete coordinates from image and figure options
+    % Delete options from all figure options
+    for n=1:length(str)
+        data = get(usr.figOptions.selOpt.(['optionsImage',num2str(n)]),'Data');
         if ~isempty(data)
             ind = strcmp(data(:,2),nameTag);
-            if any(ind)
-                if data{ind,1}
-                    showHideFigOptions(tab,value,nameTag,false,h,sColBar)
-                end
+            if any(ind) && value==n
+                showHideFigOptions(tab,value,nameTag,false,h,sColBar)
             end
-        end
-
-        % Now delete options from all figure options
-        for n=1:length(str)
-            data = get(usr.figOptions.selOpt.(['optionsImage',num2str(n)]),'Data');
-            if ~isempty(data)
-                ind = strcmp(data(:,2),nameTag);
-                if any(ind)
-                    data = data(~ind,:);
-                    set(usr.figOptions.selOpt.(['optionsImage',num2str(n)]),'Data',data)
-                end
-            end
-        end
-    else
-        % Update coordinates in image, if shown
-        if ~isempty(data)
-            ind = strcmp(data(:,2),nameTag);
             if any(ind)
-                if data{ind,1}
-                    showHideFigOptions(tab,value,nameTag,false,h,sColBar)
-                    showHideFigOptions(tab,value,nameTag,true,h,sColBar)
-                end
+                data = data(~ind,:);
+                set(usr.figOptions.selOpt.(['optionsImage',num2str(n)]),'Data',data)
             end
         end
     end

@@ -26,15 +26,17 @@ usr = get(tab,'Userdata');
 % Show warning that addition of peak will remove the fitted model and
 % possible analysis
 if any(strcmp(fieldnames(usr.file),'output'))
-    if any(strcmp(fieldnames(usr.file),'atomcounting'))
-        quest = questdlg(string,'Warning','Yes','No','No');
-    else
-        quest = questdlg(string,'Warning','Yes','No','No');
-    end
+    quest = questdlg(string,'Warning','Yes','No','No');
     drawnow; pause(0.05); % MATLAB hang 2013 version
     if strcmp(quest,'Yes')
         if any(strcmp(fieldnames(usr.file),'atomcounting'))
             deleteAtomCounting(tab,h)
+        end
+        if any(strcmp(fieldnames(usr.file),'libcounting'))
+            deleteLibCounting(tab,h)
+        end
+        if any(strcmp(fieldnames(usr.file),'strainmapping'))
+            deleteStrainMapping(tab,h)
         end
         deleteModel(tab,h)
         drawnow

@@ -36,6 +36,13 @@ if ~get(hObject,'Enabled')
     return
 end
 
+% Check if colorbar is shown
+if strcmp(get(h.colorbar(1),'State'),'off')
+    sColBar = 0;
+else
+    sColBar = 1;
+end
+
 % Turn off all editing in the figure
 plotedit(h.fig,'off')
 
@@ -77,7 +84,7 @@ for n=1:length(ind)
         state = false;
     end
     if data{n,1}~=state
-        showHideFigOptions(tab,value,data{n,2},true)
+        showHideFigOptions(tab,value,data{n,2},true,h,sColBar)
         data{n,1} = state;
     end
 end
@@ -91,7 +98,7 @@ hold on;
 
 % Get references to plotted coordinates
 type = get(h.left.peak.panels.addRem.addType,'SelectedIndex')+1;
-colr = colorAtoms(type);
+colr = colorAtoms(userdata.pathColor,type);
 val = get(usr.images.ax,'Userdata');
 ind = find(strcmp(val(:,1),nameTag));
 if isempty(ind)
@@ -115,7 +122,10 @@ set(h.right.tabgroup,'Userdata',userdata);
 title(usr.images.ax,'Add peak locations, press ESC to exit')
 abort = 0;
 
-msize = coorMarkerSize(usr.images.ax,'.');
+% Get scale marker
+scaleMarker = str2double(get(usr.figOptions.optFig.msval,'String'));
+msize = coorMarkerSize(usr.images.ax,'.',scaleMarker);
+
 if ~isempty(input.coordinates)
     coordinates = input.coordinates(input.coordinates(:,3)==type,:);
 else

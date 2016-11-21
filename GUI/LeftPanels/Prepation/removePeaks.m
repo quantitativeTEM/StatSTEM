@@ -36,6 +36,13 @@ if ~get(hObject,'Enabled')
     return
 end
 
+% Check if colorbar is shown
+if strcmp(get(h.colorbar(1),'State'),'off')
+    sColBar = 0;
+else
+    sColBar = 1;
+end
+
 % Turn off all editing in the figure
 plotedit(h.fig,'off')
 
@@ -81,7 +88,7 @@ for n=1:length(ind)
         state = false;
     end
     if data{n,1}~=state
-        showHideFigOptions(tab,value,data{n,2},true)
+        showHideFigOptions(tab,value,data{n,2},true,h,sColBar)
         data{n,1} = state;
     end
 end
@@ -95,7 +102,7 @@ hold on;
 
 % Get references to plotted coordinates
 types = get(h.left.peak.panels.addRem.addType,'ItemCount')-3;
-colr = colorAtoms(1:types);
+colr = colorAtoms(userdata.pathColor,1:types);
 val = get(usr.images.ax,'Userdata');
 ind = strcmp(val(:,1),nameTag);
 if isempty(ind)
@@ -118,7 +125,11 @@ userdata.callbackrunning = true; % For peak location routines
 set(h.right.tabgroup,'Userdata',userdata);
 title(usr.images.ax,'Remove peak locations, press ESC to exit')
 abort = 0;
-msize = coorMarkerSize(usr.images.ax,'.');
+
+% Get scale marker
+scaleMarker = str2double(get(usr.figOptions.optFig.msval,'String'));
+msize = coorMarkerSize(usr.images.ax,'.',scaleMarker);
+
 while abort==0
     [x,y] = ginput_AxInFig(usr.images.ax,h.fig,h_pan,h_zoom,h_cursor);
     if isempty(x)

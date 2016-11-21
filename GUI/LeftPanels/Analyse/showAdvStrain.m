@@ -1,7 +1,7 @@
-function showAdvPanel(jObject,event,h)
-% showAdvPanel - Callback for showing the advanced fitting options
+function showAdvStrain(jObject,event,h)
+% showAdvStrain - Make the panel with advanced options visible
 %
-%   syntax: showAdvPanel(jObject,event,h)
+%   syntax: showAdvStrain(jObject,event,h)
 %       jObject - Reference to button
 %       event   - structure recording button events
 %       h       - structure holding references to StatSTEM interface
@@ -19,7 +19,7 @@ function showAdvPanel(jObject,event,h)
 userdata = get(h.right.tabgroup,'Userdata');
 if (userdata.callbackrunning)
     % First turn off zoom, pan and datacursor
-	turnOffFigureSelection(h);
+    turnOffFigureSelection(h);
     % If so store function name and variables and cancel other function
     userdata.function.name = mfilename;
     userdata.function.input = {jObject,event,h};
@@ -32,10 +32,10 @@ end
 
 if jObject.isSelected
     % Show advanced panel
-    h.left.fit.panAdv.main.setVisible(1)
-    set(h.left.fit.panRout.main,'Border',javax.swing.border.MatteBorder(1,1,0,1,java.awt.Color(0.3,0.3,0.3)))
+    h.left.ana.panel.strainAdv.main.setVisible(1)
+    set(h.left.ana.panel.strain.main,'Border',javax.swing.border.MatteBorder(1,1,0,1,java.awt.Color(0.3,0.3,0.3)))
 else
     % Hide advanced panel
-    h.left.fit.panAdv.main.setVisible(0)
-    set(h.left.fit.panRout.main,'Border',javax.swing.border.MatteBorder(1,1,1,1,java.awt.Color(0.3,0.3,0.3)))
+    h.left.ana.panel.strainAdv.main.setVisible(0)
+    set(h.left.ana.panel.strain.main,'Border',javax.swing.border.MatteBorder(1,1,1,1,java.awt.Color(0.3,0.3,0.3)))
 end

@@ -1,8 +1,8 @@
-function showAdvPanel(jObject,event,h)
-% showAdvPanel - Callback for showing the advanced fitting options
+function selNewRefType(hObject,event,h)
+% selNewRefType - Callback for selecting type of reference atom for strain mapping
 %
-%   syntax: showAdvPanel(jObject,event,h)
-%       jObject - Reference to button
+%   syntax: selNewRefType(hObject,event)
+%       hObject - reference to dropdownmenu
 %       event   - structure recording button events
 %       h       - structure holding references to StatSTEM interface
 %
@@ -19,10 +19,10 @@ function showAdvPanel(jObject,event,h)
 userdata = get(h.right.tabgroup,'Userdata');
 if (userdata.callbackrunning)
     % First turn off zoom, pan and datacursor
-	turnOffFigureSelection(h);
+    turnOffFigureSelection(h);
     % If so store function name and variables and cancel other function
     userdata.function.name = mfilename;
-    userdata.function.input = {jObject,event,h};
+    userdata.function.input = {hObject,event,h};
     set(h.right.tabgroup,'Userdata',userdata)
     robot = java.awt.Robot;
     robot.keyPress(java.awt.event.KeyEvent.VK_ESCAPE);
@@ -30,12 +30,5 @@ if (userdata.callbackrunning)
     return
 end
 
-if jObject.isSelected
-    % Show advanced panel
-    h.left.fit.panAdv.main.setVisible(1)
-    set(h.left.fit.panRout.main,'Border',javax.swing.border.MatteBorder(1,1,0,1,java.awt.Color(0.3,0.3,0.3)))
-else
-    % Hide advanced panel
-    h.left.fit.panAdv.main.setVisible(0)
-    set(h.left.fit.panRout.main,'Border',javax.swing.border.MatteBorder(1,1,1,1,java.awt.Color(0.3,0.3,0.3)))
-end
+ind = get(hObject,'SelectedIndex');
+set(hObject,'PopupMenuWillBecomeInvisibleCallback',{@selRefType,h,ind})

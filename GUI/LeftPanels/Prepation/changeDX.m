@@ -1,5 +1,5 @@
 function changeDX(jObject,event,h)
-% changePeaks - Callback for requesting focus
+% changeDX - Callback for requesting focus
 %
 %   syntax: changeDX(jObject,event,h)
 %       jObject - Reference to java object

@@ -43,6 +43,13 @@ if strcmp(item,item2)
     return
 end
 
+% Check if colorbar is shown
+if strcmp(get(h.colorbar(1),'State'),'off')
+    sColBar = 0;
+else
+    sColBar = 1;
+end
+
 % Load the selected tab
 tab = loadTab(h);
 if isempty(tab)
@@ -89,6 +96,7 @@ switch item
         set(hObject,'SelectedItem',str{num-2,1})
         ref2.setModel(javax.swing.DefaultComboBoxModel(str))
         set(ref2,'SelectedItem',str{num-2,1})
+        h.left.ana.panel.strainAdv.selType.setModel(javax.swing.DefaultComboBoxModel(types))
     case 'Remove'
         num = get(hObject,'ItemCount');
         if num==4
@@ -168,16 +176,16 @@ switch item
                 if any(ind)
                     if data{ind,1}
                         % Delete and show
-                        showHideFigOptions(tab,val,nameTag,false)
-                        showHideFigOptions(tab,val,nameTag,true)
+                        showHideFigOptions(tab,val,nameTag,false,h,sColBar)
+                        showHideFigOptions(tab,val,nameTag,true,h,sColBar)
                     end
                 end
                 ind = strcmp(data(:,2),nameTag2);
                 if any(ind)
                     if data{ind,1}
                         % Delete and show
-                        showHideFigOptions(tab,val,nameTag2,false)
-                        showHideFigOptions(tab,val,nameTag2,true)
+                        showHideFigOptions(tab,val,nameTag2,false,h,sColBar)
+                        showHideFigOptions(tab,val,nameTag2,true,h,sColBar)
                     end
                 end
             end
@@ -188,6 +196,7 @@ switch item
         set(hObject,'SelectedItem',str2{1})
         ref2.setModel(javax.swing.DefaultComboBoxModel(str2))
         set(ref2,'SelectedItem',str2{1})
+        h.left.ana.panel.strainAdv.selType.setModel(javax.swing.DefaultComboBoxModel(str2(1:num-4)))
         
         % Enable/Disable buttons
         updateLeftPanels(h,usr.file,usr.fitOpt)
@@ -214,6 +223,11 @@ switch item
         set(hObject,'SelectedItem',str{1})
         ref2.setModel(javax.swing.DefaultComboBoxModel(str))
         set(ref2,'SelectedItem',str{1})
+        % Make selected item same as before in analysis panel
+        ind = get(h.left.ana.panel.strainAdv.selType,'SelectedIndex');
+        h.left.ana.panel.strainAdv.selType.setModel(javax.swing.DefaultComboBoxModel(str(1:num-3)))
+        set(h.left.ana.panel.strainAdv.selType,'SelectedIndex',ind)
+
     otherwise
         set(ref2,'SelectedItem',item)
 end

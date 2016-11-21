@@ -94,7 +94,7 @@ s = [234 125+18.25*Ntypes];
 hfig = figure('units','pixels','outerposition',[cent(1)-s(1)/2 cent(2)-s(2)/2 s(1) s(2)],'Name','Edit column width','NumberTitle','off','Visible','on','Resize','off','DeleteFCN',@deleteFigure,'MenuBar','none');
 
 text = uicontrol('Parent',hfig,'Style','Text','String','Modify the width of each atom type:','Position',[10 65+18.25*Ntypes 175 22]);
-table = uitable('Parent',hfig,'Position',[10 45 209 18*Ntypes+22],'ColumnFormat',{'char','numeric'},'Data',data,'ColumnEditable',[false true],'RowName',[],'ColumnName',{'Type','Width (Å)'},...
+table = uitable('Parent',hfig,'Position',[10 45 209 18*Ntypes+22],'ColumnFormat',{'char','numeric'},'Data',data,'ColumnEditable',[false true],'RowName',[],'ColumnName',{'Type',['Width (',char(197),')']},...
     'ColumnWidth',{70 120+addPix});
 
 saveBut = uicontrol('Parent',hfig,'Style','pushbutton','String','OK','Position',[10 10 100 22],'Callback',{@storeRho,hfig});

@@ -1,10 +1,10 @@
-function showAdvPanel(jObject,event,h)
-% showAdvPanel - Callback for showing the advanced fitting options
+function enableUC(jObject,event,h)
+% enableUC - Enable the field to file in the unit cell size
 %
-%   syntax: showAdvPanel(jObject,event,h)
-%       jObject - Reference to button
+%   syntax: enableUC(jObject,event,h)
+%       jObject - Reference to object
 %       event   - structure recording button events
-%       h       - structure holding references to StatSTEM interface
+%       h       - structure holding references to GUI interface
 %
 
 %--------------------------------------------------------------------------
@@ -19,7 +19,7 @@ function showAdvPanel(jObject,event,h)
 userdata = get(h.right.tabgroup,'Userdata');
 if (userdata.callbackrunning)
     % First turn off zoom, pan and datacursor
-	turnOffFigureSelection(h);
+    turnOffFigureSelection(h);
     % If so store function name and variables and cancel other function
     userdata.function.name = mfilename;
     userdata.function.input = {jObject,event,h};
@@ -30,12 +30,8 @@ if (userdata.callbackrunning)
     return
 end
 
-if jObject.isSelected
-    % Show advanced panel
-    h.left.fit.panAdv.main.setVisible(1)
-    set(h.left.fit.panRout.main,'Border',javax.swing.border.MatteBorder(1,1,0,1,java.awt.Color(0.3,0.3,0.3)))
-else
-    % Hide advanced panel
-    h.left.fit.panAdv.main.setVisible(0)
-    set(h.left.fit.panRout.main,'Border',javax.swing.border.MatteBorder(1,1,1,1,java.awt.Color(0.3,0.3,0.3)))
-end
+state = jObject.isSelected;
+h.left.ana.panel.strainAdv.impFitNUC.setEnabled(state)
+h.left.ana.panel.strainAdv.impFitNUCText.setEnabled(state)
+h.left.ana.panel.strainAdv.impFitParAll.setEnabled(state)
+h.left.ana.panel.strainAdv.impFitParTeta.setEnabled(state)

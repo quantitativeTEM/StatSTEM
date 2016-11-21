@@ -67,10 +67,11 @@ FP.abortButton = h.left.fit.panRout.AbortBut;
 if FP.widthtype==2
     % For manual width fitting
     FP.widthtype = 1;
-    if size(input.rho,1)~=size(input.coordinates,1) || any(input.rho==0)
+    if length(usr.fitOpt.model.rho_start)~=max(input.coordinates(:,3)) || any(FP.rho_start==0)
         errordlg('ERROR: Width not defined for all atom types')
         return
     end
+    input.rho = usr.fitOpt.model.rho_start(usr.file.input.coordinates(:,3));
 else
     % Don't fit the width again in the test case
     if FP.test
@@ -99,9 +100,25 @@ newMessage(message,h)
 %% Fit the model
 try
     [output,abort] = fitGauss(input,FP);
-catch
+catch ME
     if h.left.fit.panRout.AbortBut.isEnabled
-        errordlg('An error has occured during the fitting procedure, please check input coordinates')
+        % Get position GUI, to center dialog
+        pos = get(h.fig,'Position');
+        cent = [pos(1)+pos(3)/2,pos(2)+pos(4)/2];
+        % Show error
+        % Check whether error is unknown (MATLAB error)
+        if strcmp(ME.message(1:6),'Error:')
+            n1 = strfind(ME.message,'File:');
+            n2 = strfind(ME.message,'</a>');
+            
+            errMes = ['Error in script: ',ME.message(n1+6:n2-1),ME.message(n2+4:end)];
+        else
+            errMes = ME.message;
+        end
+        h_err = errordlg(errMes,'Fitting Error');
+        set(h_err,'Units','pixels','Visible','off')
+        s = get(h_err,'Position');
+        set(h_err,'Position',[cent(1)-s(3)/2 cent(2)-s(4)/2 s(3) s(4)],'Visible','on')
     end
     abort = 1;
 end
@@ -119,7 +136,7 @@ if ~abort
     usr.file.output = output;
     usr.fitOpt.model.zeta = output.zeta;
     set(tab,'Userdata',usr)
-    createModel(tab,1)
+    createModel(tab,h,1)
     createHist(tab,h,0)
     
     % Enable export fitted coordinates button

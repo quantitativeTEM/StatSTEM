@@ -111,21 +111,25 @@ set(tab,'Userdata',usr)
 str = get(usr.figOptions.selImg.listbox,'String');
 value = find(strcmp(str,'SCS vs. Thickness'));
 nameTag = 'Library';
-data = get(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data');
-if isempty(data)
-    data = {true,nameTag};
-    set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data',data);
-else
-    ind = strcmp(data(:,2),nameTag);
-    if data{ind,1}
-        deleteImageObject(usr.images.ax,nameTag)
-    else
-        data{ind,1} = true;
+if ~isempty(value)
+    data = get(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data');
+    if isempty(data)
+        data = {true,nameTag};
         set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data',data);
+    else
+        ind = strcmp(data(:,2),nameTag);
+        if data{ind,1}
+            deleteImageObject(usr.images.ax,nameTag)
+        else
+            data{ind,1} = true;
+            set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data',data);
+        end
+    end
+    val = get(usr.figOptions.selImg.listbox,'Value');
+    if val==value
+        plotLib(usr.images.ax,usr.file.input.library,nameTag);
     end
 end
-val = get(usr.figOptions.selImg.listbox,'Value');
-if val==value
-    plotLib(usr.images.ax,usr.file.input.library,nameTag);
-end
 set(tab,'Userdata',usr)
+% Update left panel
+updateLeftPanels(h,usr.file,usr.fitOpt)

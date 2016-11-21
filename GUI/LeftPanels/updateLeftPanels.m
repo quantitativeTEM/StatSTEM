@@ -50,7 +50,8 @@ if isempty(file)
     h.left.fit.panels.Parallel.Val.setEnabled(false)
     
     % Analysis panel
-    h.left.ana.panel.atomAdv.incLib.setEnabled(false)
+    h.left.ana.panel.acl.incLib.setEnabled(false)
+    h.left.ana.panel.strain.loadPUC.setEnabled(false)
     
     file.input.coordinates = [];
     file.input.types = {'1'};
@@ -74,7 +75,8 @@ else
     h.left.fit.panels.Parallel.Val.setEnabled(true)
     
     % Analysis panel
-    h.left.ana.panel.atomAdv.incLib.setEnabled(true)
+    h.left.ana.panel.acl.incLib.setEnabled(true)
+    h.left.ana.panel.strain.loadPUC.setEnabled(true)
 end
 
 %% Preparation panel
@@ -84,6 +86,7 @@ num = get(h.left.peak.panels.addRem.addType,'ItemCount');
 if length(str1)~=num
     h.left.peak.panels.addRem.addType.setModel(javax.swing.DefaultComboBoxModel(str1))
     h.left.peak.panels.addRem.changeType.setModel(javax.swing.DefaultComboBoxModel(str1))
+    h.left.ana.panel.strainAdv.selType.setModel(javax.swing.DefaultComboBoxModel(str1(1:end-3)))
 else
     str2 = cell(num,1);
     for n=1:num
@@ -92,6 +95,7 @@ else
     if any(~strcmp(str1,str2))
         h.left.peak.panels.addRem.addType.setModel(javax.swing.DefaultComboBoxModel(str1))
         h.left.peak.panels.addRem.changeType.setModel(javax.swing.DefaultComboBoxModel(str1))
+        h.left.ana.panel.strainAdv.selType.setModel(javax.swing.DefaultComboBoxModel(str1(1:end-3)))
     end
 end
 
@@ -264,4 +268,72 @@ else
     h.left.ana.panel.atomAdv.offset.setEnabled(false)
     set(h.left.ana.panel.atomAdv.offset,'Text','0')
 end
+
+% For matching with simulations
+state = false;
+if any(strcmp(fieldnames(file),'output'))
+    if any(strcmp(fieldnames(file.input),'library'))
+        state = true;
+    end
+end
+h.left.ana.panel.acl.matchSCS.setEnabled(state)
+
 h.left.ana.panel.atom.runBut.setEnabled(state_fitting)
+
+% For strain mapping
+state = false;
+if any(strcmp(fieldnames(file),'output'))
+    if isempty(fitOpt.strain.selCoor)
+        h.left.ana.panel.strainAdv.selCol.setForeground(javax.swing.plaf.ColorUIResource(0,0,0))
+        set(h.left.ana.panel.strainAdv.selCol,'Text','Select columns in image')
+    else
+        h.left.ana.panel.strainAdv.selCol.setForeground(java.awt.Color(1,0,0))
+        set(h.left.ana.panel.strainAdv.selCol,'Text','Delete selected region')
+    end
+    if any(strcmp(fieldnames(file),'strainmapping'))
+        if any(strcmp(fieldnames(file.strainmapping),'coor_relaxed'))
+            state = true;
+        end
+    end
+    h.left.ana.panel.strain.strainBut.setEnabled(state)
+    if any(strcmp(fieldnames(file.input),'projUnit'))
+        state = true;
+    end
+    h.left.ana.panel.strain.makeDisp.setEnabled(state)
+    state = false;
+    if any(strcmp(fieldnames(file),'strainmapping')) && any(strcmp(fieldnames(file.input),'projUnit'))
+        if any(strcmp(fieldnames(file.strainmapping),'refCoor'))
+            state = true;
+        end
+    end
+    h.left.ana.panel.strainAdv.autALat.setEnabled(state)
+    h.left.ana.panel.strainAdv.showALatAut.setEnabled(state)
+    h.left.ana.panel.strainAdv.usrALat.setEnabled(state)
+    h.left.ana.panel.strainAdv.selectALat.setEnabled(state)
+    state = true;
+else
+    h.left.ana.panel.strainAdv.selCol.setForeground(javax.swing.plaf.ColorUIResource(0,0,0))
+    set(h.left.ana.panel.strainAdv.selCol,'Text','Select columns in image')
+    h.left.ana.panel.strain.strainBut.setEnabled(state)
+    h.left.ana.panel.strain.makeDisp.setEnabled(state)
+    h.left.ana.panel.strainAdv.autALat.setEnabled(state)
+    h.left.ana.panel.strainAdv.showALatAut.setEnabled(state)
+    h.left.ana.panel.strainAdv.usrALat.setEnabled(state)
+    h.left.ana.panel.strainAdv.selectALat.setEnabled(state)
+end
+h.left.ana.panel.strainAdv.selCol.setEnabled(state)
+h.left.ana.panel.strainAdv.selType.setEnabled(state)
+h.left.ana.panel.strainAdv.cenCoor.setEnabled(state)
+h.left.ana.panel.strainAdv.showCen.setEnabled(state)
+h.left.ana.panel.strainAdv.usrCoor.setEnabled(state)
+h.left.ana.panel.strainAdv.selectCoor.setEnabled(state)
+h.left.ana.panel.strainAdv.impFitABut.setEnabled(state)
+if state && h.left.ana.panel.strainAdv.impFitABut.isSelected
+    state = true;
+else
+    state = false;
+end
+h.left.ana.panel.strainAdv.impFitNUC.setEnabled(state)
+h.left.ana.panel.strainAdv.impFitNUCText.setEnabled(state)
+h.left.ana.panel.strainAdv.impFitParAll.setEnabled(state)
+h.left.ana.panel.strainAdv.impFitParTeta.setEnabled(state)
