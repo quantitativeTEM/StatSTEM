@@ -1,0 +1,7 @@
+Marker colors of the StatSTEM interface
+
+type	R	G	B
+1	0	255	0
+2	255	0	255
+3	0	255	255
+4	255	0	0
