@@ -101,12 +101,13 @@ if get(color,'Red')==0
             state = false;
         end
         if data{n,1}~=state
-            showHideFigOptions(tab,value,data{n,2},state,h,sColBar)
             data{n,1} = state;
+            set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data',data)
+            showHideFigOptions(tab,value,data{n,2},state,h,sColBar)
+            usr = get(tab,'Userdata');
         end
     end
     %Update data
-    set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'Data',data)
 
     %% Make all text field unfocusable
     focusFields(h,false)
