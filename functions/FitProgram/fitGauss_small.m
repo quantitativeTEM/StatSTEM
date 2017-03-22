@@ -128,7 +128,7 @@ if widthtype == 0
         EstimatedParametersnonlin = lsqnonlin('criterionGauss_diffrhoSmall',StartParametersnonlin',[],[],options,X,Y,n_c,K,L,resObs_bs,fitzeta,indMat,dx);
     else
         options.OutputFcn = @getIterDiff;
-        EstimatedParametersnonlin = lsqnonlin('criterionGauss_samerhoSmall',StartParametersnonlin',[],[],options,X,Y,n_c,K,L,resObs_bs,fitzeta,indMat,dx,hwaitbar,abortbut);
+        EstimatedParametersnonlin = lsqnonlin('criterionGauss_diffrhoSmall',StartParametersnonlin',[],[],options,X,Y,n_c,K,L,resObs_bs,fitzeta,indMat,dx,hwaitbar,abortbut);
     end
 else
     % starting values for the non linear parameters in Å        % betaX, betaY, rho (position coordinates and width)
