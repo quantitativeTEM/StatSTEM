@@ -25,7 +25,7 @@ addpath([path,';',genpath(pathF),';',genpath(pathG)])
 
 % Start a splash screen
 splashImg = imread('splash.png');
-% spl = splash(splashImg);
+spl = splash(splashImg);
 
 % Check matlab version, and switch opengl
 v = version('-release');
@@ -253,7 +253,7 @@ updateLeftPanels(h,[],fitOpt)
 % Limit minimum size and make window appear on full screen
 % set(h.fig,'Position',[1 1 screen(3) screen(4)])
 set(h.fig,'Visible','on')
-% close(spl) % Close splash window
+close(spl) % Close splash window
 waitfor(h.fig,'Visible','on')
 warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
 jFrame = get(handle(h.fig), 'JavaFrame');
