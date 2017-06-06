@@ -34,13 +34,15 @@ tab = tabs(length(tabs));
 usr = get(tab,'Userdata');
 
 % Let the user select an input file
-[FileName,userdata.PathName] = uigetfile({'*.mat;*.txt;*.TXT','Supported Files (*.mat,*.txt)';'*.mat','MATLAB Files (*.mat)';'*.txt;*.TXT','TXT Files (*.txt)';'*.*',  'All Files (*.*)'}, ...
+[FileName,userdata.PathName] = uigetfile({'*.mat;*.ser;*.txt;*.TXT','Supported Files (*.mat,*.ser,*.txt)';'*.mat','MATLAB Files (*.mat)';'*.ser','SER Files (*.ser)';'*.txt;*.TXT','TXT Files (*.txt)';'*.*',  'All Files (*.*)'}, ...
    'Select a file',userdata.PathName);
 
 if FileName==0
     return
 else
     % Update userdata
+    userdata.callbackrunning = true;
+    userdata.loadingNewFile = true;
     set(h.right.tabgroup,'Userdata',userdata)
 end
 [~, usr.FileName, ext] = fileparts(FileName);
@@ -50,9 +52,27 @@ switch ext
         [usr.file,message,dx] = loadMatFile(userdata.PathName,usr.FileName);
     case '.txt'
         [usr.file,message,dx] = loadTXTFile(userdata.PathName,usr.FileName);
+    case '.ser'
+        [usr.file,message,dx] = loadSERfile(userdata.PathName,usr.FileName);
 end
 if ~isempty(message)
     newMessage(message,h)
+    
+    %% Update userdata and restore functions
+    userdata = get(h.right.tabgroup,'Userdata');
+    userdata.callbackrunning = false; 
+    userdata = rmfield(userdata,'loadingNewFile');
+    set(h.right.tabgroup,'Userdata',userdata);
+    % Check if other function is started
+    if ~isempty(userdata.function)
+        f = userdata.function;
+        userdata.function = [];
+        set(h.right.tabgroup,'Userdata',userdata);
+        eval([f.name,'(f.input{:})'])
+        if strcmp(f.name,'deleteFigure')
+            return
+        end
+    end
     return
 end
 
@@ -68,8 +88,14 @@ if strcmp(dx,'ask')
         end
     end
 end
-        
 
+% Update the name of the tab
+if length(usr.FileName)>18
+    tabName = [usr.FileName(1:15),'...'];
+else
+    tabName = usr.FileName;
+end
+set(tab,'Title',tabName)      
 
 %% The empty tab will be used to load the file to
 % Create an axes and panel to show images
@@ -182,13 +208,8 @@ if any(strcmp(fieldnames(usr.file),'strainmapping'))
     usr = get(tab,'Userdata');
 end
 
-% Update the name of the tab and the tooltipstring
-if length(usr.FileName)>18
-    tabName = [usr.FileName(1:15),'...'];
-else
-    tabName = usr.FileName;
-end
-set(tab,'Title',tabName,'ButtonDown',[]);
+% Update the tab
+set(tab,'ButtonDown',[]);
 v = version('-release');
 v = str2double(v(1:4));
 c = uicontextmenu;
@@ -239,3 +260,19 @@ fileID = fopen(h.startPath,'wt');
 str = strrep(userdata.PathName,'\','\\');
 fprintf(fileID, str);
 fclose(fileID);
+
+%% Update userdata and restore functions
+userdata = get(h.right.tabgroup,'Userdata');
+userdata.callbackrunning = false; 
+userdata = rmfield(userdata,'loadingNewFile');
+set(h.right.tabgroup,'Userdata',userdata);
+% Check if other function is started
+if ~isempty(userdata.function)
+    f = userdata.function;
+    userdata.function = [];
+    set(h.right.tabgroup,'Userdata',userdata);
+    eval([f.name,'(f.input{:})'])
+    if strcmp(f.name,'deleteFigure')
+        return
+    end
+end

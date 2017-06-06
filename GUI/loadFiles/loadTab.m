@@ -31,4 +31,12 @@ else
         tab = tabs(get(h.right.tabgroup,'SelectedIndex'));
     end
     mes = 'ok';
+    % Check if current tab is ok
+    tTab = get(tab,'Title');
+    if strcmp(tTab,'+')
+        tab = [];
+        mes = 'ERROR; First open a file';
+    end
 end
+
+
