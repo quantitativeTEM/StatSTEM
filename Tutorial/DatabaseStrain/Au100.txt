@@ -1,0 +1,7 @@
+Database file for StatSTEM
+length_a	2.039
+length_b	2.039
+angle_ab	90
+
+atoms	x	y
+Au	0	0
