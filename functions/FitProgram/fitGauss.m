@@ -56,29 +56,52 @@ if FP.newP
         offset = 0;
     end
     
-	% Select the fitting options in terms of different or same width of the Gaussian functions
-	if FP.widthtype == 0
-		% Fit different height and width of gaussians for each column
-		[output,abort] = fitGauss_diffrho(input, FP, offset);
-	else
-		% Fit height of gaussians with same width for each column
-		[output,abort] = fitGauss_samerho(input, FP, offset);
-		if ~abort
-			coor = input.coordinates(:,1:2);
-			input.coordinates(:,1:2) = output.coordinates(:,1:2);
-			if FP.fitRho==1
-				% Fit width of gaussians with same width for each column
-				types = max(input.coordinates(:,3));
-				FP.rho_start = zeros(types,1);
-				for i = 1:types
-					rho_temp = output.rho(input.coordinates(:,3) == i);
-					FP.rho_start(i)= median(rho_temp);
-				end
-				[output,abort] = fitRho(input, FP, 75);
-			end
-			input.coordinates(:,1:2) = coor;
-		end
-	end
+    if ~FP.patch
+        % Select the fitting options in terms of different or same width of the Gaussian functions
+        if FP.widthtype == 0
+            % Fit different height and width of gaussians for each column
+            [output,abort] = fitGauss_diffrho(input, FP, offset);
+        else
+            % Fit height of gaussians with same width for each column
+            [output,abort] = fitGauss_samerho(input, FP, offset);
+%             output.coordinates(:,1:2) = input.coordinates(:,1:2);
+            if ~abort
+                coor = input.coordinates(:,1:2);
+                input.coordinates(:,1:2) = output.coordinates(:,1:2);
+                if FP.fitRho==1
+                    % Fit width of gaussians with same width for each column
+                    types = max(input.coordinates(:,3));
+                    FP.rho_start = zeros(types,1);
+                    for i = 1:types
+                        rho_temp = output.rho(input.coordinates(:,3) == i);
+                        FP.rho_start(i)= median(rho_temp);
+                    end
+                    [output,abort] = fitRho(input, FP, 75);
+                end
+                input.coordinates(:,1:2) = coor;
+            end
+        end
+    else
+        [output,abort] = fitGauss_patch(input, FP);
+        if ~abort && FP.widthtype == 1 
+            types = max(input.coordinates(:,3));
+            FP.rho_start = zeros(types,1);
+            for i = 1:types
+                rho_temp = output.rho(input.coordinates(:,3) == i);
+                FP.rho_start(i)= median(rho_temp);
+            end
+            if ~abort
+                coor = input.coordinates(:,1:2);
+                input.coordinates(:,1:2) = output.coordinates(:,1:2);
+                FP.zeta = output.zeta;
+                if FP.fitRho==1
+                    % Fit width of gaussians with same width for each column
+                    [output,abort] = fitRho(input, FP,75);
+                end
+                input.coordinates(:,1:2) = coor;
+            end
+        end
+    end
 else
     [output,abort] = fitGauss_small(input,FP);
 end

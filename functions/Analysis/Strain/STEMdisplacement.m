@@ -69,7 +69,7 @@ if nargin<9
 end
 
 % Update parameter
-up = 0.25;
+up = 0.1;
 
 %% Relate coordinates with each other by expanding unit cell per unit cell
 % Create rotation matrix to expand unit cell
@@ -462,262 +462,272 @@ for point=1:Ntotal
     % Get reference to closest coordinate
     ind_ref = dist == min( dist );
     
-    % Find rotation and expansion around closest coordinate
-    [teta_add,f] = retrieveRotExp(ind_ref,ref_found,coor_found,a,b,R,R180,Rinv,space);
-
-    % Rotate and expand unit cell
-    R_int = [cos(teta_add) -sin(teta_add);sin(teta_add) cos(teta_add)];
-    unit_int = (R_int*(unit_rot'*f))';
-    a_int = (R_int*R*[a*f;0])';
-    b_int = (R_int*R*[0;b*f])';
-
-    % Repeat unit cell
-    unit_temp = zeros(n_atoms*3,2);
-    for n=-1:1
-        unit_temp(n_atoms*(n+1)+1:n_atoms*(n+2),:) = [unit_int(:,1)+n*a_int(1) unit_int(:,2)+n*a_int(2)];
+    if sum(ind_ref)>2
+        warndlg('Not all points found during iteration, double coordinates assigned')
+        break
     end
-    unit_comp = zeros(n_atoms*9,2);
-    for n=-1:1
-        unit_comp(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [unit_temp(:,1)+n*b_int(1) unit_temp(:,2)+n*b_int(2)];
-    end
+    try
+        % Find rotation and expansion around closest coordinate
+        [teta_add,f] = retrieveRotExp(ind_ref,ref_found,coor_found,a,b,R,R180,Rinv,space);
 
-    % Now correct for location in unit cell
-    unit_comp = [unit_comp(:,1)-unit_int(types_found(ind_ref),1) unit_comp(:,2)-unit_int(types_found(ind_ref),2)];
+        % Rotate and expand unit cell
+        R_int = [cos(teta_add) -sin(teta_add);sin(teta_add) cos(teta_add)];
+        unit_int = (R_int*(unit_rot'*f))';
+        a_int = (R_int*R*[a*f;0])';
+        b_int = (R_int*R*[0;b*f])';
 
-    % Now compare dist with distances of unit cell
-    distUnit = coor_rem(ind_as,:)-coor_found(ind_ref,:);
-    dif = (unit_comp(:,1)-distUnit(1,1)).^2 + (unit_comp(:,2)-distUnit(1,2)).^2;
-    int_typ = unit_ref(dif==min(dif),3);
-    int_ind = ind_found(ind_ref,:) + ind_unit(dif==min(dif),:);
-    % Check for double coordinates
-    ind_double = ind_found(:,1)==int_ind(1,1) & ind_found(:,2)==int_ind(1,2) & types_found == int_typ;
-    if sum(ind_double)>0
-        coorD = coor_found(ind_double,:);
-        % Current point doesn't work, use second closest point to find reference coordinate
-        coorFoundND = coor_found(~ind_double,:);
-        dist2 = sqrt((coorFoundND(:,1)-coorD(1,1)).^2 + (coorFoundND(:,2)-coorD(1,2)).^2);
-        dist = sqrt((coorFoundND(:,1)-coor_rem(ind_as,1)).^2 + (coorFoundND(:,2)-coor_rem(ind_as,2)).^2);
-        abM = max(a,b);
-        refFoundND = ref_found(~ind_double,:);
-        indFoundND = ind_found(~ind_double,:);
-        typesFoundND = types_found(~ind_double,:);
-        
-        indSel1 = dist2<(abM+space/2);
-        indSel2 = dist<(abM+space/2);
-        if sum(indSel1)>=sum(indSel2)
-            indSel = find(indSel1);
-            coorSt = coorD;
-            coorFin = coor_rem(ind_as,:);
-        else
-            indSel = find(indSel2);
-            coorSt = coor_rem(ind_as,:);
-            coorFin = coorD;
+        % Repeat unit cell
+        unit_temp = zeros(n_atoms*3,2);
+        for n=-1:1
+            unit_temp(n_atoms*(n+1)+1:n_atoms*(n+2),:) = [unit_int(:,1)+n*a_int(1) unit_int(:,2)+n*a_int(2)];
         end
-        [avDifSel,avIndSel] = getIndiceFromMulti(indSel,n_atoms,refFoundND,coorFoundND,typesFoundND,indFoundND,a,b,R,R180,Rinv,space,ind_unit,unit_ref,unit_rot,coorSt);
-        
-        % Use best option
-        ind_temp = coordinates(:,1)==coorSt(1,1) & coordinates(:,2)==coorSt(1,2);
-        coor_ref(ind_temp,:) = refFoundND(indSel(1),:) + unit_ref(avDifSel==min(avDifSel),1:2)-unit_rot(typesFoundND(indSel(1)),:);
-        types(ind_temp,:) = unit_ref(avDifSel==min(avDifSel),3);
-        indices(ind_temp,:) = avIndSel(avDifSel==min(avDifSel),:);
-        
-        % Check if option is again not found double
-        indDouble1 = indFoundND(:,1)==avIndSel(avDifSel==min(avDifSel),1) & indFoundND(:,2)==avIndSel(avDifSel==min(avDifSel),2) & typesFoundND==unit_ref(avDifSel==min(avDifSel),3);
-        if any(indDouble1)
-            % Remove option
-            coorDouble1 = coorFoundND(indDouble1,:);
-            coorFoundND = coorFoundND(~indDouble1,:);
-            refFoundND = refFoundND(~indDouble1,:);
-            indFoundND = indFoundND(~indDouble1,:);
-            typesFoundND = typesFoundND(~indDouble1,:);
+        unit_comp = zeros(n_atoms*9,2);
+        for n=-1:1
+            unit_comp(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [unit_temp(:,1)+n*b_int(1) unit_temp(:,2)+n*b_int(2)];
         end
-        
-        % Add found position to the not double matrices
-        coorFoundND = [coorFoundND;coorSt];
-        refFoundND = [refFoundND;coor_ref(ind_temp,:)];
-        indFoundND = [indFoundND;indices(ind_temp,:)];
-        typesFoundND = [typesFoundND;types(ind_temp,:)];
-        
-        % Add second position
-        dist = sqrt((coorFoundND(:,1)-coorFin(1,1)).^2 + (coorFoundND(:,2)-coorFin(1,2)).^2);
-        indSel = find(dist<(abM+space/2));
-        [avDifSel,avIndSel] = getIndiceFromMulti(indSel,n_atoms,refFoundND,coorFoundND,typesFoundND,indFoundND,a,b,R,R180,Rinv,space,ind_unit,unit_ref,unit_rot,coorFin);
-        
-        % Use best option
-        ind_temp = coordinates(:,1)==coorFin(1,1) & coordinates(:,2)==coorFin(1,2);
-        coor_ref(ind_temp,:) = refFoundND(indSel(1),:) + unit_ref(avDifSel==min(avDifSel),1:2)-unit_rot(typesFoundND(indSel(1)),:);
-        types(ind_temp,:) = unit_ref(avDifSel==min(avDifSel),3);
-        indices(ind_temp,:) = avIndSel(avDifSel==min(avDifSel),:);
-        
-        % Check if option is again not found double
-        indDouble2 = indFoundND(:,1)==avIndSel(avDifSel==min(avDifSel),1) & indFoundND(:,2)==avIndSel(avDifSel==min(avDifSel),2) & typesFoundND==unit_ref(avDifSel==min(avDifSel),3);
-        if any(indDouble2)
-            % Remove option
-            coorDouble2 = coorFoundND(indDouble2,:);
-            coorFoundND = coorFoundND(~indDouble2,:);
-            refFoundND = refFoundND(~indDouble2,:);
-            indFoundND = indFoundND(~indDouble2,:);
-            typesFoundND = typesFoundND(~indDouble2,:);
-        end
-        
-        % Add found position to the not double matrices
-        coorFoundND = [coorFoundND;coorFin];
-        refFoundND = [refFoundND;coor_ref(ind_temp,:)];
-        indFoundND = [indFoundND;indices(ind_temp,:)];
-        typesFoundND = [typesFoundND;types(ind_temp,:)];
-        
-        count = 0;
-        coorFin1 = [Inf Inf];
-        coorFin2 = [Inf Inf];
-        avDifFin1 = [Inf,Inf];
-        avDifFin2 = [Inf,Inf];
-        avIndFin1 = [Inf Inf];
-        avIndFin2 = [Inf Inf];
-        while (any(indDouble1) || any(indDouble2)) && count<20
-            count = count+1;
-            if any(indDouble1)
-                % Add second position
-                dist = sqrt((coorFoundND(:,1)-coorDouble1(1,1)).^2 + (coorFoundND(:,2)-coorDouble1(1,2)).^2);
-                indSel = find(dist<(abM+space/2));
-                [avDifSel,avIndSel] = getIndiceFromMulti(indSel,n_atoms,refFoundND,coorFoundND,typesFoundND,indFoundND,a,b,R,R180,Rinv,space,ind_unit,unit_ref,unit_rot,coorDouble1);
-                
-                % Check if option is again not found double
-                indDouble1 = indFoundND(:,1)==avIndSel(avDifSel==min(avDifSel),1) & indFoundND(:,2)==avIndSel(avDifSel==min(avDifSel),2) & typesFoundND==unit_ref(avDifSel==min(avDifSel),3);
 
-                % Use best option
-                ind_temp = coordinates(:,1)==coorDouble1(1,1) & coordinates(:,2)==coorDouble1(1,2);
-                coor_ref(ind_temp,:) = refFoundND(indSel(1),:) + unit_ref(avDifSel==min(avDifSel),1:2)-unit_rot(typesFoundND(indSel(1)),:);
-                types(ind_temp,:) = unit_ref(avDifSel==min(avDifSel),3);
-                indices(ind_temp,:) = avIndSel(avDifSel==min(avDifSel),:);
-                % Check if point are repeatively found
-                coorFin1Old = coorFin1;
-                avDifFin1Old = avDifFin1;
-                avIndFin1Old = avIndFin1;
-                coorFin1 = coorDouble1;
-                avDifFin1 = avDifSel;
-                avIndFin1 = avIndSel;
-                if any(indDouble1) && sum(coorFin1Old-coorDouble1)<eps;
-                    % Use best second option
-                    if min(avDifFin1Old)<min(avDifFin1) %Keep old value, update latest found values
-                        avDif = avDifFin1;
-                        avInd = avIndFin1;
-                        coor1 = coorFin1;
-                    else %Update old value, keep latest found values
-                        avDif = avDifFin1Old;
-                        avInd = avIndFin1Old;
-                        coor1 = coorFin1Old;
-                    end
-                    arrangeAvDif = sort(avDif,'ascend');
-                    indMin = avDif==arrangeAvDif(2);
-                    % Check if this option is again not found double
-                    indDouble1 = indFoundND(:,1)==avInd(indMin,1) & indFoundND(:,2)==avInd(indMin,2) & typesFoundND==unit_ref(indMin,3);
+        % Now correct for location in unit cell
+        unit_comp = [unit_comp(:,1)-unit_int(types_found(ind_ref),1) unit_comp(:,2)-unit_int(types_found(ind_ref),2)];
 
-                    % Update values
-                    ind_temp2 = coordinates(:,1)==coor1(1,1) & coordinates(:,2)==coor1(1,2);
-                    coor_ref(ind_temp2,:) = coor_ref(ind_temp2,:) -  unit_ref(avDif==min(avDif),1:2) +  unit_ref(indMin,1:2);% - unit_rot(types(ind_temp,:),:) + unit_rot(unit_ref(indMin,3),:);
-                    types(ind_temp2,:) = unit_ref(indMin,3);
-                    indices(ind_temp2,:) = avInd(indMin,:);
-                    
-                    % Update values
-                    if min(avDifFin1Old)<min(avDifFin1) %Keep old value, update latest found values
-                        ind_temp = ind_temp2;
-                    else %Update old value, keep latest found values
-                        refFoundND(end,:) = coor_ref(ind_temp2,:);
-                        indFoundND(end,:) = indices(ind_temp2,:);
-                        typesFoundND(end,:) = types(ind_temp2,:);
-                    end
-                end
-                if any(indDouble1)
-                    % Remove option
-                    coorDouble1 = coorFoundND(indDouble1,:);
-                    coorFoundND = coorFoundND(~indDouble1,:);
-                    refFoundND = refFoundND(~indDouble1,:);
-                    indFoundND = indFoundND(~indDouble1,:);
-                    typesFoundND = typesFoundND(~indDouble1,:);
-                end
-                
-                % Add found position to the not double matrices
-                coorFoundND = [coorFoundND;coorFin1];
-                refFoundND = [refFoundND;coor_ref(ind_temp,:)];
-                indFoundND = [indFoundND;indices(ind_temp,:)];
-                typesFoundND = [typesFoundND;types(ind_temp,:)];
+        % Now compare dist with distances of unit cell
+        distUnit = coor_rem(ind_as,:)-coor_found(ind_ref,:);
+        dif = (unit_comp(:,1)-distUnit(1,1)).^2 + (unit_comp(:,2)-distUnit(1,2)).^2;
+        int_typ = unit_ref(dif==min(dif),3);
+        int_ind = ind_found(ind_ref,:) + ind_unit(dif==min(dif),:);
+        % Check for double coordinates
+        ind_double = ind_found(:,1)==int_ind(1,1) & ind_found(:,2)==int_ind(1,2) & types_found == int_typ;
+        if sum(ind_double)>0
+            coorD = coor_found(ind_double,:);
+            % Current point doesn't work, use second closest point to find reference coordinate
+            coorFoundND = coor_found(~ind_double,:);
+            dist2 = sqrt((coorFoundND(:,1)-coorD(1,1)).^2 + (coorFoundND(:,2)-coorD(1,2)).^2);
+            dist = sqrt((coorFoundND(:,1)-coor_rem(ind_as,1)).^2 + (coorFoundND(:,2)-coor_rem(ind_as,2)).^2);
+            abM = max(a,b);
+            refFoundND = ref_found(~ind_double,:);
+            indFoundND = ind_found(~ind_double,:);
+            typesFoundND = types_found(~ind_double,:);
+
+            indSel1 = dist2<(abM+space/2);
+            indSel2 = dist<(abM+space/2);
+            if sum(indSel1)>=sum(indSel2)
+                indSel = find(indSel1);
+                coorSt = coorD;
+                coorFin = coor_rem(ind_as,:);
+            else
+                indSel = find(indSel2);
+                coorSt = coor_rem(ind_as,:);
+                coorFin = coorD;
             end
-            if any(indDouble2)
-                % Add second position
-                dist = sqrt((coorFoundND(:,1)-coorDouble2(1,1)).^2 + (coorFoundND(:,2)-coorDouble2(1,2)).^2);
-                indSel = find(dist<(abM+space/2));
-                [avDifSel,avIndSel] = getIndiceFromMulti(indSel,n_atoms,refFoundND,coorFoundND,typesFoundND,indFoundND,a,b,R,R180,Rinv,space,ind_unit,unit_ref,unit_rot,coorDouble2);
-                
-                % Check if option is again not found double
-                indDouble2 = indFoundND(:,1)==avIndSel(avDifSel==min(avDifSel),1) & indFoundND(:,2)==avIndSel(avDifSel==min(avDifSel),2) & typesFoundND==unit_ref(avDifSel==min(avDifSel),3);
-                
-                % Use best option
-                ind_temp = coordinates(:,1)==coorDouble2(1,1) & coordinates(:,2)==coorDouble2(1,2);
-                coor_ref(ind_temp,:) = refFoundND(indSel(1),:) + unit_ref(avDifSel==min(avDifSel),1:2)-unit_rot(typesFoundND(indSel(1)),:);
-                types(ind_temp,:) = unit_ref(avDifSel==min(avDifSel),3);
-                indices(ind_temp,:) = avIndSel(avDifSel==min(avDifSel),:);
-                % Check if point are repeatively found
-                coorFin2Old = coorFin2;
-                avDifFin2Old = avDifFin2;
-                avIndFin2Old = avIndFin2;
-                coorFin2 = coorDouble2;
-                avDifFin2 = avDifSel;
-                avIndFin2 = avIndSel;
-                if any(indDouble2) && sum(coorFin2Old-coorDouble2)<eps;
-                    % Use best second option
-                    if min(avDifFin2Old)<min(avDifFin2) %Keep old value, update latest found values
-                        avDif = avDifFin2;
-                        avInd = avIndFin2;
-                        coor2 = coorFin2;
-                    else %Update old value, keep latest found values
-                        avDif = avDifFin2Old;
-                        avInd = avIndFin2Old;
-                        coor2 = coorFin2Old;
-                    end
-                    arrangeAvDif = sort(avDif,'ascend');
-                    indMin = avDif==arrangeAvDif(2);
-                    % Check if this option is again not found double
-                    indDouble2 = indFoundND(:,1)==avInd(indMin,1) & indFoundND(:,2)==avInd(indMin,2) & typesFoundND==unit_ref(indMin,3);
+            [avDifSel,avIndSel] = getIndiceFromMulti(indSel,n_atoms,refFoundND,coorFoundND,typesFoundND,indFoundND,a,b,R,R180,Rinv,space,ind_unit,unit_ref,unit_rot,coorSt);
 
-                    % Update values
-                    ind_temp2 = coordinates(:,1)==coor2(1,1) & coordinates(:,2)==coor2(1,2);
-                    coor_ref(ind_temp2,:) = coor_ref(ind_temp2,:) -  unit_ref(avDif==min(avDif),1:2) +  unit_ref(indMin,1:2);% - unit_rot(types(ind_temp,:),:) + unit_rot(unit_ref(indMin,3),:);
-                    types(ind_temp2,:) = unit_ref(indMin,3);
-                    indices(ind_temp2,:) = avInd(indMin,:);
-                    
-                    % Update values
-                    if min(avDifFin2Old)<min(avDifFin2) %Keep old value, update latest found values
-                        ind_temp = ind_temp2;
-                    else %Update old value, keep latest found values
-                        refFoundND(end,:) = coor_ref(ind_temp2,:);
-                        indFoundND(end,:) = indices(ind_temp2,:);
-                        typesFoundND(end,:) = types(ind_temp2,:);
+            % Use best option
+            ind_temp = coordinates(:,1)==coorSt(1,1) & coordinates(:,2)==coorSt(1,2);
+            coor_ref(ind_temp,:) = refFoundND(indSel(1),:) + unit_ref(avDifSel==min(avDifSel),1:2)-unit_rot(typesFoundND(indSel(1)),:);
+            types(ind_temp,:) = unit_ref(avDifSel==min(avDifSel),3);
+            indices(ind_temp,:) = avIndSel(avDifSel==min(avDifSel),:);
+
+            % Check if option is again not found double
+            indDouble1 = indFoundND(:,1)==avIndSel(avDifSel==min(avDifSel),1) & indFoundND(:,2)==avIndSel(avDifSel==min(avDifSel),2) & typesFoundND==unit_ref(avDifSel==min(avDifSel),3);
+            if any(indDouble1)
+                % Remove option
+                coorDouble1 = coorFoundND(indDouble1,:);
+                coorFoundND = coorFoundND(~indDouble1,:);
+                refFoundND = refFoundND(~indDouble1,:);
+                indFoundND = indFoundND(~indDouble1,:);
+                typesFoundND = typesFoundND(~indDouble1,:);
+            end
+
+            % Add found position to the not double matrices
+            coorFoundND = [coorFoundND;coorSt];
+            refFoundND = [refFoundND;coor_ref(ind_temp,:)];
+            indFoundND = [indFoundND;indices(ind_temp,:)];
+            typesFoundND = [typesFoundND;types(ind_temp,:)];
+
+            % Add second position
+            dist = sqrt((coorFoundND(:,1)-coorFin(1,1)).^2 + (coorFoundND(:,2)-coorFin(1,2)).^2);
+            indSel = find(dist<(abM+space/2));
+            [avDifSel,avIndSel] = getIndiceFromMulti(indSel,n_atoms,refFoundND,coorFoundND,typesFoundND,indFoundND,a,b,R,R180,Rinv,space,ind_unit,unit_ref,unit_rot,coorFin);
+
+            % Use best option
+            ind_temp = coordinates(:,1)==coorFin(1,1) & coordinates(:,2)==coorFin(1,2);
+            coor_ref(ind_temp,:) = refFoundND(indSel(1),:) + unit_ref(avDifSel==min(avDifSel),1:2)-unit_rot(typesFoundND(indSel(1)),:);
+            types(ind_temp,:) = unit_ref(avDifSel==min(avDifSel),3);
+            indices(ind_temp,:) = avIndSel(avDifSel==min(avDifSel),:);
+
+            % Check if option is again not found double
+            indDouble2 = indFoundND(:,1)==avIndSel(avDifSel==min(avDifSel),1) & indFoundND(:,2)==avIndSel(avDifSel==min(avDifSel),2) & typesFoundND==unit_ref(avDifSel==min(avDifSel),3);
+            if any(indDouble2)
+                % Remove option
+                coorDouble2 = coorFoundND(indDouble2,:);
+                coorFoundND = coorFoundND(~indDouble2,:);
+                refFoundND = refFoundND(~indDouble2,:);
+                indFoundND = indFoundND(~indDouble2,:);
+                typesFoundND = typesFoundND(~indDouble2,:);
+            end
+
+            % Add found position to the not double matrices
+            coorFoundND = [coorFoundND;coorFin];
+            refFoundND = [refFoundND;coor_ref(ind_temp,:)];
+            indFoundND = [indFoundND;indices(ind_temp,:)];
+            typesFoundND = [typesFoundND;types(ind_temp,:)];
+
+            count = 0;
+            coorFin1 = [Inf Inf];
+            coorFin2 = [Inf Inf];
+            avDifFin1 = [Inf,Inf];
+            avDifFin2 = [Inf,Inf];
+            avIndFin1 = [Inf Inf];
+            avIndFin2 = [Inf Inf];
+            while (any(indDouble1) || any(indDouble2)) && count<20
+                count = count+1;
+                if any(indDouble1)
+                    % Add second position
+                    dist = sqrt((coorFoundND(:,1)-coorDouble1(1,1)).^2 + (coorFoundND(:,2)-coorDouble1(1,2)).^2);
+                    indSel = find(dist<(abM+space/2));
+                    [avDifSel,avIndSel] = getIndiceFromMulti(indSel,n_atoms,refFoundND,coorFoundND,typesFoundND,indFoundND,a,b,R,R180,Rinv,space,ind_unit,unit_ref,unit_rot,coorDouble1);
+
+
+                    % Check if option is again not found double
+                    indDouble1 = indFoundND(:,1)==avIndSel(avDifSel==min(avDifSel),1) & indFoundND(:,2)==avIndSel(avDifSel==min(avDifSel),2) & typesFoundND==unit_ref(avDifSel==min(avDifSel),3);
+
+                    % Use best option
+                    ind_temp = coordinates(:,1)==coorDouble1(1,1) & coordinates(:,2)==coorDouble1(1,2);
+                    coor_ref(ind_temp,:) = refFoundND(indSel(1),:) + unit_ref(avDifSel==min(avDifSel),1:2)-unit_rot(typesFoundND(indSel(1)),:);
+                    types(ind_temp,:) = unit_ref(avDifSel==min(avDifSel),3);
+                    indices(ind_temp,:) = avIndSel(avDifSel==min(avDifSel),:);
+                    % Check if point are repeatively found
+                    coorFin1Old = coorFin1;
+                    avDifFin1Old = avDifFin1;
+                    avIndFin1Old = avIndFin1;
+                    coorFin1 = coorDouble1;
+                    avDifFin1 = avDifSel;
+                    avIndFin1 = avIndSel;
+                    if any(indDouble1) && sum(coorFin1Old-coorDouble1)<eps;
+                        % Use best second option
+                        if min(avDifFin1Old)<min(avDifFin1) %Keep old value, update latest found values
+                            avDif = avDifFin1;
+                            avInd = avIndFin1;
+                            coor1 = coorFin1;
+                        else %Update old value, keep latest found values
+                            avDif = avDifFin1Old;
+                            avInd = avIndFin1Old;
+                            coor1 = coorFin1Old;
+                        end
+                        arrangeAvDif = sort(avDif,'ascend');
+                        indMin = avDif==arrangeAvDif(2);
+                        % Check if this option is again not found double
+                        indDouble1 = indFoundND(:,1)==avInd(indMin,1) & indFoundND(:,2)==avInd(indMin,2) & typesFoundND==unit_ref(indMin,3);
+
+                        % Update values
+                        ind_temp2 = coordinates(:,1)==coor1(1,1) & coordinates(:,2)==coor1(1,2);
+                        coor_ref(ind_temp2,:) = coor_ref(ind_temp2,:) -  unit_ref(avDif==min(avDif),1:2) +  unit_ref(indMin,1:2);% - unit_rot(types(ind_temp,:),:) + unit_rot(unit_ref(indMin,3),:);
+                        types(ind_temp2,:) = unit_ref(indMin,3);
+                        indices(ind_temp2,:) = avInd(indMin,:);
+
+                        % Update values
+                        if min(avDifFin1Old)<min(avDifFin1) %Keep old value, update latest found values
+                            ind_temp = ind_temp2;
+                        else %Update old value, keep latest found values
+                            refFoundND(end,:) = coor_ref(ind_temp2,:);
+                            indFoundND(end,:) = indices(ind_temp2,:);
+                            typesFoundND(end,:) = types(ind_temp2,:);
+                        end
                     end
+                    if any(indDouble1)
+                        % Remove option
+                        coorDouble1 = coorFoundND(indDouble1,:);
+                        coorFoundND = coorFoundND(~indDouble1,:);
+                        refFoundND = refFoundND(~indDouble1,:);
+                        indFoundND = indFoundND(~indDouble1,:);
+                        typesFoundND = typesFoundND(~indDouble1,:);
+                    end
+
+                    % Add found position to the not double matrices
+                    coorFoundND = [coorFoundND;coorFin1];
+                    refFoundND = [refFoundND;coor_ref(ind_temp,:)];
+                    indFoundND = [indFoundND;indices(ind_temp,:)];
+                    typesFoundND = [typesFoundND;types(ind_temp,:)];
                 end
                 if any(indDouble2)
-                    % Remove option
-                    coorDouble2 = coorFoundND(indDouble2,:);
-                    coorFoundND = coorFoundND(~indDouble2,:);
-                    refFoundND = refFoundND(~indDouble2,:);
-                    indFoundND = indFoundND(~indDouble2,:);
-                    typesFoundND = typesFoundND(~indDouble2,:);
+                    % Add second position
+                    dist = sqrt((coorFoundND(:,1)-coorDouble2(1,1)).^2 + (coorFoundND(:,2)-coorDouble2(1,2)).^2);
+                    indSel = find(dist<(abM+space/2));
+                    [avDifSel,avIndSel] = getIndiceFromMulti(indSel,n_atoms,refFoundND,coorFoundND,typesFoundND,indFoundND,a,b,R,R180,Rinv,space,ind_unit,unit_ref,unit_rot,coorDouble2);
+
+                    % Check if option is again not found double
+                    indDouble2 = indFoundND(:,1)==avIndSel(avDifSel==min(avDifSel),1) & indFoundND(:,2)==avIndSel(avDifSel==min(avDifSel),2) & typesFoundND==unit_ref(avDifSel==min(avDifSel),3);
+
+                    % Use best option
+                    ind_temp = coordinates(:,1)==coorDouble2(1,1) & coordinates(:,2)==coorDouble2(1,2);
+                    coor_ref(ind_temp,:) = refFoundND(indSel(1),:) + unit_ref(avDifSel==min(avDifSel),1:2)-unit_rot(typesFoundND(indSel(1)),:);
+                    types(ind_temp,:) = unit_ref(avDifSel==min(avDifSel),3);
+                    indices(ind_temp,:) = avIndSel(avDifSel==min(avDifSel),:);
+                    % Check if point are repeatively found
+                    coorFin2Old = coorFin2;
+                    avDifFin2Old = avDifFin2;
+                    avIndFin2Old = avIndFin2;
+                    coorFin2 = coorDouble2;
+                    avDifFin2 = avDifSel;
+                    avIndFin2 = avIndSel;
+                    if any(indDouble2) && sum(coorFin2Old-coorDouble2)<eps;
+                        % Use best second option
+                        if min(avDifFin2Old)<min(avDifFin2) %Keep old value, update latest found values
+                            avDif = avDifFin2;
+                            avInd = avIndFin2;
+                            coor2 = coorFin2;
+                        else %Update old value, keep latest found values
+                            avDif = avDifFin2Old;
+                            avInd = avIndFin2Old;
+                            coor2 = coorFin2Old;
+                        end
+                        arrangeAvDif = sort(avDif,'ascend');
+                        indMin = avDif==arrangeAvDif(2);
+                        % Check if this option is again not found double
+                        indDouble2 = indFoundND(:,1)==avInd(indMin,1) & indFoundND(:,2)==avInd(indMin,2) & typesFoundND==unit_ref(indMin,3);
+
+                        % Update values
+                        ind_temp2 = coordinates(:,1)==coor2(1,1) & coordinates(:,2)==coor2(1,2);
+                        coor_ref(ind_temp2,:) = coor_ref(ind_temp2,:) -  unit_ref(avDif==min(avDif),1:2) +  unit_ref(indMin,1:2);% - unit_rot(types(ind_temp,:),:) + unit_rot(unit_ref(indMin,3),:);
+                        types(ind_temp2,:) = unit_ref(indMin,3);
+                        indices(ind_temp2,:) = avInd(indMin,:);
+
+                        % Update values
+                        if min(avDifFin2Old)<min(avDifFin2) %Keep old value, update latest found values
+                            ind_temp = ind_temp2;
+                        else %Update old value, keep latest found values
+                            refFoundND(end,:) = coor_ref(ind_temp2,:);
+                            indFoundND(end,:) = indices(ind_temp2,:);
+                            typesFoundND(end,:) = types(ind_temp2,:);
+                        end
+                    end
+                    if any(indDouble2)
+                        % Remove option
+                        coorDouble2 = coorFoundND(indDouble2,:);
+                        coorFoundND = coorFoundND(~indDouble2,:);
+                        refFoundND = refFoundND(~indDouble2,:);
+                        indFoundND = indFoundND(~indDouble2,:);
+                        typesFoundND = typesFoundND(~indDouble2,:);
+                    end
+
+                    % Add found position to the not double matrices
+                    coorFoundND = [coorFoundND;coorFin2];
+                    refFoundND = [refFoundND;coor_ref(ind_temp,:)];
+                    indFoundND = [indFoundND;indices(ind_temp,:)];
+                    typesFoundND = [typesFoundND;types(ind_temp,:)];
                 end
-        
-                % Add found position to the not double matrices
-                coorFoundND = [coorFoundND;coorFin2];
-                refFoundND = [refFoundND;coor_ref(ind_temp,:)];
-                indFoundND = [indFoundND;indices(ind_temp,:)];
-                typesFoundND = [typesFoundND;types(ind_temp,:)];
             end
+        else
+            ind_temp = coordinates(:,1)==coor_rem(ind_as,1) & coordinates(:,2)==coor_rem(ind_as,2);
+            coor_ref(ind_temp,:) = ref_found(ind_ref,:) + unit_ref(dif==min(dif),1:2)-unit_rot(types_found(ind_ref),:);
+            types(ind_temp,:) = int_typ;
+            indices(ind_temp,:) = int_ind;
         end
-    else
-        ind_temp = coordinates(:,1)==coor_rem(ind_as,1) & coordinates(:,2)==coor_rem(ind_as,2);
-        coor_ref(ind_temp,:) = ref_found(ind_ref,:) + unit_ref(dif==min(dif),1:2)-unit_rot(types_found(ind_ref),:);
-        types(ind_temp,:) = int_typ;
-        indices(ind_temp,:) = int_ind;
-    end
-    ind = find(coor_ref(:,1)==0); % For next loop
+        ind = find(coor_ref(:,1)==0); % For next loop
     
+    catch
+        warndlg('Not all points found during iteration, double coordinates assigned')
+        break
+    end
     
 %     string = ['(',num2str(point),'/',num2str(Ntotal),')'];
 %     waitbar(point/Ntotal,hwait,string);

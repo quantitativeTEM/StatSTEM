@@ -113,11 +113,13 @@ end
 FP.rho = FP.dist/4*ones(FP.n_c,1);
 FP.findRho = 1;
 if any(strcmp(fieldnames(input),'rho'))
-    if size(input.rho,1)==size(input.coordinates,1)
-        % Use user defined width, don't find width by fitting
-        FP.rho = input.rho;
-        FP.findRho = 0;
-        FP.fitRho = 0;
+    if ~any(input.rho==0)
+        if size(input.rho,1)==size(input.coordinates,1)
+            % Use user defined width, don't find width by fitting
+            FP.rho = input.rho;
+            FP.findRho = 0;
+            FP.fitRho = 0;
+        end
     end
 end
 

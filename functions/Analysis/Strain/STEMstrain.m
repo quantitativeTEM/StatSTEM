@@ -1,4 +1,4 @@
-function [eps_xx,eps_xy,eps_yy,omg_xy,err] = STEMstrain(coordinates,coor_relaxed,a,b,dirTeta_ab,teta,unit,error_a,error_b)
+function [eps_xx,eps_xy,eps_yy,omg_xy,err,errMes] = STEMstrain(coordinates,coor_relaxed,a,b,dirTeta_ab,teta,unit,error_a,error_b)
 % STEMstrain - determine the strain from coordinates
 %
 %   syntax: [coor_ref,types,indices] = STEMdisplacement(coordinates,ref,...
@@ -79,119 +79,130 @@ err.xy = zeros(n1,1);
 err.yx = zeros(n1,1);
 err.yy = zeros(n1,1);
 omg_xy = zeros(n1,1);
+errMes = '';
 for n=1:n1
+    if n==193
+    end
     u = zeros(2,2);
     e_u = zeros(2,2);
     v = zeros(2,2);
     e_v = zeros(2,2);
     
-    % Use ref coodinates to find points in a direction
-    dist = sqrt( (coor_relaxed(:,1)-coor_relaxed(n,1)-Vstrain(1,1)).^2 + (coor_relaxed(:,2)-coor_relaxed(n,2)-Vstrain(1,2)).^2 );
-    if min(dist)<space
-        ind = dist==min(dist);
-        if sum(ind)~=1
-            ind = find(ind);
-            if length(ind)==2
-                c = coordinates(ind,1:2);
-                error(['Double coordinates found: (',c(1,1),',',c(1,2),') and (',c(2,1),',',c(2,2),')']);
-            else
-                c = coordinates(ind(1),1:2);
-                error(['Multiple coordinates found around: (',c(1,1),',',c(1,2),')']);
+    if coor_relaxed(n,1)~=0 && coor_relaxed(n,2)~=0
+        % Use ref coodinates to find points in a direction
+        dist = sqrt( (coor_relaxed(:,1)-coor_relaxed(n,1)-Vstrain(1,1)).^2 + (coor_relaxed(:,2)-coor_relaxed(n,2)-Vstrain(1,2)).^2 );
+        if min(dist)<space
+            ind = dist==min(dist);
+            if sum(ind)~=1
+                ind = find(ind);
+                if length(ind)==2
+                    c = coordinates(ind,1:2);
+                    errordlg(['Double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')']);
+                else
+                    c = coordinates(ind(1),1:2);
+                    errordlg(['Multiple coordinates found around: (',num2str(c(1,1)),',',num2str(c(1,2)),')']);
+                end
+                break
             end
+            % Reference point exist
+            u(1,:) = coordinates(ind,1:2) - coordinates(n,1:2) - Vstrain(1,:);
+            e_u(1,:) = sqrt( Verror(1,:).^2 );
+        else
+            u(1,:) = [NaN;NaN];
+            e_u(1,:)  = [NaN;NaN];
         end
-        % Reference point exist
-        u(1,:) = coordinates(ind,1:2) - coordinates(n,1:2) - Vstrain(1,:);
-        e_u(1,:) = sqrt( Verror(1,:).^2 );
-    else
-        u(1,:) = [NaN;NaN];
-        e_u(1,:)  = [NaN;NaN];
-    end
-    
-    % Use ref coodinates to find points in -a direction
-    dist = sqrt( (coor_relaxed(:,1)-coor_relaxed(n,1)+Vstrain(1,1)).^2 + (coor_relaxed(:,2)-coor_relaxed(n,2)+Vstrain(1,2)).^2 );
-    if min(dist)<space
-        ind = dist==min(dist);
-        if sum(ind)~=1
-            ind = find(ind);
-            if length(ind)==2
-                c = coordinates(ind,1:2);
-                error(['Double coordinates found: (',c(1,1),',',c(1,2),') and (',c(2,1),',',c(2,2),')']);
-            else
-                c = coordinates(ind(1),1:2);
-                error(['Multiple coordinates found around: (',c(1,1),',',c(1,2),')']);
+
+        % Use ref coodinates to find points in -a direction
+        dist = sqrt( (coor_relaxed(:,1)-coor_relaxed(n,1)+Vstrain(1,1)).^2 + (coor_relaxed(:,2)-coor_relaxed(n,2)+Vstrain(1,2)).^2 );
+        if min(dist)<space
+            ind = dist==min(dist);
+            if sum(ind)~=1
+                ind = find(ind);
+                if length(ind)==2
+                    c = coordinates(ind,1:2);
+                    errordlg(['Double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')']);
+                else
+                    c = coordinates(ind(1),1:2);
+                    errordlg(['Multiple coordinates found around: (',num2str(c(1,1)),',',num2str(c(1,2)),')']);
+                end
+                break
             end
+            % Reference point exist
+            u(2,:) = coordinates(n,1:2) - coordinates(ind,1:2) - Vstrain(1,:);
+            e_u(2,:) = sqrt( Verror(1,:).^2 );
+        else
+            u(2,:) = [NaN;NaN];
+            e_u(2,:)  = [NaN;NaN];
         end
-        % Reference point exist
-        u(2,:) = coordinates(n,1:2) - coordinates(ind,1:2) - Vstrain(1,:);
-        e_u(2,:) = sqrt( Verror(1,:).^2 );
-    else
-        u(2,:) = [NaN;NaN];
-        e_u(2,:)  = [NaN;NaN];
-    end
-    
-    % If possible, average both displacements
-    if any(isnan(u))
-        u = u(~isnan(u(:,1)),:);
-        e_u = e_u(~isnan(e_u(:,1)),:);
-    else
-        e_u = [sqrt( 1/2*u(1,1)^2*e_u(1,2)^2 + 1/2*u(1,2)^2*e_u(1,1)^2) sqrt( 1/2*u(2,1)^2*e_u(2,2)^2 + 1/2*u(2,2)^2*e_u(2,1)^2)];
-        u = [mean(u(:,1)) mean(u(:,2))];
-    end
-        
-    
-    % Use ref coodinates to find points in b direction
-    dist = sqrt( (coor_relaxed(:,1)-coor_relaxed(n,1)-Vstrain(2,1)).^2 + (coor_relaxed(:,2)-coor_relaxed(n,2)-Vstrain(2,2)).^2 );
-    if min(dist)<space
-        ind = dist==min(dist);
-        if sum(ind)~=1
-            ind = find(ind);
-            if length(ind)==2
-                c = coordinates(ind,1:2);
-                error(['Double coordinates found: (',c(1,1),',',c(1,2),') and (',c(2,1),',',c(2,2),')']);
-            else
-                c = coordinates(ind(1),1:2);
-                error(['Multiple coordinates found around: (',c(1,1),',',c(1,2),')']);
+
+        % If possible, average both displacements
+        if any(isnan(u))
+            u = u(~isnan(u(:,1)),:);
+            e_u = e_u(~isnan(e_u(:,1)),:);
+        else
+            e_u = [sqrt( 1/2*u(1,1)^2*e_u(1,2)^2 + 1/2*u(1,2)^2*e_u(1,1)^2) sqrt( 1/2*u(2,1)^2*e_u(2,2)^2 + 1/2*u(2,2)^2*e_u(2,1)^2)];
+            u = [mean(u(:,1)) mean(u(:,2))];
+        end
+
+
+        % Use ref coodinates to find points in b direction
+        dist = sqrt( (coor_relaxed(:,1)-coor_relaxed(n,1)-Vstrain(2,1)).^2 + (coor_relaxed(:,2)-coor_relaxed(n,2)-Vstrain(2,2)).^2 );
+        if min(dist)<space
+            ind = dist==min(dist);
+            if sum(ind)~=1
+                ind = find(ind);
+                if length(ind)==2
+                    c = coordinates(ind,1:2);
+                    errordlg(['Double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')']);
+                else
+                    c = coordinates(ind(1),1:2);
+                    errordlg(['Multiple coordinates found around: (',num2str(c(1,1)),',',num2str(c(1,2)),')']);
+                end
+                break
             end
+            % Reference point exist
+            v(1,:) = coordinates(ind,1:2) - coordinates(n,1:2) - Vstrain(2,:);
+            e_v(1,:) = sqrt( Verror(2,:).^2 );
+        else
+            v(1,:) = [NaN;NaN];
+            e_v(1,:)  = [NaN;NaN];
         end
-        % Reference point exist
-        v(1,:) = coordinates(ind,1:2) - coordinates(n,1:2) - Vstrain(2,:);
-        e_v(1,:) = sqrt( Verror(2,:).^2 );
-    else
-        v(1,:) = [NaN;NaN];
-        e_v(1,:)  = [NaN;NaN];
-    end
-    
-    % Use ref coodinates to find points in -b direction
-    dist = sqrt( (coor_relaxed(:,1)-coor_relaxed(n,1)+Vstrain(2,1)).^2 + (coor_relaxed(:,2)-coor_relaxed(n,2)+Vstrain(2,2)).^2 );
-    if min(dist)<space
-        ind = dist==min(dist);
-        if sum(ind)~=1
-            ind = find(ind);
-            if length(ind)==2
-                c = coordinates(ind,1:2);
-                error(['Double coordinates found: (',c(1,1),',',c(1,2),') and (',c(2,1),',',c(2,2),')']);
-            else
-                c = coordinates(ind(1),1:2);
-                error(['Multiple coordinates found around: (',c(1,1),',',c(1,2),')']);
+
+        % Use ref coodinates to find points in -b direction
+        dist = sqrt( (coor_relaxed(:,1)-coor_relaxed(n,1)+Vstrain(2,1)).^2 + (coor_relaxed(:,2)-coor_relaxed(n,2)+Vstrain(2,2)).^2 );
+        if min(dist)<space
+            ind = dist==min(dist);
+            if sum(ind)~=1
+                ind = find(ind);
+                if length(ind)==2
+                    c = coordinates(ind,1:2);
+                    error(['Double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')']);
+                else
+                    c = coordinates(ind(1),1:2);
+                    error(['Multiple coordinates found around: (',num2str(c(1,1)),',',num2str(c(1,2)),')']);
+                end
+                break
             end
+            % Reference point exist
+            v(2,:) = coordinates(n,1:2) - coordinates(ind,1:2) - Vstrain(2,:);
+            e_v(2,:) = sqrt( Verror(2,:).^2 );
+        else
+            v(2,:) = [NaN;NaN];
+            e_v(2,:)  = [NaN;NaN];
         end
-        % Reference point exist
-        v(2,:) = coordinates(n,1:2) - coordinates(ind,1:2) - Vstrain(2,:);
-        e_v(2,:) = sqrt( Verror(2,:).^2 );
+
+        % If possible, average both displacements
+        if any(isnan(v))
+            v = v(~isnan(v(:,1)),:);
+            e_v = e_v(~isnan(e_v(:,1)),:);
+        else
+            e_v = [sqrt( 1/2*v(1,1)^2*e_v(1,2)^2 + 1/2*v(1,2)^2*e_v(1,1)^2) sqrt( 1/2*v(2,1)^2*e_v(2,2)^2 + 1/2*v(2,2)^2*e_v(2,1)^2)];
+            v = [mean(v(:,1)) mean(v(:,2))];
+        end
     else
-        v(2,:) = [NaN;NaN];
-        e_v(2,:)  = [NaN;NaN];
+        u = [];
+        v = [];
     end
-    
-    % If possible, average both displacements
-    if any(isnan(v))
-        v = v(~isnan(v(:,1)),:);
-        e_v = e_v(~isnan(e_v(:,1)),:);
-    else
-        e_v = [sqrt( 1/2*v(1,1)^2*e_v(1,2)^2 + 1/2*v(1,2)^2*e_v(1,1)^2) sqrt( 1/2*v(2,1)^2*e_v(2,2)^2 + 1/2*v(2,2)^2*e_v(2,1)^2)];
-        v = [mean(v(:,1)) mean(v(:,2))];
-    end
-    
     if ~isempty(u) && ~isempty(v)
         D = INVV*[u;v];
         Eerr = [sqrt( u(1)^2*ErrINVV(1,1)^2 + INVV(1,1)^2*e_u(1)^2 + v(1)^2*ErrINVV(1,2)^2 + INVV(1,2)^2*e_v(1)^2 ),...
@@ -213,7 +224,9 @@ for n=1:n1
     err.yx(n,1) = Eerr(1,2);
     err.yy(n,1) = Eerr(2,2);
 end
-
+if n~=n1
+    errMes = ['Strain map cannot be made, double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')'];
+end
 % figure;
 % minplaneimg = min(min(obs));
 % scaledimg = (floor(((obs - minplaneimg) ./ (max(max(obs)) - minplaneimg)) * 255)); 

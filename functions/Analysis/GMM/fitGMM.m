@@ -34,7 +34,7 @@ atomcounting.ICL  = zeros(1,n_c);
 % atomcounting.CLC  = zeros(1,n_c);
 data = sort(atomcounting.volumes);
 
-options = statset('MaxIter', 1000);
+options = statset('MaxIter', 1000, 'TolTypeFun', 'rel', 'TolTypeX', 'rel','TolX', 1e-8, 'TolFun', 1e-8);
 if nargin>3
     h_bar.setValue(0);
 else

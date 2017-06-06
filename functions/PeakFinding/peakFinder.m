@@ -99,10 +99,10 @@ elseif strcmp(filter,'average')
         val = round(val);
     end
     filt = zeros(s(1),s(2));
-    filt(ceil(s(1)/2)-val+2:ceil(s(1)/2)+val,ceil(s(2)/2)-val+2:ceil(s(2)/2)+val) = 1/val^2;
+    filt(ceil(s(1)/2)-val+2:ceil(s(1)/2)+val,floor(s(2)/2)-val+2:floor(s(2)/2)+val) = 1/val^2;
     filt = fftshift(fft2(ifftshift(filt)));
 elseif strcmp(filter,'disk')
-    [x,y] = meshgrid(-ceil(s(2)/2):ceil(s(2)/2)-1 , -ceil(s(1)/2):ceil(s(1)/2)-1);
+    [x,y] = meshgrid(-ceil(s(2)/2):floor(s(2)/2-1) , -ceil(s(1)/2):floor(s(1)/2-1));
     R = sqrt(x.^2+y.^2)+1;
     filt = (R<=val)/max( sum(sum(R<=val)), 1);
     filt = fftshift(fft2(ifftshift( filt )));
