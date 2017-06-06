@@ -46,7 +46,9 @@ for k = 1:n_c
         mustart = (max(data) - min(data))/2;
         sigmastart  = (max(data)-min(data))/(2*k);
         s = struct('mu', mustart', 'Sigma', sigmastart^2, 'Pcomponents', ones(k,1)/k);
+        warning('off','all')
         obj_s{k} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
+        warning('on','all')
         NlogL_s = obj_s{k}.NlogL;
         % For abort button
         if toc>1
@@ -72,7 +74,9 @@ for k = 1:n_c
                 end
 
                 s = struct('mu', [atomcounting.estimatedDistributions{1,k-1}.mu' mustartextra]', 'Sigma', atomcounting.estimatedDistributions{k-1}.Sigma, 'Pcomponents', ones(k,1)/k);
+                warning('off','all')
                 obj_s{i} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
+                warning('on','all')
                 NlogL_s(i) = obj_s{i}.NlogL;
                 % For abort button
                 if toc>1
