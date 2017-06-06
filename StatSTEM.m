@@ -25,7 +25,7 @@ addpath([path,';',genpath(pathF),';',genpath(pathG)])
 
 % Start a splash screen
 splashImg = imread('splash.png');
-spl = splash(splashImg);
+% spl = splash(splashImg);
 
 % Check matlab version, and switch opengl
 v = version('-release');
@@ -52,13 +52,22 @@ else
     fclose(fileID);
 end
 
-h.datPath = [path,filesep,'GUI',filesep,'datPath.txt'];
+h.datPath = [path,filesep,'datPath.txt']; % [path,filesep,'GUI',filesep,'datPath.txt'];
 if exist(h.datPath, 'file')==0
-    pname = [path,filesep,'Database',filesep];
+    if ispc
+        pname = getenv('USERPROFILE'); 
+    else
+        pname = getenv('HOME');
+    end
+%     pname = [path,filesep,'Database',filesep];
     fid = fopen( h.datPath, 'wt' );
     fprintf( fid, '%s', pname);
     fclose(fid);
 end
+
+% StatSTEM colors
+pathColor = [path,filesep,'StatSTEMcolors.txt']; % [path,filesep,'GUI',filesep,'StatSTEMcolors.txt'];
+
 % The structure 'h' will be the main structure containing all the
 % references to all structures of the GUI
 
@@ -99,7 +108,7 @@ h.left.loadStore.load = uicontrol('Parent',h.left.loadStore.panel,'units','norma
 h.left.loadStore.save = uicontrol('Parent',h.left.loadStore.panel,'units','normalized','Position',[0.49 0.2 0.47 0.75],'String','Save','FontSize',10,'Enable','off');
 
 % Create image of StatSTEM
-imgPan = imread([pathG,filesep,'imgGUI.png']);
+imgPan = imread('imgGUI.png'); % imgPan = imread([pathG,filesep,'imgGUI.png']);
 h = panelStatSTEM(h,imgPan);
 
 %% Create right panels
@@ -110,7 +119,7 @@ h.right.tabgroup = uitabgroup(h.right.main,'units','normalized','Position',[0 0.
 tabs.PathName = h.PathName;
 tabs.dim_x = 150;
 tabs.dim_y = [50;90];%[22;50];
-tabs.pathColor = [path,filesep,'GUI',filesep,'StatSTEMcolors.txt'];
+tabs.pathColor = pathColor;%[path,filesep,'GUI',filesep,'StatSTEMcolors.txt'];
 set(h.right.tabgroup,'Userdata',tabs);
 createEmptyTab(h.right.tabgroup)
 userdata = get(h.right.tabgroup,'Userdata');
@@ -244,7 +253,7 @@ updateLeftPanels(h,[],fitOpt)
 % Limit minimum size and make window appear on full screen
 % set(h.fig,'Position',[1 1 screen(3) screen(4)])
 set(h.fig,'Visible','on')
-close(spl) % Close splash window
+% close(spl) % Close splash window
 waitfor(h.fig,'Visible','on')
 warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
 jFrame = get(handle(h.fig), 'JavaFrame');
