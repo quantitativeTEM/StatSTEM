@@ -128,6 +128,10 @@ switch ext
         return
 end
 
+% Shift column positions
+input.coordinates(:,1) = input.coordinates(:,1);
+input.coordinates(:,2) = input.coordinates(:,2);
+
 % Check if atom types are specified
 if ~isempty(input.coordinates)
     if size(input.coordinates,2)==2

@@ -85,7 +85,14 @@ end
 
 %% Calculation
 % Determine the strain values for all types
-[eps_xx,eps_xy,eps_yy,omg_xy,err] = STEMstrain(usr.file.strainmapping.coor_sel,usr.file.strainmapping.coor_relaxed,usr.file.strainmapping.a(1),usr.file.strainmapping.b(1),usr.file.strainmapping.dir_teta_ab,usr.file.strainmapping.teta(1),usr.file.input.projUnit,usr.file.strainmapping.a(2),usr.file.strainmapping.b(2));
+[eps_xx,eps_xy,eps_yy,omg_xy,err,errMes] = STEMstrain(usr.file.strainmapping.coor_sel,usr.file.strainmapping.coor_relaxed,usr.file.strainmapping.a(1),usr.file.strainmapping.b(1),usr.file.strainmapping.dir_teta_ab,usr.file.strainmapping.teta(1),usr.file.input.projUnit,usr.file.strainmapping.a(2),usr.file.strainmapping.b(2));
+
+if ~isempty(errMes)
+    newMessage(errMes,h)
+else
+    message = ['Strain map successfully generate for the file: ', usr.FileName];
+    newMessage(message,h)
+end
 
 usr.file.strainmapping.eps_xx = eps_xx;
 usr.file.strainmapping.eps_xy = eps_xy;

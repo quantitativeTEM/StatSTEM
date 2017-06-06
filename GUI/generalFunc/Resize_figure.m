@@ -24,9 +24,12 @@ if (userdata.callbackrunning)
     userdata.function.name = mfilename;
     userdata.function.input = {hObject,event,h};
     set(h.right.tabgroup,'Userdata',userdata)
-    robot = java.awt.Robot;
-    robot.keyPress(java.awt.event.KeyEvent.VK_ESCAPE);
-    robot.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE);
+    if ~isfield(userdata,'loadingNewFile')
+        robot = java.awt.Robot;
+        robot.keyPress(java.awt.event.KeyEvent.VK_ESCAPE);
+        robot.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE);
+        disp('ESC pressed')
+    end
     return
 end
 

@@ -145,7 +145,7 @@ elseif val==1 || val==2
     m2 = uimenu(c,'Label','Location','Separator','on');
     m3 = uimenu(c,'Label','Standard Colormaps','Separator','on');
     m4 = uimenu(c,'Label','Interactive Colormap Shift','Callback',{@shiftCmap,h.fig,h_bar,usr.images.ax,h});
-    m5 = uimenu(c,'Label','Open Colormap Editor','Callback',{@cmEdit,usr.images.ax});
+    m5 = uimenu(c,'Label','Open Colormap Editor','Callback',{@cmEdit,usr.images.ax,usr.images.ax,h.fig});
     m6 = uimenu(c,'Label','Reset Range Colors','Callback',{@resetCrange,usr.images.ax,[min(min(usr.file.input.obs)),max(max(usr.file.input.obs))]});
 
     % Locations
@@ -217,9 +217,12 @@ end
 colormap(ax,cmap)
 
 function cmEdit(~,~,ax,ax2,hfig,data)
-if nargin<4
+if nargin<6
     axes(ax)
-    colormapeditor;
+    range = caxis(ax);
+    pos = get(hfig,'Position');
+    range = setRangeUI(range,[pos(1)+pos(3)/2 pos(2)+pos(4)/2]);
+    caxis(ax,range)
 else
     axes(ax2)
     range = caxis(ax);

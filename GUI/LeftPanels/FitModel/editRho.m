@@ -63,6 +63,10 @@ usr.fitOpt.model.rho_start = rho;
 % Check if manual width is selected
 if h.left.fit.panels.Width.UserBut.isSelected
     usr.file.input.rho = rho(usr.file.input.coordinates(:,3));
+else
+    if any(strcmp(fieldnames(usr.file.input),'rho'))
+        usr.file.input = rmfield(usr.file.input,'rho');
+    end
 end
 
 % Update file in GUI

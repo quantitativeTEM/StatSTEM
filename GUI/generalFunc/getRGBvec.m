@@ -36,7 +36,7 @@ if strcmp(mode,'exact')
             elseif unVal(n)>c_x(end)
                 clr = cmap(end,:);
             else
-                clr = [interp1(c_x,cmap(:,1),n,'linear') interp1(c_x,cmap(:,2),n,'linear') interp1(c_x,cmap(:,3),n,'linear')];
+                clr = [interp1(c_x,cmap(:,1),unVal(n),'linear') interp1(c_x,cmap(:,2),unVal(n),'linear') interp1(c_x,cmap(:,3),unVal(n),'linear')];
             end
             RGBvec(ind,1) = clr(1,1);
             RGBvec(ind,2) = clr(1,2);

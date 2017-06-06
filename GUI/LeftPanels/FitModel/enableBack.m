@@ -17,7 +17,7 @@ function enableBack(jObject,event,h)
 
 % Check if no other routine is running
 userdata = get(h.right.tabgroup,'Userdata');
-if (userdata.callbackrunning)
+if (userdata.callbackrunning) && ~isfield(userdata,'loadingNewFile')
     % First turn off zoom, pan and datacursor
 	turnOffFigureSelection(h);
     % If so store function name and variables and cancel other function

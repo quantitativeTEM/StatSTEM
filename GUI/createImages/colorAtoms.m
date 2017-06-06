@@ -52,20 +52,27 @@ if exist(path, 'file') == 2
         nC = st2-st1+1;
         color = zeros(nC,3);
         fid = fopen(path,'rt');
+        indOk=false(nC,1);
         for n=1:nLines
             line = fgets(fid);
             if n>=st1
                 C = textscan(line,'%s','delimiter',sprintf('\t'));
                 C = C{1,1};
-                color(n-st1+1,1) = str2double(C{2})/255;
-                color(n-st1+1,2) = str2double(C{3})/255;
-                color(n-st1+1,3) = str2double(C{4})/255;
+                if ~isempty(C)
+                    indOk(n-st1+1,1) = true;
+                    color(n-st1+1,1) = str2double(C{2})/255;
+                    color(n-st1+1,2) = str2double(C{3})/255;
+                    color(n-st1+1,3) = str2double(C{4})/255;
+                end
             end
         end
         fclose(fid);
-        
+        color = color(indOk,:);
+        nC = size(color,1);
         % Check if all values are correct
-        if any(reshape(color,nC*3,1)<0) || any(reshape(color,nC*3,1)>1)
+        if isempty(color)
+            nofile = 1;
+        elseif any(reshape(color,nC*3,1)<0) || any(reshape(color,nC*3,1)>1)
             nofile = 1;
         end
     else
@@ -76,14 +83,14 @@ else
 end
 
 if nofile==1
-    T = cell(8,1);
+    T = cell(7,1);
     T{1,1} = {'Marker colors of the StatSTEM interface'};
     T{2,1} = {''};
     T{3,1} = {'type';'R';'G';'B'};
     T{4,1} = {'1';'0';'255';'0'};
-    T{5,1} = {'2';'255';'0';'255'};
+    T{5,1} = {'2';'255';'0';'0'};
     T{6,1} = {'3';'0';'255';'255'};
-    T{7,1} = {'4';'255';'0';'0'};
+    T{7,1} = {'4';'255';'0';'255'};
     fid = fopen(path,'wt');
     for n=1:size(T,1)
         for m=1:size(T{n,1},1)

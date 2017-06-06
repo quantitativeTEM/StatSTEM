@@ -126,6 +126,7 @@ end
 
 %% With the found angle find the relaxed coordinates
 coor_in = usr.file.strainmapping.coor_sel;
+% coor_in = usr.file.input.coordinates(:,1:2);
 dist = (coor_in(:,1)-usr.file.strainmapping.refCoor(1,1)).^2 + (coor_in(:,2)-usr.file.strainmapping.refCoor(1,2)).^2;
 ind = dist==min(dist);
 refCoor = coor_in(ind,1:2);

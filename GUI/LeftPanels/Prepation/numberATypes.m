@@ -135,7 +135,7 @@ switch item
             switch quest
                 case 'Delete'
                     string = ['Removal of atom type (',str{type},') will erase the fitted model and all analysis, continue?'];
-                    quest = removeQuestionPrep(tab,h,string);
+                    [quest,usr] = removeQuestionPrep(tab,h,string);
                     if strcmp(quest, 'No')
                         set(hObject,'SelectedItem',item2)
                         return

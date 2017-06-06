@@ -19,7 +19,7 @@ function zoomIn_AxinFig(hObject,event,h,zOut)
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
-
+% return
 % Select figure
 figure(h.fig)
 
@@ -150,7 +150,13 @@ end
     function getRegion(hf,~)
         pntr = get(hf,'Pointer');
         pnt2 = get(hf,'CurrentPoint');
-        pnt = get(ha,'CurrentPoint');
+        try
+            pnt = get(ha,'CurrentPoint');
+        catch
+            data{2,1} = 'Restart';
+            zoomIn_AxinFig(hObject,event,h,zOut)
+            return
+        end
         button = get(hf, 'SelectionType');
         if (strcmp(pntr, 'custom'))
             if strcmp(button,'normal')
