@@ -46,5 +46,5 @@ v = str2double(v(1:4));
 if v<2015 || license('test','distrib_computing_toolbox')==0
     options.numWorkers = 1;
 else
-    options.numWorkers = 1;%feature('numCores');
+    options.numWorkers = feature('numCores');
 end

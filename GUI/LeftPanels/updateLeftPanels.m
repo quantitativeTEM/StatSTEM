@@ -72,7 +72,7 @@ else
     h.left.fit.panels.Width.UserBut.setEnabled(true)
     h.left.fit.panels.Width.EditBut.setEnabled(true)
     h.left.fit.panels.Test.But.setEnabled(true)
-%     h.left.fit.panels.Parallel.Val.setEnabled(true)
+    h.left.fit.panels.Parallel.Val.setEnabled(true)
     
     % Analysis panel
     h.left.ana.panel.acl.incLib.setEnabled(true)

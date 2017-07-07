@@ -16,12 +16,17 @@ function [tab,mes] = loadTab(h)
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
-
-tabs = get(h.right.tabgroup,'Children');
+try
+    tabs = get(h.right.tabgroup,'Children');
+catch
+    tab = [];
+    mes = 'ERROR: StatSTEM closed';
+    return
+end
 % First check if file is loaded
 if length(tabs)==1
     tab = [];
-    mes = 'ERROR; First open a file';
+    mes = 'ERROR: First open a file';
 else
     % Load tab
     v = version('-release');
@@ -35,7 +40,7 @@ else
     tTab = get(tab,'Title');
     if strcmp(tTab,'+')
         tab = [];
-        mes = 'ERROR; First open a file';
+        mes = 'ERROR: First open a file';
     end
 end
 
