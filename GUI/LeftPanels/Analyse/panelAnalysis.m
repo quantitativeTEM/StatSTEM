@@ -126,7 +126,7 @@ jpanAna.add(h.left.ana.panel.atom.main);
 % Create to include all advanced options
 jPanAtomAdv = JPanel;
 jPanAtomAdv.setLayout(BoxLayout(jPanAtomAdv, BoxLayout.Y_AXIS));
-jPanAtomAdv.setSize(Dimension(168,182));jPanAtomAdv.setPreferredSize(Dimension(168,182));jPanAtomAdv.setMaximumSize(Dimension(168,182))
+jPanAtomAdv.setSize(Dimension(168,186));jPanAtomAdv.setPreferredSize(Dimension(168,186));jPanAtomAdv.setMaximumSize(Dimension(168,186))
 jPanAtomAdv.setAlignmentX(Component.LEFT_ALIGNMENT);
 jPanAtomAdv.setBackground(Color(0.95,0.95,0.95))
 set(jPanAtomAdv,'Border',border.MatteBorder(0,1,1,1,Color(0.3,0.3,0.3)))
@@ -510,7 +510,7 @@ jpanAna.add(h.left.ana.panel.strain.main);
 % Create to include all advanced options
 jPanStrainAdv = JPanel;
 jPanStrainAdv.setLayout(BoxLayout(jPanStrainAdv, BoxLayout.Y_AXIS));
-jPanStrainAdv.setSize(Dimension(168,299));jPanStrainAdv.setPreferredSize(Dimension(168,299));jPanStrainAdv.setMaximumSize(Dimension(168,299))
+jPanStrainAdv.setSize(Dimension(168,302));jPanStrainAdv.setPreferredSize(Dimension(168,302));jPanStrainAdv.setMaximumSize(Dimension(168,302))
 jPanStrainAdv.setAlignmentX(Component.LEFT_ALIGNMENT);
 jPanStrainAdv.setBackground(Color(0.95,0.95,0.95))
 jPanStrainAdv.setVisible(0)
