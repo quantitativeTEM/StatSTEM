@@ -24,7 +24,7 @@ pathG = [path,filesep,'GUI'];       % Path for loading GUI functions
 addpath([path,';',genpath(pathF),';',genpath(pathG)])
 
 % Start a splash screen
-splashImg = imread('splash.png');
+splashImg = imread([pathG,filesep,'splash.png']);
 spl = splash(splashImg);
 
 % Check matlab version, and switch opengl
