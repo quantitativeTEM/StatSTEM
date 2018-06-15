@@ -1,0 +1,17 @@
+Database file for StatSTEM
+length_a	3.9242
+length_b	3.9242
+length_c	3.9242
+angle_ab	90
+
+columns	x	y
+Pt	0	0
+Pt	0	0.5
+Pt	0.5	0
+Pt	0.5	0.5
+
+zInfo
+Pt	0
+Pt	0.5
+Pt	0.5
+Pt	0
