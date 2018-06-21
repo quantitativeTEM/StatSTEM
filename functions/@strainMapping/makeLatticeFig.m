@@ -120,10 +120,10 @@ msize = coorMarkerSize('line',scaleMarker);
 %% For lattice parameters in a-direction
 % Use patch to make a single plot
 R = [cos(0.5*pi) -sin(0.5*pi);sin(0.5*pi) cos(0.5*pi)];
-dirAO = (R*(lattA./a)')'*0.1*msize;
+dirAO = (R*(lattA./[a,a])')'*0.1*msize;
 dirAO(isnan(dirAO(:,1)),1) = 0;
 dirAO(isnan(dirAO(:,1)),2) = 0;
-dirBO = (R*(lattB./b)')'*0.1*msize;
+dirBO = (R*(lattB./[b,b])')'*0.1*msize;
 dirBO(isnan(dirBO(:,1)),1) = 0;
 dirBO(isnan(dirBO(:,1)),2) = 0;
 LxA = [coor(:,1)-dirAO(:,1),coor(:,1)+dirAO(:,1),coor(:,1)+lattA(:,1)+dirAO(:,1),coor(:,1)+lattA(:,1)-dirAO(:,1)];
@@ -136,7 +136,7 @@ Ly = reshape([LyA;LyB]',N*4,1);
 
 Faces = 1:4*N; Faces = reshape(Faces,4,N)';
 cr = caxis(ax);
-h = patch(ax,Lx,Ly,[0 0 0],'Visible','off');
+h = patch(Lx,Ly,[0 0 0],'Visible','off');
 set(h,'Faces',Faces,'FaceColor','flat','FaceVertexCData',RGBvecP,'EdgeColor','none','Visible','on');
 caxis(ax,cr)
 usrData = repmat([a;b],1,4)';
