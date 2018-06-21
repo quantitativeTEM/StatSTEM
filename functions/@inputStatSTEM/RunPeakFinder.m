@@ -17,6 +17,9 @@ function obj = RunPeakFinder(obj)
 %% First select parameters
 parPFR = tunePeakFinderPar(obj.obs);
 
+if isempty(parPFR)
+    return
+end
 if parPFR.store==0
     return
 end

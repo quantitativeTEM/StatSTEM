@@ -80,6 +80,10 @@ for i=1:Ntypes-1
     coor_add( ((i-1)*Nnew+1):i*Nnew ,:) = coor_new(indOK, (3*i-2):3*i);
 end
 
+% Remove zero coordinates
+indOK = coor_add(:,3)~=0;
+coor_add = coor_add(indOK,:);
+
 coorTot = [obj.coordinates;coor_add];
 obj.coordinates = coorTot;
 % Check if column names are the same, if so they should be of the same type
