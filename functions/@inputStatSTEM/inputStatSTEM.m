@@ -104,7 +104,11 @@ classdef inputStatSTEM < StatSTEMfile
             obj.beta_ymin = 0.5*dx;
             obj.beta_xmax = (size(obj.obs,2)+0.5)*dx;
             obj.beta_ymax = (size(obj.obs,1)+0.5)*dx;
-            obj.zetamax = max(max(obj.obs));
+            try
+                obj.zetamax = max(max(obj.obs));
+            catch
+                obj.zetamax = 0;
+            end
             obj.rhomax = mean(size(obj.obs));
             obj.etamax = obj.zetamax;
             obj.testpoints = round((size(obj.obs,2)+size(obj.obs,1))/2);
