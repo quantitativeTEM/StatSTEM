@@ -35,8 +35,9 @@ a = strainmapping.a(1);
 b = strainmapping.b(1);
 dir_teta_ab = strainmapping.dirTeta;
 space = strainmapping.space;
+up = strainmapping.fUpdate;
 
-[indices,types] = STEMindexing(coor,refCoor,projUnit,teta,a,b,dir_teta_ab,space,'all');
+[indices,types] = STEMindexing(coor,refCoor,projUnit,teta,a,b,dir_teta_ab,space,'all',up);
 
 strainmapping.typesNP = types;
 strainmapping.indicesP = indices;

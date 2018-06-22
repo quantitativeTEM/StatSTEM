@@ -42,6 +42,11 @@ elseif sum(double(ind))==1
         file.input = file.(fNames{ind});
         file = rmfield(file,fNames{ind});
     end
+    try
+        pUC = file.input.projUnit;
+    catch
+        pUC = [];
+    end
 elseif isfield(file,'input')
     % Convert old StatSTEM file format to new one
     if isfield(file.input,'projUnit')
@@ -73,6 +78,7 @@ elseif isfield(file,'input')
         end
     elseif length(fNames)==1 && ~isa(file.input,'struct') && size(file.input,1)>1 && size(file.input,2)>1
         file.input = inputStatSTEM(file.input);
+        pUC = file.input.projUnit;
     else
         file = [];
         message = sprintf(['The file ', FileName, ' cannot be loaded, invalid input structure']);
@@ -84,6 +90,7 @@ else
     % loaded matlab file must be an image
     if length(fNames)==1 && ~isa(file.(fNames{1}),'struct') && size(file.(fNames{1}),1)>1 && size(file.(fNames{1}),2)>1
         file.input = inputStatSTEM(file.(fNames{1}));
+        pUC = file.input.projUnit;
     else
         file = [];
         message = sprintf(['The file ', FileName, ' cannot be loaded, invalid input structure']);

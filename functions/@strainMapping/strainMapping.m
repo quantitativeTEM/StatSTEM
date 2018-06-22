@@ -22,6 +22,7 @@ classdef strainMapping < StatSTEMfile
         nUC = 3; % Number of unit cells used to improve a,b-direction and angle by fitting
         fitABang = 0; % Indicate what should be improved by fitting: 0-angle and a,b-direction, 1-only the angle
         minSpace = 0; % Distance that may be used to find closest coordinate (0 or empty means, determine from projected unit cell dimensions)
+        fUpdate = 0.1; % Update factor for indexing routine to improve lattice parameters (see StatSTEM manual appendix B) (between 0 and 1)
     end
     
     properties (Dependent)
@@ -159,6 +160,15 @@ classdef strainMapping < StatSTEMfile
             else
                 val = [];
             end
+        end
+        
+        function obj = set.fUpdate(obj,val)
+            if val<0
+                val = 0;
+            elseif val>1
+                val = 1;
+            end
+            obj.fUpdate = val;
         end
         
         function val = get.teta(obj)

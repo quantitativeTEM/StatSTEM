@@ -271,7 +271,7 @@ classdef inputStatSTEM < StatSTEMfile
         function val = get.findRho(obj)
             % Check whether width should be found by fitting
             val = 1;
-            if obj.test==1 && ~any(obj.rhoT==0) && length(obj.rhoT)>=max(obj.coordinates(:,3))
+            if (obj.test==1 || obj.widthtype==2) && ~any(obj.rhoT==0) && length(obj.rhoT)>=max(obj.coordinates(:,3))
                 val = 0;
             elseif ~any(obj.rhoT==0) && obj.fitRho==0
                 if length(obj.rhoT)>=max(obj.coordinates(:,3))

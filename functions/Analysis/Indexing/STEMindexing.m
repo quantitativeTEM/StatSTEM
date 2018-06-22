@@ -1,8 +1,8 @@
-function [indices,types] = STEMindexing(coordinates,ref,unit,teta,a,b,dirTeta_ab,space,method,layLim,up)
+function [indices,types] = STEMindexing(coordinates,ref,unit,teta,a,b,dirTeta_ab,space,method,up,layLim)
 % STEMdisplacement - Find relaxed coordinates to make a displacement map
 %
 %   syntax: [indices,types,coor_ref] = STEMindexing(coordinates,ref,...
-%                                           unit,teta,a,b,dirTeta_ab,space,method,layLim,up)
+%                                           unit,teta,a,b,dirTeta_ab,space,method,up,layLim)
 %       indices     - indexed values of coordinates (in terms of distance in number of unit cells in a and b direction)
 %       types       - type of coordinates (in terms of atom types present in the projected unit cell "unit"
 %       coordinates - coordinates [x,y]
@@ -15,8 +15,8 @@ function [indices,types] = STEMindexing(coordinates,ref,unit,teta,a,b,dirTeta_ab
 %       space       - maximum distance between found intermediate point and
 %                     real coordinate (optional input)
 %       method      - 'all' - try to identify all coordinates, 'lattice' - identify only the coordinates on a crystal lattice, 'allNoWarn' - try to identify all coordinates without warnings
-%       layLim      - maximum number of rows and columns of coordinates to find (optional input, standard 100000)
 %       up          - update parameter (optional input, standard 0.1)
+%       layLim      - maximum number of rows and columns of coordinates to find (optional input, standard 100000)
 %
 
 %--------------------------------------------------------------------------
@@ -72,10 +72,10 @@ if nargin<9
     method = 'all';
 end
 if nargin<10
-    layLim = 100000;
+    up = 0.1;
 end
 if nargin<11
-    up = 0.1;
+    layLim = 100000;
 end
 
 %% Relate coordinates with each other by expanding unit cell per unit cell

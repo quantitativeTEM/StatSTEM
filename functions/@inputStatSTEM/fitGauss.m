@@ -71,7 +71,7 @@ if newP
         output = fitGauss_samerho(input, rho, offset, maxwait);
         
         % Find width if needed
-        if input.fitRho==1 && input.test==0
+        if input.fitRho==1 && input.test==0 && input.widthtype~=2
             input.coordinates(:,1:2) = output.coordinates(:,1:2);
             
             % Fit width of gaussians with same width for each column
