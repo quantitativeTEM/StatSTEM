@@ -230,8 +230,14 @@ classdef inputStatSTEM < StatSTEMfile
             % Check if input is correct
             if isa(val,'logical')
                 obj.test = val;
+                if val==0
+                    obj.maxIter = 400;
+                end
             elseif isa(val,'double') && (val==0 || val==1)
                 obj.test = val==1;
+                if val==0
+                    obj.maxIter = 400;
+                end
             else
                 error('StatSTEMfile: test must be a logical')
             end

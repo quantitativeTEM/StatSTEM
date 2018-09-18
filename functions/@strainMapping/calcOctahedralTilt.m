@@ -39,10 +39,49 @@ maxIndB = max(obj.indices(:,2));
 IndA = minIndA:maxIndA;
 IndB = minIndB:maxIndB;
 coorUC = obj.projUnit.coor2D;
-type1 = find(coorUC(:,1)==0.5 & coorUC(:,2)==0);
-type1 = type1(1);
-type2 = find(coorUC(:,1)==0 & coorUC(:,2)==0.5);
-type2 = type2(1);
+% For 110 use only 1 oxyen atom, for 100 use 2 oxygen atoms in unit cell)
+indO = strcmp(unit.atom2D,'O');
+if any(indO)
+    nO = sum(indO);
+    if nO==1
+        type1 = find(coorUC(:,1)==0.5 & coorUC(:,2)==0.5);
+        if ~isempty(type1)
+            type1 = type1(1);
+        else
+            error('Unit cell invalid, no oxgyen atoms present at (0.5,0.5)')
+        end
+    elseif nO==2
+        type1 = find(coorUC(:,1)==0.5 & coorUC(:,2)==0);
+        type2 = find(coorUC(:,1)==0 & coorUC(:,2)==0.5);
+        if ~isempty(type1) && ~isempty(type2)
+            type1 = type1(1);
+            type2 = type2(1);
+        else
+            error('Unit cell invalid, no oxgyen atoms present at (0.5,0) and (0,0.5)')
+        end
+    end
+else
+    type1 = find(coorUC(:,1)==0.5 & coorUC(:,2)==0);
+    type2 = find(coorUC(:,1)==0 & coorUC(:,2)==0.5);
+    if ~isempty(type1) && ~isempty(type2)
+        % 100 direction
+        nO = 2;
+        type1 = type1(1);
+        type2 = type2(1);
+    else
+        % 110 direction
+        type1 = find(coorUC(:,1)==0.5 & coorUC(:,2)==0.5);
+        if ~isempty(type1)
+            nO = 1;
+            type1 = type1(1);
+        end
+    end
+end
+if nO<1
+    error('No oxygen atoms present in unit cell')
+elseif nO>2
+    error('Too many oxygen atoms present in unit cell')
+end
 
 ang = zeros(maxIndA-minIndA+1,maxIndB-minIndB+1);
 if dirTeta_ab==1
@@ -50,29 +89,56 @@ if dirTeta_ab==1
 else
     shiftB = -1;
 end
-for i=1:(maxIndA-minIndA+1)
-    for j=1:(maxIndB-minIndB+1)
-        % Find the 4 coordinates
-        indCor = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==1;
-        indL = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type2;
-        indR = obj.indices(:,1)==IndA(i)+1 & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type2;
-        indB = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type1;
-        indT = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==type1;
-        if sum(indL)==1 && sum(indR)==1 && sum(indB)==1 && sum(indT)==1
-            coorCor = obj.coordinates(indCor,1:2);
-            % Angle in a-direction
-            dirA = obj.coordinates(indR,1:2)-obj.coordinates(indL,1:2);
-            dirA = Ra*dirA';
-            angA = atan2(dirA(2),dirA(1));
+
+if nO==2
+    obj.message = '[100]-direction indentified, octahedral tilt calculate per unit cell by using oxygen atoms at the left,right,top, and bottom.';
+    for i=1:(maxIndA-minIndA+1)
+        for j=1:(maxIndB-minIndB+1)
+            % Find the 4 (or 2) coordinates
+            indCor = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==1;
+            indL = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type2;
+            indR = obj.indices(:,1)==IndA(i)+1 & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type2;
+            indB = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type1;
+            indT = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==type1;
             
-            % Angle in b-direction
-            dirB = obj.coordinates(indT,1:2)-obj.coordinates(indB,1:2);
-            dirB = Rb*dirB';
-            angB = atan2(dirB(2),dirB(1));
+            if sum(indL)==1 && sum(indR)==1 && sum(indB)==1 && sum(indT)==1
+                %coorCor = obj.coordinates(indCor,1:2);
+                % Angle in a-direction
+                dirA = obj.coordinates(indR,1:2)-obj.coordinates(indL,1:2);
+                dirA = Ra*dirA';
+                angA = atan2(dirA(2),dirA(1));
+
+                % Angle in b-direction
+                dirB = obj.coordinates(indT,1:2)-obj.coordinates(indB,1:2);
+                dirB = Rb*dirB';
+                angB = atan2(dirB(2),dirB(1));
+
+                ang(i,j) = mean([angA,angB])/2/pi*360; % In degrees
+            else
+                ang(i,j) = NaN;
+            end
+        end
+    end
+elseif nO==1
+    obj.message = '[110]-direction indentified, octahedral tilt calculate per unit cell by using oxygen atoms at the left and right in the a-direction.';
+    for i=1:(maxIndA-minIndA+1)
+        for j=1:(maxIndB-minIndB+1)
+            % Find the 4 (or 2) coordinates
+            indCor = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==1;
+            indL = obj.indices(:,1)==IndA(i)-1 & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type1;
+            indR = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type1;
             
-            ang(i,j) = mean([angA,angB])/2/pi*360; % In degrees
-        else
-            ang(i,j) = NaN;
+            if sum(indL)==1 && sum(indR)==1
+                %coorCor = obj.coordinates(indCor,1:2);
+                % Angle in a-direction
+                dirA = obj.coordinates(indR,1:2)-obj.coordinates(indL,1:2);
+                dirA = Ra*dirA';
+                angA = atan2(dirA(2),dirA(1));
+
+                ang(i,j) = angA/2/pi*360; % In degrees
+            else
+                ang(i,j) = NaN;
+            end
         end
     end
 end

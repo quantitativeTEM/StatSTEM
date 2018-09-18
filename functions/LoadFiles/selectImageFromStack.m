@@ -28,7 +28,7 @@ eAMax = uicontrol('Parent',hp1,'Style','Edit','String',num2str(Nmax),'Units','No
 Export = uicontrol('Parent',hp1,'Style','Pushbutton','String','Use selected image','Units','Normalized','Position',[0.85 0.05 0.145 0.9]);
 
 % Create axes
-ax = axes(hf,'Units','Normalized','Position',[0.05 0.1 0.9 0.85]);
+ax = axes('Units','Normalized','Position',[0.05 0.1 0.9 0.85]);
 % Show image
 axes(ax);
 imagesc(obs(:,:,1));colormap gray; axis equal off

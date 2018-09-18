@@ -15,18 +15,23 @@ function strainmapping = STEMstrain(strainmapping)
 %--------------------------------------------------------------------------
 
 coordinates = strainmapping.coordinates;
-coor_exp = strainmapping.coorExpected;
+indices = strainmapping.indices;
+types = strainmapping.typesN;
 a = strainmapping.a;
 error_a = strainmapping.errAP;
+if isnan(error_a)
+    error_a = 0;
+end
 b = strainmapping.b;
 error_b = strainmapping.errBP;
+if isnan(error_b)
+    error_b = 0;
+end
 unit = strainmapping.projUnit;
 teta = strainmapping.teta(1);
 dirTeta_ab = strainmapping.dirTeta;
 
 teta_ab = unit.ang;
-% Calculate minimum distance between 2 atoms, use half of this distance for upperlimit when searching for closest point
-space = strainmapping.space;
 
 % Rotation matrix
 R = [cos(teta) -sin(teta);sin(teta) cos(teta)];
@@ -57,68 +62,46 @@ INVV = invad_bc*Vstrain_re;
 ErrINVV = sqrt( (invad_bc^2*Verror_re.^2) + Vstrain_re.^2*Errinvad_bc^2 );
 
 n1 = size(coordinates,1);
-eps_xx = zeros(n1,1);
-eps_xy = zeros(n1,1);
-eps_yy = zeros(n1,1);
-err.xx = zeros(n1,1);
-err.xy = zeros(n1,1);
-err.yx = zeros(n1,1);
-err.yy = zeros(n1,1);
-omg_xy = zeros(n1,1);
-errMes = '';
+eps_xx = zeros(n1,2);
+eps_xy = zeros(n1,2);
+eps_yy = zeros(n1,2);
+omg_xy = zeros(n1,2);
+doubleInd = false(n1,1);
 for n=1:n1
-    if n==193
-    end
     u = zeros(2,2);
     e_u = zeros(2,2);
     v = zeros(2,2);
     e_v = zeros(2,2);
     
-    if coor_exp(n,1)~=0 && coor_exp(n,2)~=0
-        % Use ref coodinates to find points in a direction
-        dist = sqrt( (coor_exp(:,1)-coor_exp(n,1)-Vstrain(1,1)).^2 + (coor_exp(:,2)-coor_exp(n,2)-Vstrain(1,2)).^2 );
-        if min(dist)<space
-            ind = dist==min(dist);
-            if sum(ind)~=1
-                ind = find(ind);
-                if length(ind)==2
-                    c = coordinates(ind,1:2);
-                    errordlg(['Double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')']);
-                else
-                    c = coordinates(ind(1),1:2);
-                    errordlg(['Multiple coordinates found around: (',num2str(c(1,1)),',',num2str(c(1,2)),')']);
-                end
-                break
-            end
+    if types(:,1)~=0
+        % Find points in a direction
+        ind = indices(:,1)==(indices(n,1)+1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1);
+        if sum(ind)==1
             % Reference point exist
             u(1,:) = coordinates(ind,1:2) - coordinates(n,1:2) - Vstrain(1,:);
             e_u(1,:) = sqrt( Verror(1,:).^2 );
         else
             u(1,:) = [NaN;NaN];
             e_u(1,:)  = [NaN;NaN];
+            % Store double coordinates
+            if sum(ind)>1
+                doubleInd(n,1) = true;
+            end
         end
 
-        % Use ref coodinates to find points in -a direction
-        dist = sqrt( (coor_exp(:,1)-coor_exp(n,1)+Vstrain(1,1)).^2 + (coor_exp(:,2)-coor_exp(n,2)+Vstrain(1,2)).^2 );
-        if min(dist)<space
-            ind = dist==min(dist);
-            if sum(ind)~=1
-                ind = find(ind);
-                if length(ind)==2
-                    c = coordinates(ind,1:2);
-                    errordlg(['Double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')']);
-                else
-                    c = coordinates(ind(1),1:2);
-                    errordlg(['Multiple coordinates found around: (',num2str(c(1,1)),',',num2str(c(1,2)),')']);
-                end
-                break
-            end
+        % Find points in -a direction
+        ind = indices(:,1)==(indices(n,1)-1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1);
+        if sum(ind)==1
             % Reference point exist
             u(2,:) = coordinates(n,1:2) - coordinates(ind,1:2) - Vstrain(1,:);
             e_u(2,:) = sqrt( Verror(1,:).^2 );
         else
             u(2,:) = [NaN;NaN];
             e_u(2,:)  = [NaN;NaN];
+            % Store double coordinates
+            if sum(ind)>1
+                doubleInd(n,1) = true;
+            end
         end
 
         % If possible, average both displacements
@@ -131,50 +114,34 @@ for n=1:n1
         end
 
 
-        % Use ref coodinates to find points in b direction
-        dist = sqrt( (coor_exp(:,1)-coor_exp(n,1)-Vstrain(2,1)).^2 + (coor_exp(:,2)-coor_exp(n,2)-Vstrain(2,2)).^2 );
-        if min(dist)<space
-            ind = dist==min(dist);
-            if sum(ind)~=1
-                ind = find(ind);
-                if length(ind)==2
-                    c = coordinates(ind,1:2);
-                    errordlg(['Double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')']);
-                else
-                    c = coordinates(ind(1),1:2);
-                    errordlg(['Multiple coordinates found around: (',num2str(c(1,1)),',',num2str(c(1,2)),')']);
-                end
-                break
-            end
+        % Dind points in b direction
+        ind = indices(:,1)==indices(n,1) & indices(:,2)==(indices(n,2)+1) & types(:,1)==types(n,1);
+        if sum(ind)==1
             % Reference point exist
             v(1,:) = coordinates(ind,1:2) - coordinates(n,1:2) - Vstrain(2,:);
             e_v(1,:) = sqrt( Verror(2,:).^2 );
         else
             v(1,:) = [NaN;NaN];
             e_v(1,:)  = [NaN;NaN];
+            % Store double coordinates
+            if sum(ind)>1
+                doubleInd(n,1) = true;
+            end
         end
 
-        % Use ref coodinates to find points in -b direction
-        dist = sqrt( (coor_exp(:,1)-coor_exp(n,1)+Vstrain(2,1)).^2 + (coor_exp(:,2)-coor_exp(n,2)+Vstrain(2,2)).^2 );
-        if min(dist)<space
-            ind = dist==min(dist);
-            if sum(ind)~=1
-                ind = find(ind);
-                if length(ind)==2
-                    c = coordinates(ind,1:2);
-                    error(['Double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')']);
-                else
-                    c = coordinates(ind(1),1:2);
-                    error(['Multiple coordinates found around: (',num2str(c(1,1)),',',num2str(c(1,2)),')']);
-                end
-                break
-            end
+        % Find points in -b direction
+        ind = indices(:,1)==indices(n,1) & indices(:,2)==(indices(n,2)-1) & types(:,1)==types(n,1);
+        if sum(ind)==1
             % Reference point exist
             v(2,:) = coordinates(n,1:2) - coordinates(ind,1:2) - Vstrain(2,:);
             e_v(2,:) = sqrt( Verror(2,:).^2 );
         else
             v(2,:) = [NaN;NaN];
             e_v(2,:)  = [NaN;NaN];
+            % Store double coordinates
+            if sum(ind)>1
+                doubleInd(n,1) = true;
+            end
         end
 
         % If possible, average both displacements
@@ -210,8 +177,18 @@ for n=1:n1
     omg_xy(n,2) = Eerr(1,2);
     eps_yy(n,2) = Eerr(2,2);
 end
-if n~=n1
-    errMes = ['Strain map cannot be made, double coordinates found: (',num2str(c(1,1)),',',num2str(c(1,2)),') and (',num2str(c(2,1)),',',num2str(c(2,2)),')'];
+if any(doubleInd)
+    dI = find(doubleInd);
+    str = '';
+    for n=1:length(dI)
+        str = [str,'(',num2str(coordinates(dI(n),1)),',',num2str(coordinates(dI(n),2)),')'];
+        if n<length(dI)-1
+            str = [str,', '];
+        elseif n<length(dI)
+            str = [str,' and '];
+        end
+    end
+    warndlg(['Double coordinates found at: ',str]);
 end
 
 strainmapping.eps_xxP = eps_xx;

@@ -273,7 +273,7 @@ classdef strainMapping < StatSTEMfile
             % Determine whether it is possible to calculate the octahedral
             % tilt
             coorUC = obj.projUnit.coor2D;
-            if isempty(obj.indices) || isempty(coorUC) || ~any( coorUC(:,1)==0 & coorUC(:,2)==0.5 ) || ~any( coorUC(:,1)==0.5 & coorUC(:,2)==0 )
+            if isempty(obj.indices) || isempty(coorUC) || ~ (any( coorUC(:,1)==0 & coorUC(:,2)==0.5 ) || any( coorUC(:,1)==0.5 & coorUC(:,2)==0 ) )
                 val = [];
             else
                 val = true;

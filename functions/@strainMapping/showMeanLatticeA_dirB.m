@@ -34,4 +34,6 @@ hold off
 xlabel(['Distance from reference coordinate in b-direction(',char(197),')'])
 ylabel(['Spacing (',char(197),')'])
 names = obj.projUnit.atom2D';
+warning off all
 legend(names{:})
+warning on all

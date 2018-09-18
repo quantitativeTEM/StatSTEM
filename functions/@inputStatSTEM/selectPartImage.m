@@ -42,13 +42,15 @@ if ~isempty(coor)
     indY = Y>=coor(1,2) & Y<=coor(2,2);
     obj.obs = obj.obs(indY,indX);
     
-    % Keep coordinates in area
-    A = [coor(1,:);[coor(2,1),coor(1,2)];coor(2,:);[coor(1,1),coor(2,2)];coor(1,:)];
-    ind = inpolygon(obj.coordinates(:,1),obj.coordinates(:,2),A(:,1),A(:,2));
-    obj.coordinates = obj.coordinates(ind,:);
-    
-    % Shift coordinates
-    obj.coordinates(:,1) = obj.coordinates(:,1)-max(floor(coor(1,1)/obj.dx),0)*obj.dx;
-    obj.coordinates(:,2) = obj.coordinates(:,2)-max(floor(coor(1,2)/obj.dx),0)*obj.dx;
+    if ~isempty(obj.coordinates)
+        % Keep coordinates in area
+        A = [coor(1,:);[coor(2,1),coor(1,2)];coor(2,:);[coor(1,1),coor(2,2)];coor(1,:)];
+        ind = inpolygon(obj.coordinates(:,1),obj.coordinates(:,2),A(:,1),A(:,2));
+        obj.coordinates = obj.coordinates(ind,:);
+
+        % Shift coordinates
+        obj.coordinates(:,1) = obj.coordinates(:,1)-max(floor(coor(1,1)/obj.dx),0)*obj.dx;
+        obj.coordinates(:,2) = obj.coordinates(:,2)-max(floor(coor(1,2)/obj.dx),0)*obj.dx;
+    end
 end
 

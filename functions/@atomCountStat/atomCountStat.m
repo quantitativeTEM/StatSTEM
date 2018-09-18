@@ -37,6 +37,10 @@ classdef atomCountStat < atomCount
         CLC % The CLC criterion
     end
     
+    properties (SetAccess = private, Hidden)
+        ICLp = [];% Hidden variable to store ICL
+    end
+    
     methods
         showICL(obj)
         obj = selICLmin(obj)
@@ -88,12 +92,12 @@ classdef atomCountStat < atomCount
         function obj = set.selMin(obj,val)
             % Check if selected minimum exists
             if ~isempty(val)
-                ICLcrit = obj.ICL;
-                if ~isempty(ICLcrit)
+                estDis = obj.estimatedDistributions;
+                if ~isempty(estDis)
                     if val<1
                         val = 1;
-                    elseif val>length(ICLcrit)
-                        val = length(ICLcrit);
+                    elseif val>length(estDis)
+                        val = length(estDis);
                     end
                 else
                     val = [];
@@ -128,10 +132,16 @@ classdef atomCountStat < atomCount
             %
             % See also: Biernacki et al., Technical Report  3521, INRIA, Rhônes-Alpes, 1998.
             
+            val = obj.ICLp;
+            if length(val)==length(obj.estimatedDistributions)
+                return
+            end
+            
             n_c = length(obj.estimatedDistributions);
             N = length(obj.volumes);
             crit = zeros(1,n_c);
-            for p=1:n_c
+            crit(1,1:length(val)) = val;
+            for p=(length(val)+1):n_c
                 % Check if inputs are present
                 if isempty(obj.estimatedDistributions{1,p})
                     n_c=p-1;
@@ -145,10 +155,8 @@ classdef atomCountStat < atomCount
                 mlog = obj.mLogLik(1,p);
 
                 pP = zeros(N,p);
-                for n = 1:N
-                    for k = 1:p
-                        pP(n,k) = normaldistribution(obj.volumes(n),mu(k),var_eq)*P(k);
-                    end
+                for k = 1:p
+                    pP(:,k) = normaldistribution(obj.volumes,mu(k),var_eq)*P(k);
                 end
                 E_w = pP./repmat(sum(pP,2),1,p);
                 Ew = E_w(:);
@@ -301,6 +309,10 @@ classdef atomCountStat < atomCount
             end
             val = sum(val);
         end
-            
+        
+        function obj = setICL(obj,val)
+            % Give ICL values to object
+            obj.ICLp = val;
+        end
     end
 end

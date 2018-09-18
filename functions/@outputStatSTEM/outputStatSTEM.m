@@ -57,7 +57,7 @@ classdef outputStatSTEM < StatSTEMfile
         obj = selColumnAtom(obj,state)
         obj = selColumnHist(obj,state)
         obj = selColumnType(obj,state)
-        atomcounting = fitGMM(obj)
+        atomcounting = fitGMM(obj,minSel)
         libcounting = matchLib(output,library,thick)
         strainmapping = indexColumns(output,input,strainmapping)
     end

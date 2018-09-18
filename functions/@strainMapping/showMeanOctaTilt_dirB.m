@@ -27,6 +27,10 @@ end
 hold on
 indOK = ~isnan(obj.meanOctaTilt_dirB(:,3));
 errorbar(ax,obj.meanOctaTilt_dirB(indOK,1)*obj.b,obj.meanOctaTilt_dirB(indOK,2),obj.meanOctaTilt_dirB(indOK,3))
+% indOK = ~isnan(obj.meanOctaTilt_dirB(:,5));
+% errorbar(ax,obj.meanOctaTilt_dirB(indOK,1)*obj.b,obj.meanOctaTilt_dirB(indOK,4),obj.meanOctaTilt_dirB(indOK,5))
+% indOK = ~isnan(obj.meanOctaTilt_dirB(:,7));
+% errorbar(ax,obj.meanOctaTilt_dirB(indOK,1)*obj.b,obj.meanOctaTilt_dirB(indOK,6),obj.meanOctaTilt_dirB(indOK,7))
 hold off
 xlabel(['Distance from reference coordinate in b-direction(',char(197),')'])
 ylabel('Tilt (^o)')

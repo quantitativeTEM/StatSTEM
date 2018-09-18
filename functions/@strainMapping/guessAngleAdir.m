@@ -71,7 +71,7 @@ if min(distPb)<space
     indCb = find( distPb==min(distPb) );
     bDir = coordinates(indCb(1),:) - ref;
     ang(3,1) = atan(bDir(2)/bDir(1))+0.5*pi;
-    if ang(3,1)>0.5*pi
+    if ang(3,1)>=0.5*pi
         ang(3,1) = ang(3,1)-pi;
     end
 else
@@ -84,12 +84,16 @@ if min(distNb)<space
     indCb2 = find( distNb==min(distNb) );
     bDir2 = coordinates(indCb2(1),:) - ref;
     ang(4,1) = atan(bDir2(2)/bDir2(1))+0.5*pi;
-    if ang(4,1)>0.5*pi
+    if ang(4,1)>=0.5*pi
         ang(4,1) = ang(4,1)-pi;
     end
 else
     ang(4,1) = NaN;
 end
+
+% Check if sign is correct everywhere
+indNOK = sign(ang)~=sign(ang(1));
+ang = ang + sign(ang(1))*indNOK*pi;
 
 %% Find avarage
 % Remove NaN from average

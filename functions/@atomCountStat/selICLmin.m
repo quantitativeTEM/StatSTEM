@@ -26,8 +26,8 @@ title(ax,'')
 selMin = round(x);
 if selMin<1
     selMin = 1;
-elseif selMin>length(obj.ICL)
-    selMin = length(obj.ICL);
+elseif selMin>length(obj.estimatedDistributions)
+    selMin = length(obj.estimatedDistributions);
 end
 obj.selMin = selMin;
 

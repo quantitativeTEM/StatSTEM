@@ -38,10 +38,20 @@ classdef atomCountLib < atomCount
         
         function val = getCounts(obj)
             val = zeros(obj.N,1);
-            tk = obj.thick;
+            try
+                lib = [0;obj.library];
+            catch
+                lib = [0,obj.library];
+            end
+            try
+                tk = [0;obj.thick];
+            catch
+                tk = [0,obj.thick];
+            end
             for n=1:obj.N
-                dist = (obj.volumes(n)-obj.library).^2;
-                num = tk(dist==min(dist),1);
+                dist = (obj.volumes(n)-lib).^2;
+                ind = find(dist==min(dist));
+                num = tk(ind(1),1);
                 val(n,1) = num(1);
             end
         end

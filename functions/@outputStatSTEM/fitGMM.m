@@ -1,8 +1,9 @@
-function atomcounting = fitGMM(obj)
+function atomcounting = fitGMM(obj,minSel)
 % fitGMM - fit a Gaussian mixture model to a data set
 %
 %   syntax: atomcounting = fitGMM(obj)
 %       obj          - outputStatSTEM file
+%       minSel       - selected minimum in ICL for automatic run (optional)
 %       atomcounting - atomCountStat file
 %
 % See also: outputStatSTEM, atomCountStat
@@ -96,16 +97,20 @@ for k = 1:n_c
             end
         end
     end
+    tic
     best = find(NlogL_s == min(NlogL_s),1);
     atomcounting.estimatedDistributions{1,k}.mu = obj_s{best}.mu;
     atomcounting.estimatedDistributions{1,k}.Sigma = obj_s{best}.Sigma;
     atomcounting.estimatedDistributions{1,k}.PComponents = obj_s{best}.PComponents;
     atomcounting.mLogLik(1,k) = NlogL_s(best);
-
+    
+    % Calculate ICL and store it in atomcounting object (For speed)
+    atomcounting = setICL(atomcounting,atomcounting.ICL);
+    
     % Show ICL
     showICL(atomcounting)
     drawnow
-
+    
     % Update waitbar
     if ~isempty(obj.GUI)
         obj.waitbar.setValue(k/n_c*100)
@@ -134,4 +139,8 @@ atomcounting.estimatedDistributions = atomcounting.estimatedDistributions(1,1:n_
 atomcounting.mLogLik = atomcounting.mLogLik(1,1:n_c);
 
 % Select minimum in ICL curve
-atomcounting = selICLmin(atomcounting);
+if nargin<2
+    atomcounting = selICLmin(atomcounting);
+else
+    atomcounting.selMin = minSel;
+end
