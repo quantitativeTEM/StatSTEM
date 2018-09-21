@@ -16,7 +16,7 @@ function RGBvec = getRGBvec(cmap,c_x,data,mode)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-if nargin<3
+if nargin<4
     mode = 'int';
 end
 

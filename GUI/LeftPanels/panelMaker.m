@@ -1,4 +1,4 @@
-function [h,panels] = panelMaker(h,option)
+function [h,panels] = panelMaker(h,option,forCompiling)
 % panelMaker - Create panel with java buttons
 %
 %   syntax: h = panelMaker(h,option)
@@ -22,25 +22,53 @@ pth = mfilename('fullpath');
 pth = pth(1:end-10);
 pan = dir([pth,filesep,option,filesep,'*.m']);
 
-switch option
-    case 'Preparation'
-        optName = 'prep';
-        % First load primary panels
-        pan = findSwitchNamePanel(pan,'panelPFR.m',1);
-        pan = findSwitchNamePanel(pan,'panelAddRemove.m',2);
-        pan = findSwitchNamePanel(pan,'panelAssignTypes.m',3);
-        pan = findSwitchNamePanel(pan,'panelImgPar.m',4);
-        pan = findSwitchNamePanel(pan,'panelImpPeak.m',5);
-    case 'Fit Model'
-        optName = 'fit';
-    case 'Analysis'
-        optName = 'ana';
-        % First load primary panels
-        pan = findSwitchNamePanel(pan,'panelSelColumns.m',1);
-        pan = findSwitchNamePanel(pan,'panelIndexing.m',2);
-        pan = findSwitchNamePanel(pan,'panelAtomCountStat.m',3);
-        pan = findSwitchNamePanel(pan,'panelAtomCountSim.m',4);
-        pan = findSwitchNamePanel(pan,'panelStrainMap.m',5);
+if forCompiling
+    % Make sure that in this part all main panels are specified when
+    % compiling
+    switch option
+        case 'Preparation'
+            optName = 'prep';
+            % First load primary panels
+            pan(1).name = 'panelPFR.m';
+            pan(2).name = 'panelAddRemove.m';
+            pan(3).name = 'panelAssignTypes.m';
+            pan(4).name = 'panelImgPar.m';
+            pan(5).name = 'panelImpPeak.m';
+        case 'Fit Model'
+            optName = 'fit';
+            pan(1).name = 'panelFitMain.m';
+            pan(2).name = 'panelFitModelSelection.m';
+        case 'Analysis'
+            optName = 'ana';
+            % First load primary panels
+            pan(1).name = 'panelSelColumns.m';
+            pan(2).name = 'panelIndexing.m';
+            pan(3).name = 'panelAtomCountStat.m';
+            pan(4).name = 'panelAtomCountSim.m';
+            pan(5).name = 'panelStrainMap.m';
+            pan(6).name = 'panel3Dmodel.m';
+    end
+else
+    switch option
+        case 'Preparation'
+            optName = 'prep';
+            % First load primary panels
+            pan = findSwitchNamePanel(pan,'panelPFR.m',1);
+            pan = findSwitchNamePanel(pan,'panelAddRemove.m',2);
+            pan = findSwitchNamePanel(pan,'panelAssignTypes.m',3);
+            pan = findSwitchNamePanel(pan,'panelImgPar.m',4);
+            pan = findSwitchNamePanel(pan,'panelImpPeak.m',5);
+        case 'Fit Model'
+            optName = 'fit';
+        case 'Analysis'
+            optName = 'ana';
+            % First load primary panels
+            pan = findSwitchNamePanel(pan,'panelSelColumns.m',1);
+            pan = findSwitchNamePanel(pan,'panelIndexing.m',2);
+            pan = findSwitchNamePanel(pan,'panelAtomCountStat.m',3);
+            pan = findSwitchNamePanel(pan,'panelAtomCountSim.m',4);
+            pan = findSwitchNamePanel(pan,'panelStrainMap.m',5);
+    end
 end
 
 %% Import java function, since standard MATLAB code cannot be used

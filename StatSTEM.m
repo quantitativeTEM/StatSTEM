@@ -16,6 +16,7 @@ function StatSTEM()
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
+forCompiling = 0; % Put to 1 when compiling
 
 % Load functions
 path = mfilename('fullpath');
@@ -25,8 +26,12 @@ pathG = [path,filesep,'GUI'];       % Path for loading GUI functions
 addpath([path,';',genpath(pathF),';',genpath(pathG)])
 
 % Start a splash screen
-splashImg = imread([pathG,filesep,'splash.png']);
-spl = splash(splashImg);
+if forCompiling
+    splashImg = imread('splash.png');
+else
+    splashImg = imread([pathG,filesep,'splash.png']);
+    spl = splash(splashImg);
+end
 
 % Check matlab version, and switch opengl
 v = version('-release');
@@ -65,9 +70,9 @@ h.left.ana.tab = uitab(h.left.tabgroup,'Title','Analysis');
 warning('on','all')
 
 % Create left panels
-h = panelMaker(h,'Preparation');
-h = panelMaker(h,'Fit Model');
-h = panelMaker(h,'Analysis');
+h = panelMaker(h,'Preparation',forCompiling);
+h = panelMaker(h,'Fit Model',forCompiling);
+h = panelMaker(h,'Analysis',forCompiling);
 
 % Create panel for loading and storing files
 h.left.loadStore.panel = uipanel('Parent',h.left.main,'units','normalized','Position',[0 0 1 0.1],'Title','Load/save files','FontSize',10);%,'ShadowColor',[0.95 0.95 0.95],'ForegroundColor',[0.95 0.95 0.95],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.95 0.95 0.95]);
@@ -75,7 +80,11 @@ h.left.loadStore.load = uicontrol('Parent',h.left.loadStore.panel,'units','norma
 h.left.loadStore.save = uicontrol('Parent',h.left.loadStore.panel,'units','normalized','Position',[0.49 0.2 0.47 0.75],'String','Save','FontSize',10,'Enable','off');
 
 % Create image of StatSTEM
-imgPan = imread([pathG,filesep,'imgGui.png']);
+if forCompiling
+    imgPan = imread('imgGui.png');
+else
+    imgPan = imread([pathG,filesep,'imgGui.png']);
+end
 h = panelStatSTEM(h,imgPan);
 
 %% Create right panels
@@ -147,7 +156,9 @@ updateLeftPanels(h)
 % Limit minimum size and make window appear on full screen
 % set(h.fig,'Position',[1 1 screen(3) screen(4)])
 set(h.fig,'Visible','on')
-close(spl) % Close splash window
+if ~forCompiling
+	close(spl) % Close splash window
+end
 waitfor(h.fig,'Visible','on')
 warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
 jFrame = get(handle(h.fig), 'JavaFrame');

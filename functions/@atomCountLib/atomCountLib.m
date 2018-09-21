@@ -21,8 +21,8 @@ classdef atomCountLib < atomCount
     end
     
     methods
-        plotLib(obj)
         plotAtomCounts(obj)
+        plotLib(obj)
     end
     
     methods

@@ -13,7 +13,6 @@ classdef projUnitCell
     
     methods
         [unit,path,e2s] = projUCgui(unit,Name,Value,varargin)
-        unit = zInfoUCgui(unit,Name,Value,varargin)
     end
     
     methods

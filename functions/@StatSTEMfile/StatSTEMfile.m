@@ -29,7 +29,7 @@ classdef StatSTEMfile
     end
     
     methods
-        varargout = updateDX(obj,varargin)
+        out = updateDX(obj,varargin)
     end
     
     methods

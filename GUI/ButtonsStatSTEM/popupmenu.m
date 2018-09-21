@@ -1,11 +1,11 @@
 classdef popupmenu < StatSTEMbutton
     
     properties
-        name = '';
-        func = '';
-        enable = 1;
-        keepName = 0; % Keep name in list of options
-        equalTo = {''};
+        name = ''; % Name(s) in the popupmenu
+        func = ''; % Function linked to popupmenu
+        enable = 1; % Make button active or inactive (internal for StatSTEM GUI)
+        keepName = 0; % Keep names (defined in property name) in list of options
+        equalTo = {''}; % Make names in popupmenu equal to specified variable
         selOptInput = ''; % Reference to StatSTEM file variable that determines the selected option of the menu
     end
     

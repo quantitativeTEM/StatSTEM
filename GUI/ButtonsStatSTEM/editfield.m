@@ -1,10 +1,10 @@
 classdef editfield < StatSTEMbutton
     
     properties
-        name = '';
-        func = '';
-        enable = 1; 
-        equalTo = {''};
+        name = ''; % Name shown in editfield
+        func = ''; % Function coupled to editfield
+        enable = 1; % Make editfield active or inactive
+        equalTo = {''}; % Make value equal to a specific property
         alignment = 'leading'; %options: leading = leading, l = left, c = center, r = right
     end
     

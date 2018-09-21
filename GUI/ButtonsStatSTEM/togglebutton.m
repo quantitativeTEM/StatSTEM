@@ -1,11 +1,11 @@
 classdef togglebutton < StatSTEMbutton
     
     properties
-        name = '';
-        func = '';
-        enable = 1;
-        state = 1;
-        equalTo = {''};
+        name = ''; % Name shown in button
+        func = ''; % Function linked to button
+        enable = 1; % Make button active/inactive (internal for StatSTEM GUI)
+        state = 1; % Turn button on/off
+        equalTo = {''}; % Specifiy variable to see whether button should be on/off (empty variable = off, not empty = on)
     end
     
     methods

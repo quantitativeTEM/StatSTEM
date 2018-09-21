@@ -131,7 +131,7 @@ child = get(usr.images.img,'Children');
 warning('off','all') % For old versions MATLAB
 % Find old colorbar references and remove them
 for i=1:length(child)
-    if strcmp(get(child(k),'Tag'),'Colorbar')
+    if strcmp(get(child(i),'Tag'),'Colorbar')
         delete(child(i))
     end
 end

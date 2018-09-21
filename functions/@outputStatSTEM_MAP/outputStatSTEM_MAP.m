@@ -28,8 +28,8 @@ classdef outputStatSTEM_MAP < StatSTEMfile
     end
     
     methods
+        [output,obj] = selNewModel(obj,input)
         showMAPprob(obj)
-        [output,outputMAP] = selNewModel(outputMAP,input);
         hfig = showModels(obj,input)
     end
     

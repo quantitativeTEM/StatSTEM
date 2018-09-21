@@ -26,7 +26,7 @@ panel.row = struct;
 % width of 162 pixels
 
 panel.row(1).option1 = pushbutton('name','Projected unit cell','width',162,...
-    'optInput','input','output','input.projUnit','func','loadPUC');
+    'input','input','output','input.projUnit','func','loadPUC');
 
 % Second row
 panel.row(2).option1 = pushbutton('name','Auto assign','width',162,...

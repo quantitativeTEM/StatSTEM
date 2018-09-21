@@ -32,9 +32,9 @@ classdef mod3D < StatSTEMfile
     end
     
     methods
-        obj = getCoorNum(obj)
         export3Dcoor(obj,FileName)
         export3DcoorNum(obj,FileName)
+        obj = getCoorNum(obj)
     end
     
     methods

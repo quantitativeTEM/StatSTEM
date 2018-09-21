@@ -26,7 +26,7 @@ jpan = JPanel; % Create main panel
 jText = JTextArea;
 jText.setAlignmentX(0.5);
 jpan.add(jText);
-str = sprintf('Welcome to StatSTEM v3.0 beta, have fun analysing\nWhen using StatSTEM please cite: A. De Backer, K.H.W. van den Bos, et. al., Ultramicroscopy 171 (2016), p.104-116');
+str = sprintf('Welcome to StatSTEM v3.0, have fun analysing\nWhen using StatSTEM please cite: A. De Backer, K.H.W. van den Bos, et. al., Ultramicroscopy 171 (2016), p.104-116');
 jText.setText(str)
 jText.setEditable(false)
 jText.setFocusable(true)

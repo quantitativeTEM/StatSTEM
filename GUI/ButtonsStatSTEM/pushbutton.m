@@ -1,9 +1,9 @@
 classdef pushbutton < StatSTEMbutton
     
     properties
-        name = '';
-        func = '';
-        enable = 1;
+        name = ''; % Text shown in button
+        func = ''; % Function coupled to button
+        enable = 1; % Make button active or inactive (internal property for StatSTEM GUI)
     end
     
     methods

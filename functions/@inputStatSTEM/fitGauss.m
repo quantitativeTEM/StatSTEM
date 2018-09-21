@@ -7,7 +7,7 @@ function output = fitGauss(input)
 %
 %   syntax: output  = fitGauss(input)
 %       input  - inputStatSTEM file
-%       output - structure containing the output structure
+%       output - outputStatSTEM file
 %
 
 %--------------------------------------------------------------------------

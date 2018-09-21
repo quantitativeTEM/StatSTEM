@@ -6,9 +6,10 @@ function [output,outputMAP] = MAP_back_samerho(input)
 %   peaks with equal widths and a constant background. Each peak is 
 %   describing the scattered image intensity of a projected column.
 %
-% syntax: output = MAP_back_samerho(input)
-%   input  - inputStatSTEM file
-%   output - outputStatSTEM_MAP file
+% syntax: [output,outputMAP] = MAP_back_samerho(input)
+%   input     - inputStatSTEM file
+%   output    - outputStatSTEM file
+%   outputMAP - outputStatSTEM_MAP file
 
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM

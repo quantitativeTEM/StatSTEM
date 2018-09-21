@@ -1,7 +1,7 @@
 classdef textfield < StatSTEMbutton
     
     properties
-        name = '';
+        name = ''; % Name shown in field
         alignment = 'leading'; %options: leading = leading, l = left, c = center, r = right
         border = 'none'; % options; none, or color triplet [R,G,B] (relative)
     end

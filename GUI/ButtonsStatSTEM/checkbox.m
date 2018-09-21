@@ -1,11 +1,11 @@
 classdef checkbox < StatSTEMbutton
     
     properties
-        name = '';
-        func = '';
-        enable = 1;
-        equalTo = {''};
-        selected = 1;
+        name = ''; % Name of the radiobutton
+        func = ''; % Function linked to radiobutton
+        enable = 1; % Button active or inactive (internal for StatSTEM GUI)
+        equalTo = {''}; % Modify specific variable to value (true/false)
+        selected = 1; % Is button selected (true, false)
         selWhen = {}; % Specify the input value in the StatSTEM file that must be true/false to select button {value, 'input....'}
     end
     

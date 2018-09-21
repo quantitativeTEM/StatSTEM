@@ -1,11 +1,11 @@
 classdef radiobutton < StatSTEMbutton
     
     properties
-        name = '';
-        func = '';
-        enable = 1;
-        selected = 1;
-        equalTo = {''};
+        name = ''; % Name of the radiobutton
+        func = ''; % Function linked to radiobutton
+        enable = 1; % Button active or inactive (internal for StatSTEM GUI)
+        selected = 1; % Is button selected (true, false)
+        equalTo = {''}; % Modify specific variable to value defined in property optN
         optN = 1; % Indicate which option number the button is
         selWhen = {}; % Specify the input value in the StatSTEM file that must be true/false to select button {value, 'input....'}
     end

@@ -52,14 +52,20 @@ classdef outputStatSTEM < StatSTEMfile
     end
     
     methods
-        showModel(obj,input)
         output = combinedGauss(output, K, L, ind)
+        atomcounting = fitGMM(obj,minSel)
+        strainmapping = getCenCoor(output,input)
+        strainmapping = indexColumns(output,input,strainmapping)
+        libcounting = matchLib(output,library,thick)
+        input = outputIsInput(output,input)
+        plotFitCoordinates(obj,type)
+        plotSelCoordinates(obj,type)
         obj = selColumnAtom(obj,state)
         obj = selColumnHist(obj,state)
         obj = selColumnType(obj,state)
-        atomcounting = fitGMM(obj,minSel)
-        libcounting = matchLib(output,library,thick)
-        strainmapping = indexColumns(output,input,strainmapping)
+        showHistogramSCS(obj)
+        showModel(obj,input)
+        strainmapping = usrCoorGUI(output,input)
     end
     
     methods

@@ -42,11 +42,12 @@ classdef atomCountStat < atomCount
     end
     
     methods
-        showICL(obj)
-        obj = selICLmin(obj)
-        plotMinICL(obj)
-        plotGMMcomp(obj)
+        plotAtomCounts(atomcounting)
         plotGMM(obj)
+        plotGMMcomp(obj)
+        plotMinICL(obj)
+        obj = selICLmin(obj)
+        showICL(obj)
         showThickSI(obj)
         out = singleatomsensivity(atomcounting,sens)
     end
