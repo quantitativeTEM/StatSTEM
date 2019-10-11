@@ -26,6 +26,7 @@ h_cursor = datacursormode(h.fig);
 h_cursor.removeAllDataCursors();
 set(h_pan,'Enable','off')
 set(h_cursor,'Enable','off')
+
 if v < 2019
     zoomAxinFig(h,'off')
 else
