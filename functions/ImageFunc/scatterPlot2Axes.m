@@ -1,4 +1,4 @@
-function scatterPlot2Axes(ax,ax2,coordinates,data,range,nameTag,scaleMarker,dataText)
+function [h,h1,h2] = scatterPlot2Axes(ax,ax2,coordinates,data,range,nameTag,scaleMarker,dataText)
 % scatterPlot2Axes - Make a scatter plot with colorbar in second axes
 %
 % syntax: scatterPlot2Axes(ax,ax2,coordinates,data,range,nameTag,scaleMarker)
