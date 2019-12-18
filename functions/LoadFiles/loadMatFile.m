@@ -23,14 +23,18 @@ message = '';
 loc = strfind(FileName,filesep);
 FileName = FileName(loc(end)+1:end);
 
-%% Convert file to correct StatSTEM structure (1/5)
-% inputStatSTEM structure
+%% Convert file to correct StatSTEM structure (1/6)
+% inputStatSTEM structure (or recognise inputStatSTEM_HMM structure)
 fNames = fieldnames(file);
 N = length(fNames);
 ind = false(N,1);
+ind_HMM = false(N,1);
 pUC = [];
 for n=1:N
     ind(n,1) = isa(file.(fNames{n}),'inputStatSTEM');
+end
+for n=1:N
+    ind_HMM(n,1) = isa(file.(fNames{n}),'inputStatSTEM_HMM');
 end
 if sum(double(ind))>1
     message = sprintf(['The file ', FileName, ' cannot be loaded, invalid input structure']);
@@ -47,6 +51,9 @@ elseif sum(double(ind))==1
     catch
         pUC = [];
     end
+    % Update filename
+    file.input.name = FileName;
+    file.input.projUnit = pUC;
 elseif isfield(file,'input')
     % Convert old StatSTEM file format to new one
     if isfield(file.input,'projUnit')
@@ -72,18 +79,48 @@ elseif isfield(file,'input')
                 end
             else
                 file.input = inputStatSTEM(obs,dx);
-            end  
+            end
         else
             file.input = inputStatSTEM(obs);
         end
     elseif length(fNames)==1 && ~isa(file.input,'struct') && size(file.input,1)>1 && size(file.input,2)>1
         file.input = inputStatSTEM(file.input);
         pUC = file.input.projUnit;
+        
+        
     else
         file = [];
         message = sprintf(['The file ', FileName, ' cannot be loaded, invalid input structure']);
         errordlg('Invalid input structure')
         return
+    end
+    % Update filename
+    file.input.name = FileName;
+    file.input.projUnit = pUC;
+    
+    
+elseif sum(double(ind_HMM))>0
+    % inputHMM structure
+    
+    if sum(double(ind_HMM))>1
+        file = [];
+        message = sprintf(['The file ', FileName, ' cannot be loaded, invalid input structure']);
+        errordlg('Invalid input structure')
+        return
+    elseif isfield(file,'inputHMM') && ~isa(file.inputHMM,'inputStatSTEM_HMM')
+        % This means a model has been fitted before, convert structure
+        out = file.inputHMM;
+        file = rmfield(file,'inputHMM');
+        file.inputHMM = inputStatSTEM_HMM(out.O,out.libraries,out.G,out.obs_T,out.model_T,out.coordinates_T,out.dx);
+        file.input = inputStatSTEM(out.obs_T(:,:,1),out.dx,out.coordinates_T(:,:,1));
+    else
+        file.input = inputStatSTEM(file.inputHMM.obs_T(:,:,1),file.inputHMM.dx,file.inputHMM.coordinates_T(:,:,1));
+    end
+    
+    % Update filename
+    if isfield(file,'inputHMM')
+        file.inputHMM.name = FileName;
+        file.input.name = FileName;
     end
     
 else
@@ -91,6 +128,10 @@ else
     if length(fNames)==1 && ~isa(file.(fNames{1}),'struct') && size(file.(fNames{1}),1)>1 && size(file.(fNames{1}),2)>1
         file.input = inputStatSTEM(file.(fNames{1}));
         pUC = file.input.projUnit;
+        
+        % Update filename
+        file.input.name = FileName;
+        file.input.projUnit = pUC;
     else
         file = [];
         message = sprintf(['The file ', FileName, ' cannot be loaded, invalid input structure']);
@@ -98,11 +139,9 @@ else
         return
     end
 end
-% Update filename
-file.input.name = FileName;
-file.input.projUnit = pUC;
 
-%% Convert file to correct StatSTEM structure (2/5)
+
+%% Convert file to correct StatSTEM structure (2/6)
 % outputStatSTEM structure
 fNames = fieldnames(file);
 N = length(fNames);
@@ -121,7 +160,7 @@ elseif isfield(file,'output') && ~isa(file.output,'outputStatSTEM')
     if any(strcmp(names,'BetaX')) % Convert coordinates to newer version
         file.output.coordinates = [file.output.BetaX,file.(fNames{ind}).BetaY];
         file.output = rmfield(file.output,{'BetaX','BetaY'});
-    end 
+    end
     out = file.output;
     file = rmfield(file,'output');
     file.output = outputStatSTEM([out.coordinates,file.input.coordinates(:,3)],out.rho,out.eta,out.zeta,file.input.dx);
@@ -135,7 +174,7 @@ if isfield(file,'output')
     file.output.name = FileName;
 end
 
-%% Convert file to correct StatSTEM structure (3/5)
+%% Convert file to correct StatSTEM structure (3/6)
 % atomCountStat structure
 fNames = fieldnames(file);
 N = length(fNames);
@@ -176,7 +215,7 @@ if isfield(file,'atomcounting')
     file.atomcounting.name = FileName;
 end
 
-%% Convert file to correct StatSTEM structure (4/5)
+%% Convert file to correct StatSTEM structure (4/6)
 % atomCountLib structure
 fNames = fieldnames(file);
 N = length(fNames);
@@ -201,7 +240,7 @@ if isfield(file,'libcounting')
     file.libcounting.name = FileName;
 end
 
-%% Convert file to correct StatSTEM structure (5/5)
+%% Convert file to correct StatSTEM structure (5/6)
 % strainMapping structure
 fNames = fieldnames(file);
 N = length(fNames);
@@ -241,6 +280,33 @@ end
 if isfield(file,'strainmapping')
     file.strainmapping.name = FileName;
 end
+
+
+%% Convert file to correct StatSTEM structure (6/6)
+% outputHMM structure
+fNames = fieldnames(file);
+N = length(fNames);
+ind = false(N,1);
+for n=1:N
+    ind(n,1) = isa(file.(fNames{n}),'outputStatSTEM_HMM');
+end
+if sum(double(ind))>1
+    file = [];
+    message = sprintf(['The file ', FileName, ' cannot be loaded, invalid input structure']);
+    errordlg('Invalid input structure')
+    return
+elseif isfield(file,'outputHMM') && ~isa(file.outputHMM,'outputStatSTEM_HMM')
+    % This means a model has been fitted before, convert structure
+    out = file.outputHMM;
+    file = rmfield(file,'outputHMM');
+    file.outputHMM = outputStatSTEM_HMM(out.ScalingHybrid,out.Sigma,out.Init,out.A,out.H_viterbi,out.LL_viterbi);
+end
+
+% Update filename
+if isfield(file,'outputHMM')
+    file.outputHMM.name = FileName;
+end
+
 
 %% Removing all remaining fields that are not part of the StatSTEMfile class
 fNames = fieldnames(file);
