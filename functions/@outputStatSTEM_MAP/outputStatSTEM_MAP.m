@@ -1,8 +1,22 @@
 classdef outputStatSTEM_MAP < StatSTEMfile
+% outputStatSTEM_MAP - class to hold fitted parameters of different
+% Gaussian models obtained for MAP
+%
+%   Advanced analysis options are defined for this class such as:
+%
+    
+%--------------------------------------------------------------------------
+% This file is part of StatSTEM
+%
+% Copyright: 2018, EMAT, University of Antwerp
+% Author: K.H.W. van den Bos, J. Fatermans
+% License: Open Source under GPLv3
+% Contact: sandra.vanaert@uantwerpen.be
+%--------------------------------------------------------------------------
     
     properties
         models = {}; % Cell structure containing outputStatSTEM files
-        NselMod = 1; %
+        NselMod = 1; % Selected model
     end
     
     properties (Dependent)
@@ -13,23 +27,23 @@ classdef outputStatSTEM_MAP < StatSTEMfile
     end
     
     properties (SetAccess=private)
-        chi2 = 0.0;
-        heds_tot = 0.0;
-        etamin = 0.0;
-        beta_xmin = 0.0;
-        beta_ymin = 0.0;
-        etamax = 0.0;
-        beta_xmax = 0.0;
-        beta_ymax = 0.0;
-        rho_min = 0.0;
-        rho_max = 0.0;
-        zeta_min = 0.0;
-        zeta_max = 0.0;
+        chi2 = 0.0; % Least squares sum of fitted models
+        heds_tot = 0.0; % Determinant of Hessian matrix of fitted models
+        etamin = 0.0; % Lower limit on intensity of a column
+        beta_xmin = 0.0; % Lower limit on x-coordinate of a column
+        beta_ymin = 0.0; % Lower limit on y-coordinate of a column
+        etamax = 0.0; % Upper limit on intensity of a column
+        beta_xmax = 0.0; % Upper limit on x-coordinate of a column
+        beta_ymax = 0.0; % Upper limit on y-coordinate of a column
+        rho_min = 0.0; % Lower limit on width of a column
+        rho_max = 0.0; % Upper limit on width of a column
+        zeta_min = 0.0; % Lower limit on background
+        zeta_max = 0.0; % Upper limit on background
     end
     
     methods
-        [output,obj] = selNewModel(obj,input)
         showMAPprob(obj)
+        [output,outputMAP] = selNewModel(outputMAP,input);
         hfig = showModels(obj,input)
     end
     
@@ -98,7 +112,7 @@ classdef outputStatSTEM_MAP < StatSTEMfile
 
             t = zeros([1 obj.Nmodels]);
             for i = 1:obj.Nmodels
-                t(i) = factorial(u(i)) / factorial(v) * (4*pi)^(1.5*(u(i)-v)) * exp(-0.5*(chi(i))) * ((obj.beta_xmax-obj.beta_xmin)*(obj.beta_ymax-obj.beta_ymin)*(obj.etamax-obj.etamin))^(v-u(i)) * (obj.heds_tot(obj.Nmodels)/obj.heds_tot(i));
+                t(i) = factorial(u(i)) / factorial(v) * (4*pi)^(1.5*(u(i)-v)) * exp(-0.5*(chi(i))) * ((obj.beta_xmax/obj.dx-obj.beta_xmin/obj.dx)*(obj.beta_ymax/obj.dx-obj.beta_ymin/obj.dx)*(obj.etamax-obj.etamin))^(v-u(i)) * (obj.heds_tot(obj.Nmodels)/obj.heds_tot(i));
             end
             p = t/max(t);
             val = log10(p);
