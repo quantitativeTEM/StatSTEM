@@ -20,8 +20,8 @@ Idet = 1;
 exNorm = 0;
 convToEC = 0;
 dx = obj.dx;
-DT = 1; % Dwell time (micro seconds)
-BC = 1; % Beam current (Ampere)
+DT = 1; % Pixel dwell time (micro seconds)
+BC = 1; % Beam current (picoampere)
 e = 1.60217622*10^-19; % Electron charge (C)
 
 %% Make GUI
@@ -36,7 +36,7 @@ hf = figure('units','pixels','outerposition',[cent(1)-s(1)/2 cent(2)-s(2)/2 s(1)
     'NumberTitle','off','MenuBar','none','Resize','off','Visible','on','Color',[0.94,0.94,0.94]);
 
 tIvac = uicontrol('Parent',hf,'Style','Text','String','Intensity vacuum:','Position',[10 170 95 22],'BackgroundColor',[0.94,0.94,0.94]);
-tIdet = uicontrol('Parent',hf,'Style','Text','String','Intensity maximum:','Position',[10 140 100 22],'BackgroundColor',[0.94,0.94,0.94]);
+tIdet = uicontrol('Parent',hf,'Style','Text','String','Intensity detector:','Position',[10 140 100 22],'BackgroundColor',[0.94,0.94,0.94]);
 
 eVac = uicontrol('Parent',hf,'Style','Edit','String',num2str(Ivac),'Position',[110 173 80 22],'Callback',{@setIvac});
 eDet = uicontrol('Parent',hf,'Style','Edit','String',num2str(Idet),'Position',[110 143 80 22],'Callback',{@setIdet});
@@ -45,7 +45,7 @@ pDet = uicontrol('Parent',hf,'Style','pushbutton','String','Load values from det
 
 pPix = uipanel('Parent',hf,'units','pixels','Position',[1 45 199 55],'Title','Use electron counts','BackgroundColor',[0.8 0.8 0.8]);
 
-cPix = uicontrol('Parent',pPix,'Style','checkbox','String','Convert calibrated map','Position',[10 10 180 22],'BackgroundColor',[0.8 0.8 0.8],'Callback',{@showECopt,hf});
+cPix = uicontrol('Parent',pPix,'Style','checkbox','String','Convert image to electron counts','Position',[10 10 180 22],'BackgroundColor',[0.8 0.8 0.8],'Callback',{@showECopt,hf});
 
 uicontrol('Parent',hf,'Style','pushbutton','String','OK','Position',[65 10 60 22],'Callback',{@storeVal,hf});
 uicontrol('Parent',hf,'Style','pushbutton','String','Cancel','Position',[130 10 60 22],'Callback',{@cancel,hf});

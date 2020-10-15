@@ -11,8 +11,8 @@ function [h,panels] = panelMaker(h,option,forCompiling)
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
-% Copyright: 2018, EMAT, University of Antwerp
-% Author: K. H. W. van den Bos
+% Copyright: 2020, EMAT, University of Antwerp
+% Author: K. H. W. van den Bos, J. Fatermans
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
@@ -33,7 +33,7 @@ if forCompiling
             pan(2).name = 'panelAddRemove.m';
             pan(3).name = 'panelAssignTypes.m';
             pan(4).name = 'panelImgPar.m';
-            pan(5).name = 'panelImpPeak.m';
+            %pan(5).name = 'panelImpPeak.m';
         case 'Fit Model'
             optName = 'fit';
             pan(1).name = 'panelFitMain.m';
@@ -45,8 +45,9 @@ if forCompiling
             pan(2).name = 'panelIndexing.m';
             pan(3).name = 'panelAtomCountStat.m';
             pan(4).name = 'panelAtomCountSim.m';
-            pan(5).name = 'panelStrainMap.m';
+            pan(5).name = 'panelAtomCountHMM.m';
             pan(6).name = 'panel3Dmodel.m';
+            pan(7).name = 'panelStrainMap.m';
     end
 else
     switch option
@@ -57,7 +58,7 @@ else
             pan = findSwitchNamePanel(pan,'panelAddRemove.m',2);
             pan = findSwitchNamePanel(pan,'panelAssignTypes.m',3);
             pan = findSwitchNamePanel(pan,'panelImgPar.m',4);
-            pan = findSwitchNamePanel(pan,'panelImpPeak.m',5);
+            %pan = findSwitchNamePanel(pan,'panelImpPeak.m',5);
         case 'Fit Model'
             optName = 'fit';
         case 'Analysis'
@@ -67,7 +68,9 @@ else
             pan = findSwitchNamePanel(pan,'panelIndexing.m',2);
             pan = findSwitchNamePanel(pan,'panelAtomCountStat.m',3);
             pan = findSwitchNamePanel(pan,'panelAtomCountSim.m',4);
-            pan = findSwitchNamePanel(pan,'panelStrainMap.m',5);
+            pan = findSwitchNamePanel(pan,'panelAtomCountHMM.m',5);
+            pan = findSwitchNamePanel(pan,'panel3Dmodel.m',6);
+            pan = findSwitchNamePanel(pan,'panelStrainMap.m',7);
     end
 end
 

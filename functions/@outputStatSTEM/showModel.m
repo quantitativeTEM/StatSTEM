@@ -19,8 +19,8 @@ if isempty(obj.model)
     return
 end
 
-x_axis = (1:size(obj.model,2))*obj.dx;
-y_axis = (1:size(obj.model,1))*obj.dx;
+x_axis = ((1:size(obj.model,2))-0.5)*obj.dx;
+y_axis = ((1:size(obj.model,1))-0.5)*obj.dx;
 
 % Show observation
 imagesc(x_axis,y_axis,obj.model);axis equal off;colormap gray
