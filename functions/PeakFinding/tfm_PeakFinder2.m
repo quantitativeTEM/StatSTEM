@@ -83,7 +83,7 @@ function obj = tfm_PeakFinder2(obj)
         uicontrol('Parent',hpf.par.pan,'Style','text','String','Threshold value:','units','normalized','Position',[br+0.2 0.8 0.2 0.15],'FontSize',10,'HorizontalAlignment','left','BackgroundColor',[0.8 0.8 0.8]);
 
         %Peak Distance
-        est_lim_d = mean(nx,ny)*0.1;
+        est_lim_d = mean(nx,ny)*0.2;
         SliderDm = uicontrol('Parent',hpf.par.pan,'Style','slider','units','normalized','Position',[br+0.4 0.38 0.2 0.15],'Min',0,'Max',est_lim_d);
         uicontrol('Parent',hpf.par.pan,'Style','text','String','Minimum Distance (px):','units','normalized','Position',[br+0.4 0.8 0.2 0.15],'FontSize',10,'HorizontalAlignment','left','BackgroundColor',[0.8 0.8 0.8]);
     
