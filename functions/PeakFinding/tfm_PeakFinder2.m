@@ -15,7 +15,11 @@ function obj = tfm_PeakFinder2(obj)
     % License: Open Source under GPLv3
     % Contact: sandra.vanaert@uantwerpen.be
     %--------------------------------------------------------------------------
-    global thr d_min sigma xy hpf gr_cm cdat_0
+    global thr d_min sigma xy hpf gr_cm cdat_0 ver
+    % Determine Matlab version for compatibility
+    ver = version('-release');
+    ver = str2double(ver(1:4));
+
     obs = obj.obs;
     [ny,nx] = size(obs);
     
@@ -53,7 +57,9 @@ function obj = tfm_PeakFinder2(obj)
         cdat = cdat_0;
         cdat(1:32) = sin(linspace(0,pi,32));
         imagesc(hpf.par.wb,cdat); axis off; colormap(gr_cm); caxis([0 1]);
-        hpf.par.wb.Toolbar = [];
+        if ver >= 2019
+            hpf.par.wb.Toolbar = [];
+        end
 
         % Info panel
         hpf.help.pan = uipanel('Parent',hpf.par.pan,'units','normalized','Position',[0.62 0.3 0.38-br 0.6],'ShadowColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
@@ -71,21 +77,15 @@ function obj = tfm_PeakFinder2(obj)
         est_lim_s = mean(nx,ny)*0.1;
         SliderSi = uicontrol('Parent',hpf.par.pan,'Style','slider','units','normalized','Position',[br 0.38 0.2 0.15],'Min',3,'Max',est_lim_s);
         uicontrol('Parent',hpf.par.pan,'Style','text','String','Estimated Radius (px):','units','normalized','Position',[br 0.8 0.2 0.15],'FontSize',10,'HorizontalAlignment','left','BackgroundColor',[0.8 0.8 0.8]);
-%         uicontrol('Parent',hpf.par.pan,'Style','text','units','normalized','Position',[br 0.27 0.01 0.1],'String',num2str(3,0),'BackgroundColor',[0.8 0.8 0.8],'HorizontalAlignment','right');
-%         uicontrol('Parent',hpf.par.pan,'Style','text','units','normalized','Position',[0.2 0.27 0.01 0.1],'String',num2str(est_lim_s,1),'BackgroundColor',[0.8 0.8 0.8],'HorizontalAlignment','left');
 
         %Threshold
         SliderTh = uicontrol('Parent',hpf.par.pan,'Style','slider','units','normalized','Position',[br+0.2 0.38 0.2 0.15],'Min',0,'Max',1);
         uicontrol('Parent',hpf.par.pan,'Style','text','String','Threshold value:','units','normalized','Position',[br+0.2 0.8 0.2 0.15],'FontSize',10,'HorizontalAlignment','left','BackgroundColor',[0.8 0.8 0.8]);
-%         uicontrol('Parent',hpf.par.pan,'Style','text','units','normalized','Position',[br+0.2 0.27 0.01 0.1],'String','0','BackgroundColor',[0.8 0.8 0.8],'HorizontalAlignment','right');
-%         uicontrol('Parent',hpf.par.pan,'Style','text','units','normalized','Position',[0.4 0.27 0.01 0.1],'String','1','BackgroundColor',[0.8 0.8 0.8],'HorizontalAlignment','left');
 
         %Peak Distance
-        est_lim_d = mean(nx,ny)*0.1;
+        est_lim_d = mean(nx,ny)*0.2;
         SliderDm = uicontrol('Parent',hpf.par.pan,'Style','slider','units','normalized','Position',[br+0.4 0.38 0.2 0.15],'Min',0,'Max',est_lim_d);
         uicontrol('Parent',hpf.par.pan,'Style','text','String','Minimum Distance (px):','units','normalized','Position',[br+0.4 0.8 0.2 0.15],'FontSize',10,'HorizontalAlignment','left','BackgroundColor',[0.8 0.8 0.8]);
-%         uicontrol('Parent',hpf.par.pan,'Style','text','units','normalized','Position',[br+0.4 0.27 0.01 0.1],'String','0','BackgroundColor',[0.8 0.8 0.8],'HorizontalAlignment','right');
-%         uicontrol('Parent',hpf.par.pan,'Style','text','units','normalized','Position',[0.6 0.27 0.01 0.1],'String','1','BackgroundColor',[0.8 0.8 0.8],'HorizontalAlignment','left');
     
     %    Textboxes   %
     %%%%%%%%%%%%%%%%%%
@@ -236,7 +236,9 @@ function obj = tfm_PeakFinder2(obj)
     function waitbar_out()
         hpf.par.wb.Children.CData = cdat_0;
         set(hpf.par.wb,'visible','off')
-        hpf.par.wb.Colormap = gr_cm;
+        if ver >= 2019
+            hpf.par.wb.Colormap = gr_cm;
+        end
         drawnow;
     end
 
@@ -247,17 +249,18 @@ function obj = tfm_PeakFinder2(obj)
         timerDat.n_tick = 1;
         timerObject = timer('TimerFcn',@tick,...
                             'ExecutionMode','fixedRate',...
-                            'Period',0.01,...
+                            'Period',0.05,...
                             'UserData', timerDat);
         start(timerObject);
 
         function tick(timerObj,event)
-
              timerData = get(timerObj, 'UserData');
              im = timerData.im_dat;
-             im = circshift(im,timerData.n_tick,2);
+             im = circshift(im,timerData.n_tick*5,2);
              timerData.axes.Children.CData = im; 
-             timerData.axes.Colormap = gr_cm;
+             if ver >= 2019
+                timerData.axes.Colormap = gr_cm;
+             end
              timerData.n_tick = timerData.n_tick + 1;
              set(timerObj, 'UserData', timerData);
              drawnow
