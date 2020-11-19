@@ -16,19 +16,19 @@ function StatSTEM()
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-forCompiling = 0; % Put to 1 when compiling
-
-% Load functions
-path = mfilename('fullpath');
-path = path(1:end-9);
-pathF = [path,filesep,'functions']; % Path for loading fit functions
-pathG = [path,filesep,'GUI'];       % Path for loading GUI functions
-addpath([path,';',genpath(pathF),';',genpath(pathG)])
-
 % Start a splash screen
-if forCompiling
+if isdeployed
     splashImg = imread('splash.png');
+    imgPan = imread('imgGui.png');
 else
+    % Load functions
+    path = mfilename('fullpath');
+    path = path(1:end-9);
+    pathF = [path,filesep,'functions']; % Path for loading fit functions
+    pathG = [path,filesep,'GUI'];       % Path for loading GUI functions
+
+    addpath([path,';',genpath(pathF),';',genpath(pathG)])
+    imgPan = imread([pathG,filesep,'imgGui.png']);
     splashImg = imread([pathG,filesep,'splash.png']);
     spl = splash(splashImg);
 end
@@ -70,21 +70,15 @@ h.left.ana.tab = uitab(h.left.tabgroup,'Title','Analysis');
 warning('on','all')
 
 % Create left panels
-h = panelMaker(h,'Preparation',forCompiling);
-h = panelMaker(h,'Fit Model',forCompiling);
-h = panelMaker(h,'Analysis',forCompiling);
+h = panelMaker(h,'Preparation',isdeployed);
+h = panelMaker(h,'Fit Model',isdeployed);
+h = panelMaker(h,'Analysis',isdeployed);
 
 % Create panel for loading and storing files
 h.left.loadStore.panel = uipanel('Parent',h.left.main,'units','normalized','Position',[0 0 1 0.1],'Title','Load/save files','FontSize',10);%,'ShadowColor',[0.95 0.95 0.95],'ForegroundColor',[0.95 0.95 0.95],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.95 0.95 0.95]);
 h.left.loadStore.load = uicontrol('Parent',h.left.loadStore.panel,'units','normalized','Position',[0.02 0.2 0.47 0.75],'String','Load','FontSize',10);
 h.left.loadStore.save = uicontrol('Parent',h.left.loadStore.panel,'units','normalized','Position',[0.49 0.2 0.47 0.75],'String','Save','FontSize',10,'Enable','off');
 
-% Create image of StatSTEM
-if forCompiling
-    imgPan = imread('imgGui.png');
-else
-    imgPan = imread([pathG,filesep,'imgGui.png']);
-end
 h = panelStatSTEM(h,imgPan);
 
 %% Create right panels
@@ -156,7 +150,7 @@ updateLeftPanels(h)
 % Limit minimum size and make window appear on full screen
 % set(h.fig,'Position',[1 1 screen(3) screen(4)])
 set(h.fig,'Visible','on')
-if ~forCompiling
+if ~isdeployed
 	close(spl) % Close splash window
 end
 waitfor(h.fig,'Visible','on')
