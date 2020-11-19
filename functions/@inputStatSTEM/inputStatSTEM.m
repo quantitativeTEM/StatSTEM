@@ -5,8 +5,8 @@ classdef inputStatSTEM < StatSTEMfile
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
-% Copyright: 2018, EMAT, University of Antwerp
-% Author: K.H.W. van den Bos
+% Copyright: 2020, EMAT, University of Antwerp
+% Author: K.H.W. van den Bos, J. Fatermans
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
@@ -23,18 +23,17 @@ classdef inputStatSTEM < StatSTEMfile
         test = 0; % Fit under test conditions (maximum number of iterations is set to 4)
         cluster = 0; % Calculation in a cluster, print progress in command window (1 = 'yes', 0 = 'no')
         silent = 0; % Hide progress indication from comment window
-        MaxColumns = 10; % Maximum number of expected columns in the image
-        testpoints = 0; % Number of test coordinates evaluated to add column in model fit using MAP
-        zetamin = 0.0; % Lower limit on background
-        rhomin = 0.0; % Lower limit on width of a column
-        etamin = 0.0; % Lower limit on intensity of a column
-        beta_xmin = 0.0; % Lower limit on x-coordinate of a column
-        beta_ymin = 0.0; % Lower limit on y-coordinate of a column
-        zetamax = 0.0; % Upper limit on background
-        rhomax = 0.0; % Upper limit on width of a column
-        etamax = 0.0; % Upper limit on intensity of a column
-        beta_xmax = 0.0; % Upper limit on x-coordinate of a column
-        beta_ymax = 0.0; % Upper limit on y-coordinate of a column
+        MaxColumns = 0; % Maximum number of expected columns in the image
+        zetamin = 0.0; % Lower limit on background in pixel intensities
+        zetamax = 0.0; % Upper limit on background in pixel intensities
+        rhomin = 0.0; % Lower limit on width of a column in A
+        rhomax = 0.0; % Upper limit on width of a column in A
+        etamin = 0.0; % Lower limit on intensity of a column in pixel intensities
+        etamax = 0.0; % Upper limit on intensity of a column in pixel intensities
+        beta_xmin = 0.0; % Lower limit on x-coordinate of a column in A
+        beta_xmax = 0.0; % Upper limit on x-coordinate of a column in A
+        beta_ymin = 0.0; % Lower limit on y-coordinate of a column in A
+        beta_ymax = 0.0; % Upper limit on y-coordinate of a column in A
     end
     
     properties (Dependent=true, Hidden=true)
@@ -87,7 +86,7 @@ classdef inputStatSTEM < StatSTEMfile
         obj = keepPeaks(obj)
         [input,strainmapping] = loadPUC(input,strainmapping)
         obj = makeBack(obj)
-        [output,outputMAP] = MAP_back_samerho(input)
+        [output,outputMAP] = MAP(input)
         obj = numberATypes(obj,item)
         plotCoordinates(obj)
         obj = removeAllPeaks(obj)
@@ -101,25 +100,22 @@ classdef inputStatSTEM < StatSTEMfile
     % Functions to make sure input is correct
     methods
         function obj = inputStatSTEM(obs,dx,coordinates,types,Name,Value,varargin)
-            % Create a input file for StatSTEM
+            % Create an input file for StatSTEM
             obj.obs = obs;
             if nargin>=2
                 obj.dx = dx;
             else
                 dx = obj.dx;
             end
-            obj.beta_xmin = 0.5*dx;
-            obj.beta_ymin = 0.5*dx;
-            obj.beta_xmax = (size(obj.obs,2)+0.5)*dx;
-            obj.beta_ymax = (size(obj.obs,1)+0.5)*dx;
+            obj.beta_xmax = size(obj.obs,2)*dx; % limit defined within field of view of image
+            obj.beta_ymax = size(obj.obs,1)*dx;
             try
                 obj.zetamax = max(max(obj.obs));
             catch
                 obj.zetamax = 0;
             end
-            obj.rhomax = mean(size(obj.obs));
+            obj.rhomax = mean(size(obj.obs))*dx; % limit defined as average of dimensions of image
             obj.etamax = obj.zetamax;
-            obj.testpoints = round((size(obj.obs,2)+size(obj.obs,1))/2);
             if nargin>=3
                 obj.coordinates = coordinates;
             end
@@ -367,28 +363,29 @@ classdef inputStatSTEM < StatSTEMfile
         
         function obj = set.MaxColumns(obj,val)
             % Check if input is correct
-            if isa(val,'double') && isscalar(val) && val>0 && val>=size(obj.coordinates,1)
+            if isa(val,'double') && isscalar(val) && val>=0
                 obj.MaxColumns = val;
             else
-                error('StatSTEMfile: MaxColumns must be positive and greater than initial number of columns')
+                error('StatSTEMfile: MaxColumns must be a non-negative number')
             end
         end
         
-        function obj = set.testpoints(obj,val)
-            % Check if input is correct
-            if isa(val,'double') && isscalar(val) && val>0
-                obj.testpoints = val;
-            else
-                error('StatSTEMfile: number of testpoints must be positive')
-            end
-        end
         
         function obj = set.zetamin(obj,val)
             % Check if input is correct
-            if isa(val,'double') && isscalar(val)
+            if isa(val,'double') && isscalar(val) && val>=0
                 obj.zetamin = val;
             else
-                error('StatSTEMfile: zetamin must be a number')
+                error('StatSTEMfile: zetamin must be a non-negative number')
+            end
+        end
+        
+        function obj = set.zetamax(obj,val)
+            % Check if input is correct
+            if isa(val,'double') && isscalar(val) && val>obj.zetamin
+                obj.zetamax = val;
+            else
+                error('StatSTEMfile: zetamax must be a number greater than zetamin')
             end
         end
         
@@ -397,7 +394,16 @@ classdef inputStatSTEM < StatSTEMfile
             if isa(val,'double') && isscalar(val) && val>=0
                 obj.rhomin = val;
             else
-                error('StatSTEMfile: rhomin must be a positive number')
+                error('StatSTEMfile: rhomin must be a non-negative number')
+            end
+        end
+        
+        function obj = set.rhomax(obj,val)
+            % Check if input is correct
+            if isa(val,'double') && isscalar(val) && val>obj.rhomin
+                obj.rhomax = val;
+            else
+                error('StatSTEMfile: rhomax must be a number greater than rhomin')
             end
         end
         
@@ -410,12 +416,30 @@ classdef inputStatSTEM < StatSTEMfile
             end
         end
         
+        function obj = set.etamax(obj,val)
+            % Check if input is correct
+            if isa(val,'double') && isscalar(val) && val>obj.etamin
+                obj.etamax = val;
+            else
+                error('StatSTEMfile: etamax must be a number greater than etamin')
+            end
+                end
+        
         function obj = set.beta_xmin(obj,val)
             % Check if input is correct
             if isa(val,'double') && isscalar(val) && val>=0
                 obj.beta_xmin = val;
             else
-                error('StatSTEMfile: beta_xmin must be a positive number')
+                error('StatSTEMfile: beta_xmin must be a non-negative number')
+            end
+        end
+        
+        function obj = set.beta_xmax(obj,val)
+            % Check if input is correct
+            if isa(val,'double') && isscalar(val) && val>obj.beta_xmin
+                obj.beta_xmax = val;
+            else
+                error('StatSTEMfile: beta_xmax must be a number greater than beta_xmin')
             end
         end
         
@@ -424,49 +448,13 @@ classdef inputStatSTEM < StatSTEMfile
             if isa(val,'double') && isscalar(val) && val>=0
                 obj.beta_ymin = val;
             else
-                error('StatSTEMfile: beta_ymin must be a positive number')
-            end
-        end
-        
-        function obj = set.zetamax(obj,val)
-            % Check if input is correct
-            if isa(val,'double') && isscalar(val) && val>=obj.zetamin
-                obj.zetamax = val;
-            else
-                error('StatSTEMfile: zetamax must be a number greater than zetamin')
-            end
-        end
-        
-        function obj = set.rhomax(obj,val)
-            % Check if input is correct
-            if isa(val,'double') && isscalar(val) && val>=obj.rhomin
-                obj.rhomax = val;
-            else
-                error('StatSTEMfile: rhomax must be a number greater than rhomin')
-            end
-        end
-        
-        function obj = set.etamax(obj,val)
-            % Check if input is correct
-            if isa(val,'double') && isscalar(val) && val>=obj.etamin
-                obj.etamax = val;
-            else
-                error('StatSTEMfile: etamax must be a number greater than etamin')
-            end
-        end
-        
-        function obj = set.beta_xmax(obj,val)
-            % Check if input is correct
-            if isa(val,'double') && isscalar(val) && val>=obj.beta_xmin
-                obj.beta_xmax = val;
-            else
-                error('StatSTEMfile: beta_xmax must be a number greater than beta_xmin')
+                error('StatSTEMfile: beta_ymin must be a non-negative number')
             end
         end
         
         function obj = set.beta_ymax(obj,val)
             % Check if input is correct
-            if isa(val,'double') && isscalar(val) && val>=obj.beta_ymin
+            if isa(val,'double') && isscalar(val) && val>obj.beta_ymin
                 obj.beta_ymax = val;
             else
                 error('StatSTEMfile: beta_ymax must be a number greater than beta_ymin')

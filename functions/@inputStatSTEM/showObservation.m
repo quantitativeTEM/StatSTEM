@@ -14,8 +14,8 @@ function showObservation(obj)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-x_axis = (1:size(obj.obs,2))*obj.dx;
-y_axis = (1:size(obj.obs,1))*obj.dx;
+x_axis = ((1:size(obj.obs,2))-0.5)*obj.dx;
+y_axis = ((1:size(obj.obs,1))-0.5)*obj.dx;
 
 % Show observation
 imagesc(x_axis,y_axis,obj.obs);axis equal off;colormap gray

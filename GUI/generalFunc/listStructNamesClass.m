@@ -24,3 +24,5 @@ out(5,:) = {'atomcounting','atomCountStat'};
 out(6,:) = {'libcounting','atomCountLib'};
 out(7,:) = {'strainmapping','strainMapping'};
 out(8,:) = {'model3D','mod3D'};
+out(9,:) = {'inputHMM','inputStatSTEM_HMM'};
+out(10,:) = {'outputHMM','outputStatSTEM_HMM'};

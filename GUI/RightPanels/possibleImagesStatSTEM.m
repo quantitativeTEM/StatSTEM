@@ -34,6 +34,11 @@ out.option1 = addFigOpt(out.option1,[char(949),'_xy'],'showStrainEpsXY','strainm
 out.option1 = addFigOpt(out.option1,[char(949),'_yy'],'showStrainEpsYY','strainmapping.eps_yy');
 out.option1 = addFigOpt(out.option1,[char(969),'_xy'],'showStrainOmgXY','strainmapping.omg_xy');
 
+% Option1b: Observation Time Series
+out.option1b = listImagesStatSTEM('Observations Time Series','showObservation_T','inputHMM.obs_T');
+out.option1b = addFigOpt(out.option1b,'Coordinates Time Series','plotCoordinates_T','outputHMM.coordinates_T',true); % Show this option by default
+out.option1b = addFigOpt(out.option1b,'Atom Counts Time Series','plotAtomCounts_T','outputHMM.H_viterbi');
+
 % Option2: Model
 out.option2 = listImagesStatSTEM('Model','showModel','output.model','input');
 out.option2 = addFigOpt(out.option2,'Input coordinates','plotCoordinates','input.coordinates');
@@ -51,6 +56,11 @@ out.option2 = addFigOpt(out.option2,[char(949),'_xx'],'showStrainEpsXX','strainm
 out.option2 = addFigOpt(out.option2,[char(949),'_xy'],'showStrainEpsXY','strainmapping.eps_xy');
 out.option2 = addFigOpt(out.option2,[char(949),'_yy'],'showStrainEpsYY','strainmapping.eps_yy');
 out.option2 = addFigOpt(out.option2,[char(969),'_xy'],'showStrainOmgXY','strainmapping.omg_xy');
+
+% Option2b: Model Time Series
+out.option2b = listImagesStatSTEM('Models Time Series','showModel_T','inputHMM.model_T');
+out.option2b = addFigOpt(out.option2b,'Coordinates Time Series','plotCoordinates_T','outputHMM.coordinates_T',true); % Show this option by default
+out.option2b = addFigOpt(out.option2b,'Atom Counts Time Series','plotAtomCounts_T','outputHMM.H_viterbi');
 
 % Option3: Histogram SCS
 out.option3 = listImagesStatSTEM('Histogram SCS','showHistogramSCS','output.volumes');

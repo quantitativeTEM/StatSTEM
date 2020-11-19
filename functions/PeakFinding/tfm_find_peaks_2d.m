@@ -21,9 +21,10 @@ function [img_o, xy] = tfm_find_peaks_2d(img, sigma, pk_min, d_min)
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
-   
+
     % Avoide negative values
     img = img+min(img(:));
+    img = img/max(img(:));
     
     % This ratio corresponds roughly to the the visual column radius
     sigma = sigma/3;
@@ -38,6 +39,7 @@ function [img_o, xy] = tfm_find_peaks_2d(img, sigma, pk_min, d_min)
 
     % Apply Wiener filter
     d = wiener2(d,[nkr_w nkr_w]);
+    d = real(d);
     
     % Apply Median filter to compensate salt/pepper-like artefacts
     d = medfilt2(d,[nkr_m nkr_m],'symmetric');
@@ -46,27 +48,28 @@ function [img_o, xy] = tfm_find_peaks_2d(img, sigma, pk_min, d_min)
     d = fcn_anscombe_inv(d);
     
     d = max(min(img(:)), d);
-    
+ 
     % Signal to noise ratio
     psnr = (var(d(:))/var(img(:)-d(:)));
     alpha = 1/psnr;
 
     % Perform deconvolution with gaussian, according to:
-    % Van Dyck, D. (2012). Basics of Image Processing and Analysis. p. 74. https://doi.org/10.5281/zenodo.51511
+    % Van Dyck, D. (2012). Basics of Image Processing and Analysis. p. 74. https://doi.org/10.5281/zenodo.51511  
     [ny, nx] = size(d);
     [gx,gy]=fcn_real_space_2_F_space(nx,ny);
     H = fcn_gauss_2d_fourier_space(gx,gy,sigma);
     Y = conj(H)./(abs(H).^2+(alpha));
-
-    d_deconv = fftshift(ifft2(fft2(ifftshift(d)).*ifftshift(Y)));
+    
+    d_deconv = fcn_conv2D(d,Y);
     d_deconv = real(d_deconv);
+    
 
-    se = strel('disk',round(5*sigma));
+    se = strel('disk',round(4*sigma));
     img_o = imtophat(d_deconv,se);
     
     sc = max(img_o(:));
     img_o = img_o/sc;
-    
+  
     if nargout > 1
         xy = fcn_local_max(img_o,pk_min,d_min);
     else
@@ -180,5 +183,34 @@ function img_o = fcn_anscombe_inv(x)
     end
     img_o = max(0, a*x.^2+e+ix.*(b+ix.*(c+ix*d)));
 
+
 end
  
+function im_o = fcn_conv2D(im1, im2)
+    n_pix_border = 30;
+
+    im1_pad = fcn_smooth_borders(im1,n_pix_border);
+    im2_pad = fcn_smooth_borders(im2,n_pix_border);
+
+    im_o = fftshift(ifft2(fft2(ifftshift(im1_pad)).*ifftshift(im2_pad)));
+    im_o = im_o(n_pix_border+1:end-n_pix_border,n_pix_border+1:end-n_pix_border);
+
+end
+
+function im_o = fcn_smooth_borders(img,n_pix_border)
+
+    img_pad = padarray(img,[n_pix_border n_pix_border],'symmetric');
+
+    [ny, nx] = size(img_pad);
+    [X, Y] = meshgrid(0:nx-1, 0:ny-1);
+
+    dxf = nx-(abs(X-nx/2)+(nx/2));
+    dyf = ny-(abs(Y-ny/2)+(ny/2));
+
+    df = min(cat(3,dxf,dyf),[],3);
+    df = df./n_pix_border;
+    df(df>=1) = 1;
+
+    im_o = img_pad.*df;
+
+end

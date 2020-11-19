@@ -18,7 +18,7 @@ function panel = panelAddRemove()
 panel = struct;
 
 % Start by defining the name
-panel.name = 'Add/Remove Peaks';
+panel.name = 'Add/Remove peaks';
 
 panel.row = struct;
 %% Define buttons, etc row per row (don't put too much buttons per row for size limitations)
