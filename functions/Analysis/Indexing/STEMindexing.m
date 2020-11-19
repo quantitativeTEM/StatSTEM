@@ -49,7 +49,7 @@ if ~isempty(ind)
     if ind~=1
         unitCoor = [unitCoor(ind,:); unitCoor(1:ind-1,:); unitCoor(ind+1:end,:)];
         unit.coor2D = [unit.coor2D(ind,:); unit.coor2D(1:ind-1,:); unit.coor2D(ind+1:end,:)];
-        unit.atom2D = [unit.atom2D(ind,:); unit.atomsD(1:ind-1,:); unit.atom2D(ind+1:end,:)];
+        unit.atom2D = [unit.atom2D(ind,:); unit.atom2D(1:ind-1,:); unit.atom2D(ind+1:end,:)];
         unitType = [unitType(ind,:); unitType(1:ind-1,:); unitType(ind+1:end,:)];
     end
 else
