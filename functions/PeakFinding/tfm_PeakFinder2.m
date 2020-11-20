@@ -23,7 +23,7 @@ function obj = tfm_PeakFinder2(obj)
     obs = obj.obs;
     [ny,nx] = size(obs);
     
-    thr = 0;
+    thr = 0.05;
     sigma = 10;
     d_min = 0;
     
