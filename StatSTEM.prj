@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="3180951167" file="C:\Users\Karel\Documents\MATLAB\StatSTEMv3.0\StatSTEM.prj" location="C:\Users\Karel\Documents\MATLAB\StatSTEMv3.0" name="StatSTEM" preferred-package-location="C:\Users\Karel\Documents\MATLAB\StatSTEMv3.0\StatSTEM\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="3180951167" file="C:\Users\thoma\Desktop\StatSTEM\StatSTEM.prj" location="C:\Users\thoma\Desktop\StatSTEM" name="StatSTEM" preferred-package-location="C:\Users\Karel\Documents\MATLAB\StatSTEMv3.0\StatSTEM\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>StatSTEM</param.appname>
     <param.icon>${PROJECT_ROOT}\StatSTEM_resources\icon.ico</param.icon>
     <param.icons>
@@ -8,7 +8,7 @@
       <file>${PROJECT_ROOT}\StatSTEM_resources\icon_24.png</file>
       <file>${PROJECT_ROOT}\StatSTEM_resources\icon_16.png</file>
     </param.icons>
-    <param.version>3.0</param.version>
+    <param.version>3.1</param.version>
     <param.authnamewatermark />
     <param.email>Sandra.VanAert@uantwerpen.be</param.email>
     <param.company>EMAT</param.company>
@@ -34,18 +34,28 @@ When using this program please cite: A. De Backer, Ultramicroscopy 171 (2016), p
     <param.web.mcr>true</param.web.mcr>
     <param.package.mcr>false</param.package.mcr>
     <param.no.mcr>false</param.no.mcr>
-    <param.web.mcr.name>StatSTEM3.0</param.web.mcr.name>
+    <param.web.mcr.name>StatSTEM3.1</param.web.mcr.name>
     <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
     <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
     <param.windows.command.prompt>true</param.windows.command.prompt>
     <param.create.log>false</param.create.log>
     <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text>Syntax 
+	  -? 
+	 
+ Input Arguments 
+	 -?  print help on how to use the application 
+	 input arguments</param.help.text>
     <unset>
       <param.authnamewatermark />
       <param.guid />
       <param.installpath.string />
       <param.installpath.combo />
       <param.logo />
+      <param.install.notes />
       <param.target.install.notes />
       <param.intermediate />
       <param.files.only />
@@ -63,6 +73,9 @@ When using this program please cite: A. De Backer, Ultramicroscopy 171 (2016), p
       <param.windows.command.prompt />
       <param.create.log />
       <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
     </unset>
     <fileset.main>
       <file>${PROJECT_ROOT}\StatSTEM.m</file>
@@ -79,44 +92,20 @@ When using this program please cite: A. De Backer, Ultramicroscopy 171 (2016), p
     </fileset.package>
     <fileset.depfun />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\StatSTEM\for_testing" name="splash.png" optional="false">C:\Users\Karel\Documents\MATLAB\StatSTEMv3.0\StatSTEM\for_testing\splash.png</file>
-      <file location="${PROJECT_ROOT}\StatSTEM\for_testing" name="readme.txt" optional="true">C:\Users\Karel\Documents\MATLAB\StatSTEMv3.0\StatSTEM\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\StatSTEM\for_testing" name="StatSTEM.exe" optional="false">C:\Users\Karel\Documents\MATLAB\StatSTEMv3.0\StatSTEM\for_testing\StatSTEM.exe</file>
+      <file location="${PROJECT_ROOT}\StatSTEM\for_testing" name="splash.png" optional="false">C:\Users\thoma\Desktop\StatSTEM\StatSTEM\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\StatSTEM\for_testing" name="StatSTEM.exe" optional="false">C:\Users\thoma\Desktop\StatSTEM\StatSTEM\for_testing\StatSTEM.exe</file>
+      <file location="${PROJECT_ROOT}\StatSTEM\for_testing" name="readme.txt" optional="true">C:\Users\thoma\Desktop\StatSTEM\StatSTEM\for_testing\readme.txt</file>
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2017a</root>
+      <root>C:\Program Files\MATLAB\R2019b</root>
       <toolboxes>
-        <toolbox name="fixedpoint" />
         <toolbox name="matlabcoder" />
-        <toolbox name="matlabhdlcoder" />
-        <toolbox name="embeddedcoder" />
-        <toolbox name="polyspacebugfinder" />
       </toolboxes>
-      <toolbox>
-        <fixedpoint>
-          <enabled>true</enabled>
-        </fixedpoint>
-      </toolbox>
       <toolbox>
         <matlabcoder>
           <enabled>true</enabled>
         </matlabcoder>
-      </toolbox>
-      <toolbox>
-        <matlabhdlcoder>
-          <enabled>true</enabled>
-        </matlabhdlcoder>
-      </toolbox>
-      <toolbox>
-        <embeddedcoder>
-          <enabled>true</enabled>
-        </embeddedcoder>
-      </toolbox>
-      <toolbox>
-        <polyspacebugfinder>
-          <enabled>true</enabled>
-        </polyspacebugfinder>
       </toolbox>
     </matlab>
     <platform>
@@ -128,7 +117,7 @@ When using this program please cite: A. De Backer, Ultramicroscopy 171 (2016), p
       <vista>false</vista>
       <linux>false</linux>
       <solaris>false</solaris>
-      <osver>6.1</osver>
+      <osver>10.0</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>win64</arch>

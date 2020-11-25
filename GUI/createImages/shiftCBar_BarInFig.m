@@ -77,8 +77,8 @@ set(hf,'WindowButtonMotionFcn',[],'WindowKeyReleaseFcn',[],'WindowButtonUpFcn',[
             elseif y_new<=1.1
                 x = (y_int:((s+1-y_int)/(s+1)):(s+1))';
             else
-                ym = min((y_int)/(y_new)*ceil(y_new),64);
-                x = [linspace(1,(y_int)/(y_new)*floor(y_new),floor(y_new)) linspace(ym,64,65-ceil(y_new))]';
+                ym = min((y_int)/(y_new)*ceil(y_new),s);
+                x = [linspace(1,(y_int)/(y_new)*floor(y_new),floor(y_new)) linspace(ym,s,(s+1)-ceil(y_new))]';    
             end
             cmap_new = [interp1(ind,cmap(:,1),x) interp1(ind,cmap(:,2),x) interp1(ind,cmap(:,3),x)];
             colormap(ha,cmap_new)
