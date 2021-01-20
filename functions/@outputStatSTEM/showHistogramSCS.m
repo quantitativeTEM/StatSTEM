@@ -23,8 +23,8 @@ end
 val = obj.selVol;
 bins = getNBins(val);
 hist(val,bins);
-xlabel('Scattering cross-section (e^-Å^2)')
-ylabel('Frequency')
+xlabel('Scattering cross-section $\left[\mathrm{e/\AA^2}\right]$','Interpreter','LaTex')
+ylabel('Frequency','Interpreter','LaTex')
 
 % Make color gray
 h = findobj(ax,'Type','patch');
