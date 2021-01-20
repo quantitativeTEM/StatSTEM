@@ -14,22 +14,24 @@ for n=1:length(ind)
     % select section of the image and grid around a single atom column
     [obs_s, X_s, Y_s, K_s, L_s] = selectSection(obs_bs, X, Y, Box(type(i)),betaX_org(i)/dx, betaY_org(i)/dx);
     [betaX_b, betaY_b, rho_b, eta_b] = selectParameters(betaX_estimatedbackground, betaY_estimatedbackground, rho_estimatedbackground, eta_estimatedbackground, radius,i);
-    reshapeX_s = reshape(X_s,L_s*K_s,1);
-    reshapeY_s = reshape(Y_s,L_s*K_s,1);
+    LsKs = L_s*K_s;
+    reshapeX_s = reshape(X_s,LsKs,1);
+    reshapeY_s = reshape(Y_s,LsKs,1);
 
     % Create model to subtract from partial images, for overlap neighbouring columns
-    combined_background = sparse(L_s*K_s,1);
+    combined_background = sparse(LsKs,1);
     for k = 1:length(betaX_b)
-        R = sqrt( ( reshapeX_s - betaX_b(k) ).^2 + (reshapeY_s - betaY_b(k)).^2);
-        combined_background = combined_background + eta_b(k)*exp(-R.^2/(2*rho_b(k)^2));
+        R = (reshapeX_s - betaX_b(k)).^2 + (reshapeY_s - betaY_b(k)).^2;
+        combined_background = combined_background + eta_b(k)*exp(-R/(2*rho_b(k)^2));
     end
-    obs_s_back = reshape(obs_s,L_s*K_s,1) - combined_background;
+    obs_s_back = reshape(obs_s,LsKs,1) - combined_background;
 
     % fit
-    StartParametersnonlin_s = [betaX_estimatedbackground(i) betaY_estimatedbackground(i)];
     if strcmp(method,'same')
+        StartParametersnonlin_s = [betaX_estimatedbackground(i) betaY_estimatedbackground(i)];
         EstimatedParametersnonlin(:,n) = lsqnonlin('criterionGauss_samerho',StartParametersnonlin_s',[],[],options,reshapeX_s,reshapeY_s,K_s,L_s,obs_s_back,rho_estimatedbackground(i));
     else
+        StartParametersnonlin_s = [betaX_estimatedbackground(i) betaY_estimatedbackground(i) rho_estimatedbackground(i)];
         EstimatedParametersnonlin(:,n) = lsqnonlin('criterionGauss_diffrho',StartParametersnonlin_s',[],[],options,reshapeX_s,reshapeY_s,K_s,L_s,obs_s_back);
     end
 end
