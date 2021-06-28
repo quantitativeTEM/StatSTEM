@@ -8,8 +8,8 @@ function obj = calibrateImage(obj)
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
-% Copyright: 2018, EMAT, University of Antwerp
-% Author: K.H.W. van den Bos
+% Copyright: 2020, EMAT, University of Antwerp
+% Author: K.H.W. van den Bos, J. Fatermans
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
@@ -58,6 +58,8 @@ if exNorm
     if convToEC
         d = DT*10^-18*BC/e;
         obj.obs = obj.obs*d;
+        obj.zetamax = max(max(obj.obs));
+        obj.etamax = obj.zetamax;
     end
 end
 
