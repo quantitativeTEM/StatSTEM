@@ -8,8 +8,8 @@ function obj = selectPartImage(obj)
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
-% Copyright: 2018, EMAT, University of Antwerp
-% Author: K.H.W. van den Bos
+% Copyright: 2020, EMAT, University of Antwerp
+% Author: K.H.W. van den Bos, J. Fatermans
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
@@ -41,6 +41,10 @@ if ~isempty(coor)
     indX = X>=coor(1,1) & X<=coor(2,1);
     indY = Y>=coor(1,2) & Y<=coor(2,2);
     obj.obs = obj.obs(indY,indX);
+    
+    obj.rhomax = mean(size(obj.obs))*obj.dx;
+    obj.beta_xmax = size(obj.obs,2)*obj.dx;
+    obj.beta_ymax = size(obj.obs,2)*obj.dx;
     
     if ~isempty(obj.coordinates)
         % Keep coordinates in area
