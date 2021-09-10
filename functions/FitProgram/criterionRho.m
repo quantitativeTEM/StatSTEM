@@ -37,7 +37,7 @@ function Fun = criterionRho(rho,Xreshape,Yreshape,K,L,reshapeobs,betaX,betaY,fit
 
 rho_vec = rho(type);
 Ga = sparse(K*L,length(type)+fitzeta);
-Ga(:,1:end-fitzeta) = getGa(K,L,max_n,indMat,rho_vec,dx,betaX,betaY,Xreshape,Yreshape,ind);
+Ga(:,1:end-fitzeta) = getGa(K,L,indMat,rho_vec,dx,betaX,betaY,Xreshape,Yreshape,ind);
 thetalin = getLinearPar(Ga,reshapeobs,K*L,fitzeta,0); % Zeta must be subtracted before running function
 output = outputStatSTEM([betaX, betaY, type],rho_vec,thetalin(1:end-fitzeta),0,dx);
 if nargin>=15

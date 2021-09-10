@@ -36,9 +36,9 @@ rho = thetanonlin(2*n_c+1:end);
 rho_est = rho(type);
 
 Ga = sparse(K*L,n_c+back);
-Ga(:,1:end-back) = getGa(K,L,64,indMat,rho_est,dx,betaX,betaY,X,Y,(1:n_c)');
+Ga(:,1:end-back) = getGa(K,L,indMat,rho_est,dx,betaX,betaY,X,Y,(1:n_c)');
 % for i = 1:n_c
-%     R = sqrt((X - betaX(i)).^2 + (Y - betaY(i)).^2);
+%     R = (X - betaX(i)).^2 + (Y - betaY(i)).^2;
 %     Ga(:,i) = gaus( R , rho_est(i) );
 % end
 if back

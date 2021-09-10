@@ -31,13 +31,11 @@ if input.numWorkers ~= 1
     end
 end
 
-max_n = 70-6*parWork;
-tic
 % Get linear parameters, if necessary
 indCol = (1:input.n_c)';
 Ga = sparse(input.K*input.L,input.n_c+double(input.fitZeta));
 if parWork == 1
-    Ga(:,indCol) = getGa(input.K,input.L,max_n,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,indCol);
+    Ga(:,indCol) = getGa(input.K,input.L,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,indCol);
     if ~isempty(input.GUI)
         % For aborting function
         drawnow
@@ -50,7 +48,7 @@ if parWork == 1
 else
     job = cell(input.numWorkers,1);
     for n=1:input.numWorkers
-        job{n} = parfeval(@getGa,1,input.K,input.L,max_n,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,input.indAllWorkers{n,1});
+        job{n} = parfeval(@getGa,1,input.K,input.L,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,input.indAllWorkers{n,1});
     end
     for n=1:input.numWorkers
         if ~isempty(input.GUI)

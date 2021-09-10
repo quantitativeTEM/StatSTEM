@@ -1,4 +1,4 @@
-function Ga = getGa(K,L,Mnum,indMat,rho,dx,BetaX,BetaY,X,Y,ind)
+function Ga = getGa(K, L, indMat, rho, dx, BetaX, BetaY, X, Y, ind)
 % getGa - create matrix with all the gaussian peaks
 %
 %   Matrix with all the gaussian peaks at different columns is created for 
@@ -7,7 +7,6 @@ function Ga = getGa(K,L,Mnum,indMat,rho,dx,BetaX,BetaY,X,Y,ind)
 %   syntax: Ga = getGa(K,L,Mnum,indMat,rho,dx,BetaX,BetaY,X,Y,ind)
 %       K      - number of pixels in x-direction
 %       L      - number of pixels in y-direction
-%       Mnum   - number for speeding up matrix generation
 %       indMat - matrix indicating the indice of each pixel
 %       rho    - the width of the columns
 %       BetaX  - the x-coordinates
@@ -26,22 +25,13 @@ function Ga = getGa(K,L,Mnum,indMat,rho,dx,BetaX,BetaY,X,Y,ind)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-num = length(ind);
-Ga = sparse(K*L,num);
-% Now devide num by maximum number and compute Ga in steps
-N = floor(num/Mnum)+1;
+N = length(ind);
+px_p_col = (round((rho(1)*3)/dx)*2)^2;
+Ga = spalloc(K*L,N,px_p_col*N);
 for k=1:N
-    if k==N
-        M = mod(num,Mnum);
-    else
-        M = Mnum;
-    end
-    GaInt = sparse(K*L,M);
-    for n = 1:M
-        i = ind(n+(k-1)*Mnum);
-        ind_s = selectSectionInd(indMat, rho(i)/dx*3,BetaX(i)/dx, BetaY(i)/dx);
-        R = sqrt( ( X(ind_s) - BetaX(i) ).^2 + (Y(ind_s) - BetaY(i)).^2);
-        GaInt(ind_s,n) = exp(-R.^2/(2*rho(i)^2));
-    end
-    Ga(:,(k-1)*Mnum+1:(k-1)*Mnum+M) = GaInt;
+    i = ind(k);
+    ind_s = selectSectionInd(indMat, (rho(i)*3)/dx, BetaX(i)/dx, BetaY(i)/dx);
+    R = (X(ind_s) - BetaX(i)).^2 + (Y(ind_s) - BetaY(i)).^2;
+    Ga(ind_s,k) = exp(-R/(2*rho(i)^2));
 end
+
