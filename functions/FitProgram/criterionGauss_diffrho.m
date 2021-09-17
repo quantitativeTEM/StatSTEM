@@ -36,15 +36,16 @@ Fun = model - reshapeobs;
 
 if nargout == 2
     rho2 = rho^2;
+    rho3 = rho^3;
     firstorderderivative = sparse(K*L,4);
     firstorderderivative(:,1) = model.*(Xreshape - beta(1))/(rho2);
     firstorderderivative(:,2) = model.*(Yreshape - beta(2))/(rho2);
-    firstorderderivative(:,3) = model.*R/rho^3;
+    firstorderderivative(:,3) = model.*R/rho3;
     firstorderderivative(:,4) = Ga;
     
     derGaToThetanonlin1 = Ga.*(Xreshape - beta(1))/rho2;
     derGaToThetanonlin2 = Ga.*(Yreshape - beta(2))/rho2;
-    derGaToThetanonlin3 = Ga.*R/rho^3;
+    derGaToThetanonlin3 = Ga.*R/rho3;
     matrix1T = derGaToThetanonlin1';
     derivativeThetalinToThetanonlin(:,1) = -GaTGa\(matrix1T*Ga + GaT*derGaToThetanonlin1)*eta + GaTGa\matrix1T*reshapeobs;
     matrix2T = derGaToThetanonlin2';

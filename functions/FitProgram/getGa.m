@@ -26,7 +26,7 @@ function Ga = getGa(K, L, indMat, rho, dx, BetaX, BetaY, X, Y, ind)
 %--------------------------------------------------------------------------
 
 N = length(ind);
-px_p_col = (round((rho(1)*3)/dx)*2)^2;
+px_p_col = ceil(((max(rho)*6))/dx)^2;
 Ga = spalloc(K*L,N,px_p_col*N);
 for k=1:N
     i = ind(k);
