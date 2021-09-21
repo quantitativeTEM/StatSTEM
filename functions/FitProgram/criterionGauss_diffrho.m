@@ -25,8 +25,8 @@ function [Fun, Jacobian] = criterionGauss_diffrho(thetanonlin,Xreshape,Yreshape,
 beta = thetanonlin(1:2);
 rho = thetanonlin(end);
 
-R = (Xreshape - beta(1)).^2 + (Yreshape - beta(2)).^2;
-Ga = gaus(R,rho);
+R2 = (Xreshape - beta(1)).^2 + (Yreshape - beta(2)).^2;
+Ga = gaus(R2,rho);
 GaT = Ga';
 GaTGa = GaT*Ga;
 GaTobs = GaT*reshapeobs;
@@ -39,12 +39,12 @@ if nargout == 2
     firstorderderivative = sparse(K*L,4);
     firstorderderivative(:,1) = model.*(Xreshape - beta(1))/(rho2);
     firstorderderivative(:,2) = model.*(Yreshape - beta(2))/(rho2);
-    firstorderderivative(:,3) = model.*R/rho^3;
+    firstorderderivative(:,3) = model.*R2/rho^3;
     firstorderderivative(:,4) = Ga;
     
     derGaToThetanonlin1 = Ga.*(Xreshape - beta(1))/rho2;
     derGaToThetanonlin2 = Ga.*(Yreshape - beta(2))/rho2;
-    derGaToThetanonlin3 = Ga.*R/rho^3;
+    derGaToThetanonlin3 = Ga.*R2/rho^3;
     matrix1T = derGaToThetanonlin1';
     derivativeThetalinToThetanonlin(:,1) = -GaTGa\(matrix1T*Ga + GaT*derGaToThetanonlin1)*eta + GaTGa\matrix1T*reshapeobs;
     matrix2T = derGaToThetanonlin2';

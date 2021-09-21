@@ -24,8 +24,8 @@ function [Fun, Jacobian] = criterionGauss_samerho(beta,Xreshape,Yreshape,K,L,res
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-R = (Xreshape - beta(1)).^2 + (Yreshape - beta(2)).^2;
-Ga = gaus(R,rho);
+R2 = (Xreshape - beta(1)).^2 + (Yreshape - beta(2)).^2;
+Ga = gaus(R2,rho);
 GaT = Ga';
 GaTGa = GaT*Ga;
 GaTobs = GaT*reshapeobs;

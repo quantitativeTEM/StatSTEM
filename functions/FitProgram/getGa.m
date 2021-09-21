@@ -31,7 +31,7 @@ Ga = spalloc(K*L,N,px_p_col*N);
 for k=1:N
     i = ind(k);
     ind_s = selectSectionInd(indMat, (rho(i)*3)/dx, BetaX(i)/dx, BetaY(i)/dx);
-    R = (X(ind_s) - BetaX(i)).^2 + (Y(ind_s) - BetaY(i)).^2;
-    Ga(ind_s,k) = exp(-R/(2*rho(i)^2));
+    R2 = (X(ind_s) - BetaX(i)).^2 + (Y(ind_s) - BetaY(i)).^2;
+    Ga(ind_s,k) = exp(-R2/(2*rho(i)^2));
 end
 
