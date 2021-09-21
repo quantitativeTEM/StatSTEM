@@ -36,6 +36,7 @@ Fun = model - reshapeobs;
 
 if nargout == 2
     rho2 = rho^2;
+    rho3 = rho^3;
     firstorderderivative = sparse(K*L,4);
     firstorderderivative(:,1) = model.*(Xreshape - beta(1))/(rho2);
     firstorderderivative(:,2) = model.*(Yreshape - beta(2))/(rho2);
