@@ -21,8 +21,8 @@ for n=1:length(ind)
     % Create model to subtract from partial images, for overlap neighbouring columns
     combined_background = sparse(LsKs,1);
     for k = 1:length(betaX_b)
-        R = (reshapeX_s - betaX_b(k)).^2 + (reshapeY_s - betaY_b(k)).^2;
-        combined_background = combined_background + eta_b(k)*exp(-R/(2*rho_b(k)^2));
+        R2 = (reshapeX_s - betaX_b(k)).^2 + (reshapeY_s - betaY_b(k)).^2;
+        combined_background = combined_background + eta_b(k)*exp(-R2/(2*rho_b(k)^2));
     end
     obs_s_back = reshape(obs_s,LsKs,1) - combined_background;
 

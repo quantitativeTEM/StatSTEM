@@ -33,7 +33,7 @@ betaY = thetanonlin(n_c+1:2*n_c);
 rho = thetanonlin(2*n_c+1:end);
 
 Ga = sparse(K*L,n_c+back);
-Ga(:,1:end-back) = getGa(K,L,64,indMat,rho,dx,betaX,betaY,X,Y,(1:n_c)');
+Ga(:,1:end-back) = getGa(K,L,indMat,rho,dx,betaX,betaY,X,Y,(1:n_c)');
 if back
     Ga(:,end) = ones(K*L,1);
 end

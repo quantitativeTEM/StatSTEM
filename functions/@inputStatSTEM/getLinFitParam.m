@@ -31,13 +31,15 @@ if input.numWorkers ~= 1
     end
 end
 
-max_n = 70-6*parWork;
-tic
-% Get linear parameters, if necessary
-indCol = (1:input.n_c)';
-Ga = sparse(input.K*input.L,input.n_c+double(input.fitZeta));
+KL =input.K*input.L;
+N = input.n_c;
+Z = double(input.fitZeta);
+px_p_col = ceil(((max(rho)*6))/input.dx)^2;
+Ga = spalloc(KL, N+Z, px_p_col*N + Z*KL);
+% Ga = sparse(input.K*input.L,input.n_c+double(input.fitZeta));
 if parWork == 1
-    Ga(:,indCol) = getGa(input.K,input.L,max_n,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,indCol);
+    indCol = (1:input.n_c)';
+    Ga(:,indCol) = getGa(input.K,input.L,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,indCol);
     if ~isempty(input.GUI)
         % For aborting function
         drawnow
@@ -45,12 +47,12 @@ if parWork == 1
             error('Error: function stopped by user')
         end
     end
-    thetalin = getLinearPar(Ga,input.reshapeobs,input.K*input.L,input.fitZeta,input.zeta);
+    thetalin = getLinearPar(Ga,input.reshapeobs,KL,input.fitZeta,input.zeta);
     clear Ga
 else
     job = cell(input.numWorkers,1);
     for n=1:input.numWorkers
-        job{n} = parfeval(@getGa,1,input.K,input.L,max_n,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,input.indAllWorkers{n,1});
+        job{n} = parfeval(@getGa,1,input.K,input.L,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,input.indAllWorkers{n,1});
     end
     for n=1:input.numWorkers
         if ~isempty(input.GUI)
@@ -60,7 +62,7 @@ else
         Ga(:,input.indAllWorkers{n,1}) = fetchOutputs(job{n});
     end
     clear job
-    job = parfeval(@getLinearPar,1,Ga,input.reshapeobs,input.K*input.L,input.fitZeta,input.zeta);
+    job = parfeval(@getLinearPar,1,Ga,input.reshapeobs,KL,input.fitZeta,input.zeta);
     if ~isempty(input.GUI)
         % For aborting function
         drawnow

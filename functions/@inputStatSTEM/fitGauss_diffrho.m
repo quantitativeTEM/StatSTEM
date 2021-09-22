@@ -25,7 +25,6 @@ function output = fitGauss_diffrho(input, rho, offset, maxwait)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-tic;
 if nargin<4
     maxwait = 100;
 end
@@ -70,9 +69,6 @@ output = getLinFitParam(input,rho_estimatedbackground,[Estimated_BetaX,Estimated
 obs_bs = input.obs - output.zeta;
 Estimated_eta = output.eta;
 eta_estimatedbackground = output.eta;
-
-reshape_obs_bs = reshape(input.obs,input.K*input.L,1);
-max_n = 70-6*input.numWorkers;
 
 %% options for lsqnonlin
 options = optimset('lsqnonlin');

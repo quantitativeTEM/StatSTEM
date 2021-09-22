@@ -25,7 +25,6 @@ function output = fitGauss_samerho(input, rho, offset, maxwait)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-tic;
 if nargin<4
     maxwait = 100;
 end

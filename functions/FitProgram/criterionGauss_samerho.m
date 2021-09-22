@@ -24,8 +24,8 @@ function [Fun, Jacobian] = criterionGauss_samerho(beta,Xreshape,Yreshape,K,L,res
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-R = sqrt((Xreshape - beta(1)).^2 + (Yreshape - beta(2)).^2);
-Ga = gaus(R,rho);
+R2 = (Xreshape - beta(1)).^2 + (Yreshape - beta(2)).^2;
+Ga = gaus(R2,rho);
 GaT = Ga';
 GaTGa = GaT*Ga;
 GaTobs = GaT*reshapeobs;
@@ -34,13 +34,14 @@ model = eta*Ga;
 Fun = model - reshapeobs;
 
 if nargout == 2
+    rho2 = rho^2;
     firstorderderivative = sparse(K*L,3);
-    firstorderderivative(:,1) = model.*(Xreshape - beta(1))/(rho^2);
-    firstorderderivative(:,2) = model.*(Yreshape - beta(2))/(rho^2);
+    firstorderderivative(:,1) = model.*(Xreshape - beta(1))/(rho2);
+    firstorderderivative(:,2) = model.*(Yreshape - beta(2))/(rho2);
     firstorderderivative(:,3) = Ga;
     
-    derGaToThetanonlin1 = Ga.*(Xreshape - beta(1))/((rho)^2);
-    derGaToThetanonlin2 = Ga.*(Yreshape - beta(2))/((rho)^2);
+    derGaToThetanonlin1 = Ga.*(Xreshape - beta(1))/(rho2);
+    derGaToThetanonlin2 = Ga.*(Yreshape - beta(2))/(rho2);
     matrix1T = derGaToThetanonlin1';
     derivativeThetalinToThetanonlin(:,1) = -GaTGa\(matrix1T*Ga + GaT*derGaToThetanonlin1)*eta + GaTGa\matrix1T*reshapeobs;
     matrix2T = derGaToThetanonlin2';
