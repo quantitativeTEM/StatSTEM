@@ -45,7 +45,7 @@ n_c = obj.n_c;
 for k = 1:n_c
     obj_s = cell(1,k);
     if k == 1
-        mustart = (max(data) - min(data))/2;
+        mustart = (max(data) + min(data))/2;
         sigmastart  = (max(data)-min(data))/(2*k);
         s = struct('mu', mustart', 'Sigma', sigmastart^2, 'Pcomponents', ones(k,1)/k);
         warning('off','all')
