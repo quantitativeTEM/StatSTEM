@@ -11,8 +11,8 @@ function atomcounting = fitGMM(obj,minSel)
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
-% Copyright: 2018, EMAT, University of Antwerp
-% Authors: A. De Backer, K.H.W. van den Bos
+% Copyright: 2021, EMAT, University of Antwerp
+% Authors: A. De Backer, K.H.W. van den Bos, A. De wael
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
@@ -43,19 +43,29 @@ end
 tic
 n_c = obj.n_c;
 for k = 1:n_c
-    obj_s = cell(1,k);
+    niter = 20;
+    NlogL_best = 1e+50;
+    sigmastart  = (max(data)-min(data))/(2*k);
     if k == 1
-        mustart = (max(data) + min(data))/2;
-        sigmastart  = (max(data)-min(data))/(2*k);
-        s = struct('mu', mustart', 'Sigma', sigmastart^2, 'Pcomponents', ones(k,1)/k);
+        mu_0 = (max(data) + min(data))/2;
+    else
+        mu_0 = min(data) + (0.5+(0:1:(k-1)).').*(max(data)-min(data))/k;
+    end
+    for iter = 1:niter % several random displacements as compared to mu_0 to avoid local minima
+        mustart = mu_0 + ((max(data)-min(data))/(2*5)).*randn(k, 1);
+        mustart = max(min(data), min(max(data), mustart)); % keeping the random starting values within the range of the data
+        s = struct('mu', mustart, 'Sigma', sigmastart^2, 'Pcomponents', ones(k,1)/k);
         warning('off','all')
         if v<2017
-            obj_s{k} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
+            obj_s_iter = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
         else
-            obj_s{k} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
+            obj_s_iter = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
         end
         warning('on','all')
-        NlogL_s = obj_s{k}.NlogL;
+        if obj_s_iter.NlogL < NlogL_best
+            NlogL_best = obj_s_iter.NlogL;
+            obj_best = obj_s_iter;
+        end
         % For abort button in StatSTEM interface (if present)
         if ~isempty(obj.GUI)
             % For aborting function
@@ -65,44 +75,13 @@ for k = 1:n_c
                 break
             end
         end
-    else
-        NlogL_s = zeros(1,k);
-        for i = 1:k
-            sortmu = sort(atomcounting.estimatedDistributions{1,k-1}.mu);
-            if i == 1
-                mustartextra = (sortmu(1) - min(data))/2;
-            elseif i == k
-                mustartextra = (max(data) - sortmu(k-1))/2 + sortmu(k-1);
-            else
-                mustartextra = (sortmu(i) - sortmu(i-1))/2 + sortmu(i-1);
-            end
-
-            s = struct('mu', [atomcounting.estimatedDistributions{1,k-1}.mu' mustartextra]', 'Sigma', atomcounting.estimatedDistributions{k-1}.Sigma, 'Pcomponents', ones(k,1)/k);
-            warning('off','all')
-            if v<2017
-                obj_s{i} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
-            else
-                obj_s{i} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
-            end
-            warning('on','all')
-            NlogL_s(i) = obj_s{i}.NlogL;
-            % For abort button in StatSTEM interface (if present)
-            if ~isempty(obj.GUI)
-                % For aborting function
-                drawnow
-                if get(obj.GUI,'Userdata')==0
-                    n_c = k-1;
-                    break
-                end
-            end
-        end
+    
     end
     tic
-    best = find(NlogL_s == min(NlogL_s),1);
-    atomcounting.estimatedDistributions{1,k}.mu = obj_s{best}.mu;
-    atomcounting.estimatedDistributions{1,k}.Sigma = obj_s{best}.Sigma;
-    atomcounting.estimatedDistributions{1,k}.PComponents = obj_s{best}.PComponents;
-    atomcounting.mLogLik(1,k) = NlogL_s(best);
+    atomcounting.estimatedDistributions{1,k}.mu = obj_best.mu;
+    atomcounting.estimatedDistributions{1,k}.Sigma = obj_best.Sigma;
+    atomcounting.estimatedDistributions{1,k}.PComponents = obj_best.PComponents;
+    atomcounting.mLogLik(1,k) = NlogL_best;
     
     % Calculate ICL and store it in atomcounting object (For speed)
     atomcounting = setICL(atomcounting,atomcounting.ICL);
