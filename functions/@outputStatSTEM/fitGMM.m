@@ -52,6 +52,7 @@ for k = 1:n_c
         mu_0 = min(data) + (0.5+(0:1:(k-1)).').*(max(data)-min(data))/k;
     end
     for iter = 1:niter % several random displacements as compared to mu_0 to avoid local minima
+         % further optimisation is possible though..
         mustart = mu_0 + ((max(data)-min(data))/(2*5)).*randn(k, 1);
         mustart = max(min(data), min(max(data), mustart)); % keeping the random starting values within the range of the data
         s = struct('mu', mustart, 'Sigma', sigmastart^2, 'Pcomponents', ones(k,1)/k);
