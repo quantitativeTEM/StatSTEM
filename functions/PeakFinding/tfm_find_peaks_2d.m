@@ -23,7 +23,7 @@ function [img_o, xy] = tfm_find_peaks_2d(img, sigma, pk_min, d_min)
 %--------------------------------------------------------------------------
 
     % Avoide negative values
-    img = img+min(img(:));
+    img = img-min(img(:));
     img = img/max(img(:));
     
     % This ratio corresponds roughly to the the visual column radius
