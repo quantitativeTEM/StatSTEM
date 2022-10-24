@@ -44,7 +44,7 @@ N = length(betaX);
 model = zeros(L,K)+output.zeta;
 for i=1:N
     ind_s = selectSectionInd(indM, rho(i)/output.dx*3, betaX(i)/output.dx+0.5, betaY(i)/output.dx+0.5);
-    R = sqrt( ( X(ind_s) - betaX(i) ).^2 + (Y(ind_s) - betaY(i)).^2);
-    model(ind_s) = model(ind_s) + eta(i)*exp(-R.^2/(2*rho(i)^2));
+    R2 = ( ( X(ind_s) - betaX(i) ).^2 + (Y(ind_s) - betaY(i)).^2);
+    model(ind_s) = model(ind_s) + eta(i)*exp(-R2/(2*rho(i)^2));
 end
 output.pModel = model;
