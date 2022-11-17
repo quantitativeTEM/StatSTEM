@@ -76,12 +76,16 @@ if numel(zdim)<1 || any(zdim)<1
 end
 obs=double(reshape(output{6},[xdim ydim zdim]));
 
+%Rotate and mirror dm file such that it is shown correctly
+obs = imrotate(obs,-90); % rotate 90 degrees clockwise
+obs = flipdim(obs, 2); % horizontal flip
+
 % Take mean value if needed
 if takeMean
     obs = mean(obs,3);
 end
 
-% Make sure the unit are in Å
+% Make sure the unit are in Ã…
 if size(units,1)~=1
     units = units';
 end
