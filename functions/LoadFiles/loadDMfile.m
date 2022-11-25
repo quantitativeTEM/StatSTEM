@@ -77,8 +77,7 @@ end
 obs=double(reshape(output{6},[xdim ydim zdim]));
 
 %Rotate and mirror dm file such that it is shown correctly
-obs = imrotate(obs,-90); % rotate 90 degrees clockwise
-obs = flipdim(obs, 2); % horizontal flip
+obs = permute(obs, [2 1 3]);
 
 % Take mean value if needed
 if takeMean
