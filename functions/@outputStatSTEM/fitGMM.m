@@ -50,9 +50,9 @@ for k = 1:n_c
         s = struct('mu', mustart', 'Sigma', sigmastart^2, 'Pcomponents', ones(k,1)/k);
         warning('off','all')
         if v<2017
-            obj_s{k} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
+            obj_s{k} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
         else
-            obj_s{k} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
+            obj_s{k} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
         end
         warning('on','all')
         NlogL_s = obj_s{k}.NlogL;
@@ -80,9 +80,9 @@ for k = 1:n_c
             s = struct('mu', [atomcounting.estimatedDistributions{1,k-1}.mu' mustartextra]', 'Sigma', atomcounting.estimatedDistributions{k-1}.Sigma, 'Pcomponents', ones(k,1)/k);
             warning('off','all')
             if v<2017
-                obj_s{i} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
+                obj_s{i} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
             else
-                obj_s{i} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'full', 'SharedCov', true, 'Regularize', 0);
+                obj_s{i} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
             end
             warning('on','all')
             NlogL_s(i) = obj_s{i}.NlogL;
