@@ -131,7 +131,7 @@ classdef atomCountStat < atomCount
         function val = get.ICL(obj)
             % ICL - the Integrated Classification Likelihood Criterion
             %
-            % See also: Biernacki et al., Technical Report  3521, INRIA, Rhônes-Alpes, 1998.
+            % See also: Biernacki et al., Technical Report  3521, INRIA, RhÃ´nes-Alpes, 1998.
             
             val = obj.ICLp;
             if length(val)==length(obj.estimatedDistributions)
@@ -151,22 +151,19 @@ classdef atomCountStat < atomCount
 
                 % Gather inputs
                 mu = obj.estimatedDistributions{1,p}.mu;
-                var_eq = sqrt(obj.estimatedDistributions{1,p}.Sigma);
+                var_eq = obj.estimatedDistributions{1,p}.Sigma;
                 P = obj.estimatedDistributions{1,p}.PComponents;
                 mlog = obj.mLogLik(1,p);
 
                 pP = zeros(N,p);
                 for k = 1:p
-                    pP(:,k) = normaldistribution(obj.volumes,mu(k),var_eq)*P(k);
+                    pP(:,k) = mvnpdf(obj.volumes,mu(k),var_eq)*P(k);
                 end
                 E_w = pP./repmat(sum(pP,2),1,p);
                 Ew = E_w(:);
                 index=find(ne(log(Ew),-Inf));
-                som=0;
-                for j=1:length(index)
-                    som = som + sum(sum(Ew(index(j)).*log(Ew(index(j)))));
-                end
-                crit(1,p) = 2*mlog - 2*som + p*2*log(N);
+                EN = -sum(sum(sum(Ew(index).*log(Ew(index)))))
+                crit(1,p) = 2*mlog + 2*EN + p*2*log(N);
             end
             val = crit(1,1:n_c);
         end
