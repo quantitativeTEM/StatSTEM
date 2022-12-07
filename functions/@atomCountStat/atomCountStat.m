@@ -162,7 +162,7 @@ classdef atomCountStat < atomCount
                 E_w = pP./repmat(sum(pP,2),1,p);
                 Ew = E_w(:);
                 index=find(ne(log(Ew),-Inf));
-                EN = -sum(sum(sum(Ew(index).*log(Ew(index)))))
+                EN = -sum(sum(sum(Ew(index).*log(Ew(index)))));
                 crit(1,p) = 2*mlog + 2*EN + p*2*log(N);
             end
             val = crit(1,1:n_c);
