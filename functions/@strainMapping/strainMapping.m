@@ -70,7 +70,7 @@ classdef strainMapping < StatSTEMfile
         meanOctaTilt_dirB = []; % A (n*3) vector with the mean octahedral tilt in degrees in the b-direction [distance,angle,error]
     end
     
-    properties (SetAccess=private, Hidden) % Private variables to store values after calculations by specific functions
+    properties (SetAccess=public, Hidden) % Private variables to store values after calculations by specific functions
         % Run findLatDir to get values
         tetaP = [];
         errTetaP = [];
