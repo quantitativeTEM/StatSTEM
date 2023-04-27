@@ -14,6 +14,11 @@ function strainmapping = STEMstrain_ab(strainmapping)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
+ warndlg(['The strain is computed along the a-direction of the projected unit cell' ...
+     ' and the direction perpendicular to it. This perpendicular direction only correpsonds' ...
+     ' to the b-direction in case of an angle of 90 degrees between the a- and b-direction in the projected unit cell.']);
+
+
 coordinates = strainmapping.coordinates;
 teta = strainmapping.teta(1);
 R1 = [cos(-teta) -sin(-teta);sin(-teta) cos(-teta)];
