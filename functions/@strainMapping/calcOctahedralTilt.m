@@ -90,6 +90,8 @@ else
     shiftB = -1;
 end
 
+figure, plot(obj.coordinates(:,1), obj.coordinates(:,2),'.'), axis equal, hold on
+
 if nO==2
     obj.message = '[100]-direction indentified, octahedral tilt calculate per unit cell by using oxygen atoms at the left,right,top, and bottom.';
     for i=1:(maxIndA-minIndA+1)
@@ -102,6 +104,13 @@ if nO==2
             indT = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==type1;
             
             if sum(indL)==1 && sum(indR)==1 && sum(indB)==1 && sum(indT)==1
+
+                plot(obj.coordinates(indCor,1), obj.coordinates(indCor,2), 'ro')
+plot(obj.coordinates(indL,1), obj.coordinates(indL,2), 'go')
+plot(obj.coordinates(indR,1), obj.coordinates(indR,2), 'go')
+plot(obj.coordinates(indT,1), obj.coordinates(indT,2), 'go')
+plot(obj.coordinates(indB,1), obj.coordinates(indB,2), 'go')
+
                 %coorCor = obj.coordinates(indCor,1:2);
                 % Angle in a-direction
                 dirA = obj.coordinates(indR,1:2)-obj.coordinates(indL,1:2);
