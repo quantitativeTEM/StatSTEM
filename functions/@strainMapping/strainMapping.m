@@ -51,6 +51,12 @@ classdef strainMapping < StatSTEMfile
         eps_yy % Strain in y-direction
         eps_xy % Shear strain
         omg_xy % Rotational strain
+
+        % Run STEMstrain_ab to get values
+        eps_aa % Strain in x-direction
+        eps_bb % Strain in y-direction
+        eps_ab % Shear strain
+        omg_ab % Rotational strain
         
         % Run measureLatPar to get values
         latticeA = [];% A (n*2) vector with the lattice parameter of the a-direction per coordinate
@@ -92,6 +98,12 @@ classdef strainMapping < StatSTEMfile
         eps_yyP = [];
         eps_xyP = [];
         omg_xyP = [];
+
+        % Run STEMstrain_ab to get values
+        eps_aaP = [];
+        eps_bbP = [];
+        eps_abP = [];
+        omg_abP = [];
         
         % Run measureLatPar to get values
         latticeAP = [];
@@ -131,8 +143,13 @@ classdef strainMapping < StatSTEMfile
         showStrainEpsXY(obj)
         showStrainEpsYY(obj)
         showStrainOmgXY(obj)
+        showStrainEpsAA(obj)
+        showStrainEpsAB(obj)
+        showStrainEpsBB(obj)
+        showStrainOmgAB(obj)
         strainmapping = STEMrefPar(strainmapping)
         strainmapping = STEMstrain(strainmapping)
+        strainmapping = STEMstrain_ab(strainmapping)
     end
     
     methods
@@ -227,6 +244,22 @@ classdef strainMapping < StatSTEMfile
         function val = get.omg_xy(obj)
             val = obj.omg_xyP;
         end
+
+        function val = get.eps_aa(obj)
+            val = obj.eps_aaP;
+        end
+        
+        function val = get.eps_ab(obj)
+            val = obj.eps_abP;
+        end
+        
+        function val = get.eps_bb(obj)
+            val = obj.eps_bbP;
+        end
+        
+        function val = get.omg_ab(obj)
+            val = obj.omg_abP;
+        end
         
         function val = get.latticeA(obj)
             val = obj.latticeAP;
@@ -268,6 +301,14 @@ classdef strainMapping < StatSTEMfile
             obj.eps_xyP = [epsXY,errEpsXY];
             obj.eps_yyP = [epsYY,errEpsYY];
             obj.omg_xyP = [omgXY,errOmgXY];
+        end
+
+        function obj = setEps_ab(obj,epsAA,errEpsAA,epsAB,errEpsAB,epsBB,errEpsBB,omgAB,errOmgAB)
+            % Function to load old parameters
+            obj.eps_aaP = [epsAA,errEpsAA];
+            obj.eps_abP = [epsAB,errEpsAB];
+            obj.eps_bbP = [epsBB,errEpsBB];
+            obj.omg_abP = [omgAB,errOmgAB];
         end
         
         function val = get.suitOctaTilt(obj)

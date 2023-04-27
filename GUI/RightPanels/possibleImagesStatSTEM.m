@@ -33,6 +33,10 @@ out.option1 = addFigOpt(out.option1,[char(949),'_xx'],'showStrainEpsXX','strainm
 out.option1 = addFigOpt(out.option1,[char(949),'_xy'],'showStrainEpsXY','strainmapping.eps_xy');
 out.option1 = addFigOpt(out.option1,[char(949),'_yy'],'showStrainEpsYY','strainmapping.eps_yy');
 out.option1 = addFigOpt(out.option1,[char(969),'_xy'],'showStrainOmgXY','strainmapping.omg_xy');
+out.option1 = addFigOpt(out.option1,[char(949),'_aa'],'showStrainEpsAA','strainmapping.eps_aa');
+out.option1 = addFigOpt(out.option1,[char(949),'_ab'],'showStrainEpsAB','strainmapping.eps_ab');
+out.option1 = addFigOpt(out.option1,[char(949),'_bb'],'showStrainEpsBB','strainmapping.eps_bb');
+out.option1 = addFigOpt(out.option1,[char(969),'_ab'],'showStrainOmgAB','strainmapping.omg_ab');
 
 % Option1b: Observation Time Series
 out.option1b = listImagesStatSTEM('Observations Time Series','showObservation_T','inputHMM.obs_T');
@@ -56,6 +60,10 @@ out.option2 = addFigOpt(out.option2,[char(949),'_xx'],'showStrainEpsXX','strainm
 out.option2 = addFigOpt(out.option2,[char(949),'_xy'],'showStrainEpsXY','strainmapping.eps_xy');
 out.option2 = addFigOpt(out.option2,[char(949),'_yy'],'showStrainEpsYY','strainmapping.eps_yy');
 out.option2 = addFigOpt(out.option2,[char(969),'_xy'],'showStrainOmgXY','strainmapping.omg_xy');
+out.option2 = addFigOpt(out.option2,[char(949),'_aa'],'showStrainEpsAA','strainmapping.eps_aa');
+out.option2 = addFigOpt(out.option2,[char(949),'_ab'],'showStrainEpsAB','strainmapping.eps_ab');
+out.option2 = addFigOpt(out.option2,[char(949),'_bb'],'showStrainEpsBB','strainmapping.eps_bb');
+out.option2 = addFigOpt(out.option2,[char(969),'_ab'],'showStrainOmgAB','strainmapping.omg_ab');
 
 % Option2b: Model Time Series
 out.option2b = listImagesStatSTEM('Models Time Series','showModel_T','inputHMM.model_T');
