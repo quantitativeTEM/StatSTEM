@@ -1,4 +1,4 @@
-function quiverPlot2Axes(ax,ax2,x,y,u,v,nameTag,range,scaleMarker,dataText)
+function quiverPlot2Axes(ax,ax2,x,y,u,v,nameTag,range,scaleMarker,dataText,colorbarText)
 % quiverPlot2Axes - Make a quiver plot with colors in 2 overlaying axes
 %
 % syntax: quiverPlot2Axes(ax,ax2,x,y,u,v,nameTag,range,scaleMarker,dataText)
@@ -23,7 +23,9 @@ function quiverPlot2Axes(ax,ax2,x,y,u,v,nameTag,range,scaleMarker,dataText)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-
+if nargin<11
+    colorbarText = ['Displacement (',char(197),')'];
+end
 if nargin<10
     dataText = 'Value %g';
 end
@@ -97,14 +99,15 @@ if vM<2015
         nameTag = ['\omega',nameTag(2:end)];
     end
     
-    ylabel(h2,['Displacement (',char(197),')'])
+    ylabel(h2,colorbarText)
     warning('on','all')
 else
     h1 = colorbar(ax);
     set(h1,'Visible','off','HitTest','off')
     pos = get(h1,'Position');
     h2 = colorbar(ax2,'Position',pos);
-    ylabel(h2,['Displacement (',char(197),')'])
+    ylabel(h2,colorbarText)
+
 end
 % Create UIMenu for colors
 createUIMenu2Axes(ax2,h2,h,usrData,range,'quiver')
