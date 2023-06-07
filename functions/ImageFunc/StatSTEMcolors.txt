@@ -5,7 +5,5 @@ type	R	G	B
 2	0	255	0
 3	0	255	255
 4	255	255	0
-<<<<<<< Updated upstream
 5	255	0	255
-=======
->>>>>>> Stashed changes
+
