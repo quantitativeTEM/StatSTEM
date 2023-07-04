@@ -120,7 +120,7 @@ else
         end
     end
     StartParametersnonlin = [input.coordinates(:,1); input.coordinates(:,2)];
-    EstimatedParametersnonlin = lsqnonlin('criterionGauss_samerhoSmall',StartParametersnonlin',[],[],options,...
+    EstimatedParametersnonlin = lsqnonlin('criterionGauss_userdefinedrhoSmall',StartParametersnonlin',[],[],options,...
         input.Xreshape,input.Yreshape,rhoT,input.n_c,input.K,input.L,resObs_bs,input.coordinates(:,3),input.fitZeta,input.indMat,input.dx,inOpt{:});
     % Gather fit parameters
     coordinates = [EstimatedParametersnonlin(1:input.n_c)',EstimatedParametersnonlin(input.n_c+1:2*input.n_c)'];
