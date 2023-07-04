@@ -88,7 +88,7 @@ if input.widthtype == 0
     % Gather fit parameters
     coordinates = [EstimatedParametersnonlin(1:input.n_c)',EstimatedParametersnonlin(input.n_c+1:2*input.n_c)'];
     rho = EstimatedParametersnonlin(2*input.n_c+1:end)';
-else
+elseif input.widthtype == 1
     % starting values for the non linear parameters in Å        % betaX, betaY, rho (position coordinates and width)
     rhoT = zeros(max(input.coordinates(:,3)),1);
     if length(rho)~=max(input.coordinates(:,3))
@@ -103,6 +103,25 @@ else
     StartParametersnonlin = [input.coordinates(:,1); input.coordinates(:,2);rhoT];
     EstimatedParametersnonlin = lsqnonlin('criterionGauss_samerhoSmall',StartParametersnonlin',[],[],options,...
         input.Xreshape,input.Yreshape,input.n_c,input.K,input.L,resObs_bs,input.coordinates(:,3),input.fitZeta,input.indMat,input.dx,inOpt{:});
+    % Gather fit parameters
+    coordinates = [EstimatedParametersnonlin(1:input.n_c)',EstimatedParametersnonlin(input.n_c+1:2*input.n_c)'];
+    rhoT = EstimatedParametersnonlin(2*input.n_c+1:end)';
+    rho = rhoT(input.coordinates(:,3));
+else
+    % starting values for the non linear parameters in Å        % betaX, betaY, rho (position coordinates and width)
+    rhoT = zeros(max(input.coordinates(:,3)),1);
+    if length(rho)~=max(input.coordinates(:,3))
+        for i=1:max(input.coordinates(:,3))
+            rhoT(i,1) = mean(rho);
+        end
+    else
+        for i=1:max(input.coordinates(:,3))
+            rhoT(i,1) = mean(rho(input.coordinates(:,3)==1));
+        end
+    end
+    StartParametersnonlin = [input.coordinates(:,1); input.coordinates(:,2)];
+    EstimatedParametersnonlin = lsqnonlin('criterionGauss_samerhoSmall',StartParametersnonlin',[],[],options,...
+        input.Xreshape,input.Yreshape,rhoT,input.n_c,input.K,input.L,resObs_bs,input.coordinates(:,3),input.fitZeta,input.indMat,input.dx,inOpt{:});
     % Gather fit parameters
     coordinates = [EstimatedParametersnonlin(1:input.n_c)',EstimatedParametersnonlin(input.n_c+1:2*input.n_c)'];
     rhoT = EstimatedParametersnonlin(2*input.n_c+1:end)';
