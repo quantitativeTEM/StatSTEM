@@ -1,10 +1,10 @@
 function [Fun, Jacobian] = criterionGauss_userdefinedrhoSmall(thetanonlin,X,Y,rho,n_c,K,L,obs,type,back,indMat,dx,hwaitbar,abortbut)
-% criterionGauss_samerhoSmall - criterion to fit gaussian peak with same width
+% criterionGauss_userdefinedrhoSmall - criterion to fit gaussian peak with user defined width
 %
 %   Criterion is used to fit multiple peak locations to an image. The width
-%   is kept constant for atoms having the same type.
+%   is user defined.
 %
-%   syntax: [Fun, Jacobian] = criterionGauss_samerhoSmall(thetanonlin,X,Y,n_c,K,L,obs,type,back,indMat,dx,hwaitbar,abortbut)
+%   syntax: [Fun, Jacobian] = criterionGauss_userdefinedrhoSmall(thetanonlin,X,Y,n_c,K,L,obs,type,back,indMat,dx,hwaitbar,abortbut)
 %       thetanonlin - the nonlinear parameters (x,y-coordinates and widths)
 %       X           - X-grid of image (1 x N array)
 %       Y           - Y-grid of image (1 x N array)
