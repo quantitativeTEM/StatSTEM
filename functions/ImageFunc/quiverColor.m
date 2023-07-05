@@ -26,6 +26,7 @@ mag = sqrt(u.^2+v.^2);
 N = length(mag);
 ang   = atan2(v,u);
 magN = mag/max(mag);
+% magN = mag;
 if nargin<7
     cmap = jet(256);
     c_x = linspace(0,max(mag),size(cmap,1));
@@ -68,7 +69,7 @@ end
 cr = caxis(ax);
 axes(ax)
 p = patch(Vx,Vy,[0 0 0],'Visible','off');
-set(p,'Faces',Faces,'FaceColor','flat','FaceVertexCData',RGBvecP,'Visible','on');
+set(p,'Faces',Faces,'FaceColor','flat','FaceVertexCData',RGBvecP,'Visible','on', 'EdgeColor', 'none');
 caxis(ax,cr)
 if nargout>0
     h = p;
