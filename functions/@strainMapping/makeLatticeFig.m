@@ -94,7 +94,8 @@ N = length(a)*2;
 
 
 %% Define colors
-range = [obj.a-0.2,obj.a+0.2];
+% range = [obj.a-0.2,obj.a+0.2];
+range = [min(min(a(a ~=0)),min(b(b~=0))), max(max(a),max(b))];
 xC = linspace(0,1,33);
 cmap = [xC',zeros(33,1),ones(33,1)];
 xC = linspace(1,0,33);
