@@ -28,9 +28,9 @@ rho = thetanonlin(end);
 R2 = (Xreshape - beta(1)).^2 + (Yreshape - beta(2)).^2;
 Ga = gaus(R2,rho);
 GaT = Ga';
-GaTGa = GaT*Ga;
+invGaTGa = inv(GaT*Ga);
 GaTobs = GaT*reshapeobs;
-eta = GaTGa\GaTobs;
+eta = invGaTGa*GaTobs;
 model = eta*Ga;
 Fun = model - reshapeobs;
 
@@ -47,11 +47,11 @@ if nargout == 2
     derGaToThetanonlin2 = Ga.*(Yreshape - beta(2))/rho2;
     derGaToThetanonlin3 = Ga.*R2/rho^3;
     matrix1T = derGaToThetanonlin1';
-    derivativeThetalinToThetanonlin(:,1) = -GaTGa\(matrix1T*Ga + GaT*derGaToThetanonlin1)*eta + GaTGa\matrix1T*reshapeobs;
+    derivativeThetalinToThetanonlin(:,1) = -invGaTGa*(matrix1T*Ga + GaT*derGaToThetanonlin1)*eta + invGaTGa*matrix1T*reshapeobs;
     matrix2T = derGaToThetanonlin2';
-    derivativeThetalinToThetanonlin(:,2) = -GaTGa\(matrix2T*Ga + GaT*derGaToThetanonlin2)*eta + GaTGa\matrix2T*reshapeobs;
+    derivativeThetalinToThetanonlin(:,2) = -invGaTGa*(matrix2T*Ga + GaT*derGaToThetanonlin2)*eta + invGaTGa*matrix2T*reshapeobs;
     matrix3T = derGaToThetanonlin3';
-    derivativeThetalinToThetanonlin(:,3) = -GaTGa\(matrix3T*Ga + GaT*derGaToThetanonlin3)*eta + GaTGa\matrix3T*reshapeobs;
+    derivativeThetalinToThetanonlin(:,3) = -invGaTGa*(matrix3T*Ga + GaT*derGaToThetanonlin3)*eta + invGaTGa*matrix3T*reshapeobs;
 
     firstorderder1 = firstorderderivative(:,1:3);
     firstorderder2 = firstorderderivative(:,end);
