@@ -58,6 +58,11 @@ for i=1:length(zInfo)
     atomsPerCol(i,1) = length(zInfo{i})/2;
 end
 
+flipSgn = 1; % flip sign depending on (un)even number of atoms in thickest column for nicer 3D model
+if mod(max(counting.Counts),2)
+    flipSgn = -1;
+end
+
 N = counting.N;
 NatInCol = zeros(N,1);
 for i=1:N
@@ -70,7 +75,7 @@ for i=1:N
     if Counts(i,1)<3
     end
     for j=1:nAtCol
-        coorInt( ((j-1)*Counts(i,1)+1):(j*Counts(i,1)) ,3) = ( (1:Counts(i,1))' - ceil( (Counts(i,1)+1)/2 ) - zInfo{j*2})*c;
+        coorInt( ((j-1)*Counts(i,1)+1):(j*Counts(i,1)) ,3) = ( (1:Counts(i,1))' - ceil( (Counts(i,1)+1)/2 ) + flipSgn*zInfo{j*2})*c;
         typeInt( ((j-1)*Counts(i,1)+1):(j*Counts(i,1)) ,1) = repmat(zInfo(j*2-1),Counts(i,1),1);
     end
     coorTypePerCol{i,1} = coorInt;

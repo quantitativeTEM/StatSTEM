@@ -8,7 +8,7 @@ addpath(genpath(pathF))
 appFitApp = 1;  % Select whether fit options below should be applied to all files
 fitZeta = 0;    % Fit background
 zeta = 0;       % Value background (if not fitted)
-widthtype = 1;  % Use same Gaussian width for different atomic columns (1 = 'same', 0 = 'different')
+widthtype = 1;  % Use same Gaussian width for different atomic columns (1 = 'same', 0 = 'different', 2 = 'user defined')
 atToFit = 1;    % Fit Gaussian function to all selected peak positions
 test = 0;       % Will fit be a test (1 = 'yes', 0 = 'no')
 cluster = 1;    % Calculation in a cluster, print progress in command window (1 = 'yes', 0 = 'no')
@@ -17,7 +17,7 @@ numWorkers = feature('numCores'); % Number of cores for parallel computing
 silent = 1;     % Hide progress indication from comment window
 peakShape = 1;  % Determine Peakshape (1 = 'Gauss', 2 = 'Lorentz')
 
-rho_start = [];    % Starting value width, empty means program will find a value, otherwise define a value for each column type in a N x 1 vector 
+rho_start = [];    % Starting value width, empty means program will find a value, otherwise define a value for each column type in a N x 1 vector (for N different types) 
                    % Can also be defined in the input structure, in field input.rhoT
                    
 %% Check MATLAB version (before MATLAB 2015 no parallel computing is allowed)

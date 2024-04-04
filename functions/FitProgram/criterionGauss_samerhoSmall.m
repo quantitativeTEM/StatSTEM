@@ -29,7 +29,6 @@ function [Fun, Jacobian] = criterionGauss_samerhoSmall(thetanonlin,X,Y,n_c,K,L,o
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
-
 betaX = thetanonlin(1:n_c);
 betaY = thetanonlin(n_c+1:2*n_c);
 rho = thetanonlin(2*n_c+1:end);
@@ -45,15 +44,14 @@ if back
     Ga(:,end) = ones(KL,1);
 end
 GaT = Ga';
-invGaTGa = inv(GaT*Ga);
 GaTobs = GaT*obs;
+invGaTGa = inv(GaT*Ga);
 thetalin = invGaTGa*GaTobs;
 model = zeros(KL,1);
 for n=1:n_c+back
     model = model + Ga(:,n)*thetalin(n);
 end
 Fun = model - obs;
-
 if nargout==2
     l_rho = length(rho);
     firstorderderivative = sparse(KL,3*n_c+l_rho+back);
@@ -79,8 +77,10 @@ if nargout==2
 
         matrix1T = derGaToThetanonlin1';
         derivativeThetalinToThetanonlin(:,i) = -invGaTGa*(matrix1T*Ga + GaT*derGaToThetanonlin1)*thetalin + invGaTGa*matrix1T*obs;
+
         matrix2T = derGaToThetanonlin2';
         derivativeThetalinToThetanonlin(:,n_c+i) = -invGaTGa*(matrix2T*Ga + GaT*derGaToThetanonlin2)*thetalin + invGaTGa*matrix2T*obs;
+
         
         derGaToThetanonlin1(:,i) = sparse(KL,1);
         derGaToThetanonlin2(:,i) = sparse(KL,1);
@@ -91,6 +91,7 @@ if nargout==2
         matrix3(:,ind) = derGaToThetanonlin3(:,ind);
         matrix3T = matrix3';
         derivativeThetalinToThetanonlin(:,2*n_c + type(i)) = -invGaTGa*(matrix3T*Ga + GaT*matrix3)*thetalin + invGaTGa*matrix3T*obs;
+
     end
     if back
         firstorderderivative(:,end) = ones(KL,1);
