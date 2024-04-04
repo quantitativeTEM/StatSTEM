@@ -100,6 +100,7 @@ xC = linspace(0,1,33);
 cmap = [xC',zeros(33,1),ones(33,1)];
 xC = linspace(1,0,33);
 cmap = [cmap;[ones(32,1),zeros(32,1),xC(2:end)']];
+%cmap = jet(512);
 c_x = linspace(range(1),range(2),size(cmap,1));
 RGBvecA = getRGBvec(cmap,c_x,a,'exact');
 RGBvecB = getRGBvec(cmap,c_x,b,'exact');
