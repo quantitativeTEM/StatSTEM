@@ -60,14 +60,14 @@ if nargout==2
         % BetaY
         firstorderderivative(:,n_c+i) = thetalin(i)*Ga(:,i).*(Y - betaY(i))/(rho(i)^2);
         % rho
-        R = sqrt((X - betaX(i)).^2 + (Y - betaY(i)).^2);
-        firstorderderivative(:,2*n_c + i) = firstorderderivative(:,2*n_c + i) + thetalin(i)*Ga(:,i).*R.^2/(rho(i))^3;
+        R2 = ((X - betaX(i)).^2 + (Y - betaY(i)).^2);
+        firstorderderivative(:,2*n_c + i) = firstorderderivative(:,2*n_c + i) + thetalin(i)*Ga(:,i).*R2/(rho(i))^3;
         % eta
         firstorderderivative(:,3*n_c+i) = Ga(:,i);
 
         derGaToThetanonlin1(:,i) = Ga(:,i).*(X - betaX(i))/((rho(i))^2);
         derGaToThetanonlin2(:,i) = Ga(:,i).*(Y - betaY(i))/((rho(i))^2);
-        derGaToThetanonlin3(:,i) = Ga(:,i).*R.^2/(rho(i))^3;
+        derGaToThetanonlin3(:,i) = Ga(:,i).*R2/(rho(i))^3;
 
         matrix1T = derGaToThetanonlin1';
         derivativeThetalinToThetanonlin(:,i) = -invGaTGa*(matrix1T*Ga + GaT*derGaToThetanonlin1)*thetalin + invGaTGa*matrix1T*obs;

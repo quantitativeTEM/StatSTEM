@@ -35,6 +35,7 @@ panel.advanced = struct; % empty structure means that no advanced options are pr
 
 panel.showAdv = 0; % 1 - Show panel from start
 panel.advanced(1).panel = panelFitBack;
-panel.advanced(2).panel = panelFitWidth;
-panel.advanced(3).panel = panelFitTest;
-panel.advanced(4).panel = panelFitPar;
+panel.advanced(2).panel = panelPeakShape;
+panel.advanced(3).panel = panelFitWidth;
+panel.advanced(4).panel = panelFitTest;
+panel.advanced(5).panel = panelFitPar;

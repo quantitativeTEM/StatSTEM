@@ -1,10 +1,10 @@
-function [Fun, Jacobian] = criterionGauss_userdefinedrhoSmall(thetanonlin,X,Y,rho,n_c,K,L,obs,type,back,indMat,dx,hwaitbar,abortbut)
-% criterionGauss_userdefinedrhoSmall - criterion to fit gaussian peak with user defined width
+function [Fun, Jacobian] = criterionLorentz_userdefinedrhoSmall(thetanonlin,X,Y,rho,n_c,K,L,obs,type,back,indMat,dx,hwaitbar,abortbut)
+% criterionLorentz_userdefinedrhoSmall - criterion to fit Lorentz peak with user defined width
 %
 %   Criterion is used to fit multiple peak locations to an image. The width
 %   is user defined.
 %
-%   syntax: [Fun, Jacobian] = criterionGauss_userdefinedrhoSmall(thetanonlin,X,Y,n_c,K,L,obs,type,back,indMat,dx,hwaitbar,abortbut)
+%   syntax: [Fun, Jacobian] = criterionLorentz_userdefinedSmall(thetanonlin,X,Y,n_c,K,L,obs,type,back,indMat,dx,hwaitbar,abortbut)
 %       thetanonlin - the nonlinear parameters (x,y-coordinates and widths)
 %       X           - X-grid of image (1 x N array)
 %       Y           - Y-grid of image (1 x N array)
@@ -33,24 +33,25 @@ function [Fun, Jacobian] = criterionGauss_userdefinedrhoSmall(thetanonlin,X,Y,rh
 betaX = thetanonlin(1:n_c);
 betaY = thetanonlin(n_c+1:2*n_c);
 % rho = thetanonlin(2*n_c+1:end);
-rho_est = rho(type);
+% rho_est = rho(type);
+rho_est = rho;
 
-Ga = sparse(K*L,n_c+back);
-Ga(:,1:end-back) = getGa(K,L,indMat,rho_est,dx,betaX,betaY,X,Y,(1:n_c)');
+Lo = sparse(K*L,n_c+back);
+Lo(:,1:end-back) = getGa(K,L,indMat,rho_est,dx,betaX,betaY,X,Y,(1:n_c)');
 % for i = 1:n_c
 %     R = sqrt((X - betaX(i)).^2 + (Y - betaY(i)).^2);
 %     Ga(:,i) = gaus( R , rho_est(i) );
 % end
 if back
-    Ga(:,end) = ones(K*L,1);
+    Lo(:,end) = ones(K*L,1);
 end
-GaT = Ga';
-invGaTGa = inv(GaT*Ga);
-GaTobs = GaT*obs;
-thetalin = invGaTGa*GaTobs;
+LoT = Lo';
+invLoTLo = inv(LoT*Lo);
+LoTobs = LoT*obs;
+thetalin = invLoTLo*LoTobs;
 model = zeros(K*L,1);
 for n=1:n_c+back
-    model = model + Ga(:,n)*thetalin(n);
+    model = model + Lo(:,n)*thetalin(n);
 end
 Fun = model - obs;
 
@@ -59,31 +60,30 @@ if nargout==2
     firstorderderivative = sparse(K*L,3*n_c+back);
     derivativeThetalinToThetanonlin = sparse(n_c+back,2*n_c);
     % For Jacobian
-    derGaToThetanonlin1 = sparse(K*L,n_c+back);
-    derGaToThetanonlin2 = sparse(K*L,n_c+back);
-%     derGaToThetanonlin3 = sparse(K*L,n_c+back);
+    derLoToThetanonlin1 = sparse(K*L,n_c+back);
+    derLoToThetanonlin2 = sparse(K*L,n_c+back);
     for i=1:n_c
         % BetaX
-        firstorderderivative(:,i) = thetalin(i)*Ga(:,i).*(X - betaX(i))/(rho(type(i))^2);
+        firstorderderivative(:,i) = 3*thetalin(i)*Lo(:,i).^(5/3).*(X - betaX(i));
         % BetaY
-        firstorderderivative(:,n_c+i) = thetalin(i)*Ga(:,i).*(Y - betaY(i))/(rho(type(i))^2);
+        firstorderderivative(:,n_c+i) = 3*thetalin(i)*Lo(:,i).^(5/3).*(Y - betaY(i));
         % rho
 %         R = sqrt((X - betaX(i)).^2 + (Y - betaY(i)).^2);
 %         firstorderderivative(:,2*n_c + type(i)) = firstorderderivative(:,2*n_c + type(i)) + thetalin(i)*Ga(:,i).*R.^2/(rho(type(i)))^3;
         % eta
-        firstorderderivative(:,2*n_c+i) = Ga(:,i);
+        firstorderderivative(:,2*n_c+i) = Lo(:,i);
 
-        derGaToThetanonlin1(:,i) = Ga(:,i).*(X - betaX(i))/((rho(type(i)))^2);
-        derGaToThetanonlin2(:,i) = Ga(:,i).*(Y - betaY(i))/((rho(type(i)))^2);
+        derLoToThetanonlin1(:,i) = 3*Lo(:,i).^(5/3).*(X - betaX(i));
+        derLoToThetanonlin2(:,i) = 3*Lo(:,i).^(5/3).*(Y - betaY(i));
 %         derGaToThetanonlin3(:,i) = Ga(:,i).*R.^2/(rho(type(i)))^3;
 
-        matrix1T = derGaToThetanonlin1';
-        derivativeThetalinToThetanonlin(:,i) = -invGaTGa*(matrix1T*Ga + GaT*derGaToThetanonlin1)*thetalin + invGaTGa*matrix1T*obs;
-        matrix2T = derGaToThetanonlin2';
-        derivativeThetalinToThetanonlin(:,n_c+i) = -invGaTGa*(matrix2T*Ga + GaT*derGaToThetanonlin2)*thetalin + invGaTGa*matrix2T*obs;
+        matrix1T = derLoToThetanonlin1';
+        derivativeThetalinToThetanonlin(:,i) = -invLoTLo*(matrix1T*Lo + LoT*derLoToThetanonlin1)*thetalin + invLoTLo*matrix1T*obs;
+        matrix2T = derLoToThetanonlin2';
+        derivativeThetalinToThetanonlin(:,n_c+i) = -invLoTLo*(matrix2T*Lo + LoT*derLoToThetanonlin2)*thetalin + invLoTLo*matrix2T*obs;
         
-        derGaToThetanonlin1(:,i) = sparse(K*L,1);
-        derGaToThetanonlin2(:,i) = sparse(K*L,1);
+        derLoToThetanonlin1(:,i) = sparse(K*L,1);
+        derLoToThetanonlin2(:,i) = sparse(K*L,1);
     end
 %     for j=1:l_rho
 %         matrix3 = sparse(K*L,n_c+back);

@@ -1,13 +1,13 @@
-function output = fitGauss_samerho(input, rho, offset, maxwait)
-% fitGauss_samerho - program to fit gaussian peaks having the same width to
+function output = fitLorentz_samerho(input, rho, offset, maxwait)
+% fiLorentz_samerho - program to fit Lorentzian peaks having the same width to
 %                    a STEM image
 %
 %   In this method, each individual peak is cut out of the original image.
-%   Next, the image contrubutions of the neighbouring atoms are subtracted.
-%   Than, a gaussian peak is fitted (coordinates). The width of the 
-%   gaussian peak is not fitted.
+%   Next, the image contributions of the neighbouring atoms are subtracted.
+%   Than, a Lorentzian peak is fitted (coordinates). The width of the 
+%   Lorentzian peak is not fitted.
 %
-%   syntax: output = fitGauss_samerho(input, rho, offset, maxwait)
+%   syntax: output = fitLorentz_samerho(input, rho, offset, maxwait)
 %       input   - inputStatSTEM structure
 %       rho     - vector containing Gaussian width for each column position
 %       offset  - offset value for progressbar (optional)
@@ -63,7 +63,7 @@ Y = input.Y;
 Box = round(input.dist/input.dx)/2*ones(max(type),1); %calcBoxSize(input.obs,input.coordinates,input.dx);
 
 %% startmodel
-output = getLinFitParam(input,rho_estimatedbackground,[Estimated_BetaX,Estimated_BetaY]);
+output = getLinFitParamLo(input,rho_estimatedbackground,[Estimated_BetaX,Estimated_BetaY]);
 obs_bs = input.obs - output.zeta;
 Estimated_eta = output.eta;
 eta_estimatedbackground = output.eta;
@@ -117,13 +117,13 @@ for iter = 1:input.maxIter % maximum number of iterations for convergence
                 error('Error: function stopped by user')
             end
         end
-        EstimatedParametersnonlin = fitAtomNonLinear('same',input.coordinates,obs_bs,X,Y,Box,betaX_estimatedbackground,betaY_estimatedbackground,rho_estimatedbackground,eta_estimatedbackground,input.dx,radius,options,input.indWorkers{1,1});
+        EstimatedParametersnonlin = fitAtomNonLinearLo('same',input.coordinates,obs_bs,X,Y,Box,betaX_estimatedbackground,betaY_estimatedbackground,rho_estimatedbackground,eta_estimatedbackground,input.dx,radius,options,input.indWorkers{1,1});
         Estimated_BetaX(input.indWorkers{1,1}) = EstimatedParametersnonlin(1,:);
         Estimated_BetaY(input.indWorkers{1,1}) = EstimatedParametersnonlin(2,:);
     else
         job = cell(input.numWorkers,1);
         for i = 1:input.numWorkers
-            job{i} = parfeval(@fitAtomNonLinear,1,'same',input.coordinates,obs_bs,X,Y,Box,betaX_estimatedbackground,betaY_estimatedbackground,rho_estimatedbackground,eta_estimatedbackground,input.dx,radius,options,input.indWorkers{i,1});
+            job{i} = parfeval(@fitAtomNonLinearLo,1,'same',input.coordinates,obs_bs,X,Y,Box,betaX_estimatedbackground,betaY_estimatedbackground,rho_estimatedbackground,eta_estimatedbackground,input.dx,radius,options,input.indWorkers{i,1});
         end
         for i = 1:input.numWorkers
             if ~isempty(input.GUI)
@@ -140,7 +140,7 @@ for iter = 1:input.maxIter % maximum number of iterations for convergence
     end
     
     % Get linear parameters
-    output = getLinFitParam(input,rho_estimatedbackground,[Estimated_BetaX,Estimated_BetaY]);
+    output = getLinFitParamLo(input,rho_estimatedbackground,[Estimated_BetaX,Estimated_BetaY]);
     
     if input.fitZeta
         obs_bs = input.obs - output.zeta;
@@ -180,7 +180,7 @@ end
 
 %% Store found results (output structure is already generated in loop)
 output.iter = iter;
-output = combinedGauss(output, input.K, input.L);
+output = combinedLorentz(output, input.K, input.L);
 temp = (output.model - input.obs).^2;
 output.lsq = sum(temp(:));
 

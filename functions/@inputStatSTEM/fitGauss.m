@@ -37,6 +37,7 @@ else
     newP = 1;
 end
 % Select different method
+% newP = 1;
 if newP
     % Start parallel toolbox if necessary
     if input.numWorkers ~= 1
@@ -59,16 +60,27 @@ if newP
     
     % Select the fitting options in terms of different or same width of the Gaussian functions
     if input.widthtype == 0
-        % Fit different height and width of gaussians for each column
-        output = fitGauss_diffrho(input, rho, offset);
+        if input.peakShape == 1
+            % Fit different height and width of gaussians for each column
+            output = fitGauss_diffrho(input, rho, offset);
+        elseif input.peakShape == 2
+            % Fit different height and width of Lorentzian for each column
+            output = fitLorentz_diffrho(input, rho, offset);
+        end
     else
         if input.fitRho && input.test==0
             maxwait = 75;
         else
             maxwait = 100;
         end
-        % Fit height of gaussians with same width for each column
-        output = fitGauss_samerho(input, rho, offset, maxwait);
+
+        if input.peakShape == 1
+            % Fit height of gaussians with same width for each column
+            output = fitGauss_samerho(input, rho, offset, maxwait);
+        elseif input.peakShape == 2
+            % Fit height of Lorentzians with same width for each column
+            output = fitLorentz_samerho(input, rho, offset, maxwait);
+        end
         
         % Find width if needed
         if input.fitRho==1 && input.test==0 && input.widthtype~=2
@@ -86,7 +98,15 @@ if newP
         end
     end
 else
-    output = fitGauss_small(input);
+    if isempty(input.peakShape)
+        input.peakShape = 1;
+    end
+
+    if input.peakShape == 1
+        output = fitGauss_small(input);
+    elseif input.peakShape == 2
+        output = fitLorentz_small(input);
+    end
 end
 
 % Update waitbart if needed

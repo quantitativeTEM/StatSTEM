@@ -72,30 +72,41 @@ if ~isempty(input.GUI)
     optIn = {input.GUI,input.waitbar,offwait,maxwait,options.MaxIter};
 end
 
-EstimatedRho = fminsearch('criterionRho',input.rho_start,options,input.Xreshape,input.Yreshape,input.K,input.L,input.reshapeobs-input.zeta,input.coordinates(:,1),input.coordinates(:,2),input.fitZeta,input.coordinates(:,3),input.indMat,input.dx,(1:input.n_c)',max_n,optIn{:});
+if input.peakShape == 1
+    EstimatedRho = fminsearch('criterionRho',input.rho_start,options,input.Xreshape,input.Yreshape,input.K,input.L,input.reshapeobs-input.zeta,...
+    input.coordinates(:,1),input.coordinates(:,2),input.fitZeta,input.coordinates(:,3),input.indMat,input.dx,input.peakShape,(1:input.n_c)',max_n,optIn{:});
+elseif input.peakShape == 2
+    EstimatedRho = fminsearch('criterionRhoLo',input.rho_start,options,input.Xreshape,input.Yreshape,input.K,input.L,input.reshapeobs-input.zeta,...
+    input.coordinates(:,1),input.coordinates(:,2),input.fitZeta,input.coordinates(:,3),input.indMat,input.dx,input.peakShape,(1:input.n_c)',max_n,optIn{:});
+end
 
 rho = EstimatedRho(input.coordinates(:,3));
 
 % Create outputStatSTEM structure
-output = getLinFitParam(input,rho);
-output = combinedGauss(output, input.K, input.L);
+if input.peakShape == 1
+    output = getLinFitParam(input,rho);
+    output = combinedGauss(output, input.K, input.L);
+elseif input.peakShape == 2
+    output = getLinFitParamLo(input,rho);
+    output = combinedLorentz(output, input.K, input.L);
+end
 output.iter = 0;
 temp = (output.model - input.obs).^2;
 output.lsq = sum(temp(:));
 
-function stop = getIter(x,optimValues,state,~,~,~,~,~,~,~,~,~,~,~,~,max_n,GUI,hwaitbar,offwait,maxwait,maxIter)
+function stop = getIter(x,optimValues,state,~,~,~,~,~,~,~,~,~,~,~,~,~,max_n,GUI,hwaitbar,offwait,maxwait,maxIter)
 % This function updates a waitbar used in the GUI
-if nargin<19
+if nargin<20
     offwait = 0;
     maxwait = 100;
-elseif nargin<20
+elseif nargin<21
     maxwait = 100;
 end
 r = maxwait-offwait;
-if nargin>=18
+if nargin>=19
     hwaitbar.setValue(offwait+optimValues.iteration/maxIter*r);
 end
-if nargin>=17
+if nargin>=18
     % For abort button
     drawnow
     if get(GUI,'Userdata')==0

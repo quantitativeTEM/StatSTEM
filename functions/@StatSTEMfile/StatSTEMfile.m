@@ -15,6 +15,7 @@ classdef StatSTEMfile
         coordinates = []; % A (n x 3) vector containing the x- and y-coordinates (in angstrom) and the (3rd column) type number
         types = {'1'}; % Names of the atom types in cell array (k x 1)
         numWorkers = feature('numCores'); % Number of cores for parallel computing
+        peakShape = 1; % Different peak shapes (1 = 'Gauss', 2 = 'Lorentz')    
     end
 
     properties (Hidden)

@@ -1,9 +1,10 @@
-function output = getLinFitParam(input,rho,coordinates)
-% getLinFitParam - find linear parameter from fitted non-linear parameters
+function output = getLinFitParamVo(input,rho,ratioGL,coordinates)
+% getLinFitParamVo - find linear parameter from fitted non-linear parameters
 %
-%   syntax: output = getLinFitParam(input,rho,coordinates)
+%   syntax: output = getLinFitParamVo(input,rho,coordinates)
 %       input       - inputStatSTEM structure
 %       rho         - A (Nx1)-vector containing the width for each column
+%       ratioGL     - ratio between the Gaussian and Lorentzian
 %       coordinates - New column coordinates (optional)
 %       output      - outputStatSTEM structure
 %
@@ -12,7 +13,7 @@ function output = getLinFitParam(input,rho,coordinates)
 % This file is part of StatSTEM
 %
 % Copyright: 2018, EMAT, University of Antwerp
-% Author: K.H.W. van den Bos
+% Author: K.H.W. van den Bos, A. De Backer
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
@@ -35,11 +36,11 @@ KL =input.K*input.L;
 N = input.n_c;
 Z = double(input.fitZeta);
 px_p_col = ceil(((max(rho)*6))/input.dx)^2;
-Ga = spalloc(KL, N+Z, px_p_col*N + Z*KL);
+Vo = spalloc(KL, N+Z, px_p_col*N + Z*KL);
 % Ga = sparse(input.K*input.L,input.n_c+double(input.fitZeta));
 if parWork == 1
     indCol = (1:input.n_c)';
-    Ga(:,indCol) = getGa(input.K,input.L,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,indCol);
+    Vo(:,indCol) = getVo(input.K,input.L,input.indMat,rho,ratioGL,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,indCol);
     if ~isempty(input.GUI)
         % For aborting function
         drawnow
@@ -47,22 +48,22 @@ if parWork == 1
             error('Error: function stopped by user')
         end
     end
-    thetalin = getLinearPar(Ga,input.reshapeobs,KL,input.fitZeta,input.zeta);
-    clear Ga
+    thetalin = getLinearPar(Vo,input.reshapeobs,KL,input.fitZeta,input.zeta);
+    clear Vo
 else
     job = cell(input.numWorkers,1);
     for n=1:input.numWorkers
-        job{n} = parfeval(@getGa,1,input.K,input.L,input.indMat,rho,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,input.indAllWorkers{n,1});
+        job{n} = parfeval(@getVo,1,input.K,input.L,input.indMat,rho,ratioGL,input.dx,input.coordinates(:,1),input.coordinates(:,2),input.Xreshape,input.Yreshape,input.indAllWorkers{n,1});
     end
     for n=1:input.numWorkers
         if ~isempty(input.GUI)
             % For aborting function
             drawnow
         end
-        Ga(:,input.indAllWorkers{n,1}) = fetchOutputs(job{n});
+        Vo(:,input.indAllWorkers{n,1}) = fetchOutputs(job{n});
     end
     clear job
-    job = parfeval(@getLinearPar,1,Ga,input.reshapeobs,KL,input.fitZeta,input.zeta);
+    job = parfeval(@getLinearPar,1,Vo,input.reshapeobs,KL,input.fitZeta,input.zeta);
     if ~isempty(input.GUI)
         % For aborting function
         drawnow
@@ -71,7 +72,7 @@ else
         end
     end
     thetalin = fetchOutputs(job);
-    clear job Ga
+    clear job Vo
 end
 
 if input.fitZeta
@@ -83,5 +84,5 @@ else
 end
 
 % Create outputStatSTEMstructure
-output = outputStatSTEM(input.coordinates,rho,eta,zeta,input.dx,input.peakShape);
+output = outputStatSTEM(input.coordinates,rho,eta,zeta,input.dx,input.peakShape,ratioGL);
 output.types = input.types;

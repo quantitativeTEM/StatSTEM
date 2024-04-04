@@ -15,6 +15,7 @@ cluster = 1;    % Calculation in a cluster, print progress in command window (1 
 maxIter = 400;  % Maximum number of iterations
 numWorkers = feature('numCores'); % Number of cores for parallel computing
 silent = 1;     % Hide progress indication from comment window
+peakShape = 1;  % Determine Peakshape (1 = 'Gauss', 2 = 'Lorentz')
 
 rho_start = [];    % Starting value width, empty means program will find a value, otherwise define a value for each column type in a N x 1 vector 
                    % Can also be defined in the input structure, in field input.rhoT
@@ -68,6 +69,7 @@ for n=1:length(filename)
         input.fitZeta = fitZeta;
         input.zeta = zeta;
         input.widthtype = widthtype;
+        input.peakShape = peakShape;
         input.atToFit = atToFit;
         input.test = test;
         input.cluster = cluster;

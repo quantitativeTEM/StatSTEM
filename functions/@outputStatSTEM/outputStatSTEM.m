@@ -17,6 +17,7 @@ classdef outputStatSTEM < StatSTEMfile
         rho = []; % A (n x 1) vector containing the width of each column (in angstrom)
         eta = []; % A (n x 1) vector containing the height of each column
         zeta = 0; % The background value (standard at 0)
+        ratioGL = []; % for fitting the voigt shape: ratio between Gaussian and Lorentzian peak shape
         selRegion = []; % Selected region to extract coordinates (n x 2) vector with x- and y-coordinates for analysis
         rangeVol = []; % Selected range of volumes of the scattering cross-section for analysis [min, max]
         selType = []; % Select type of atoms for analysis
@@ -53,6 +54,8 @@ classdef outputStatSTEM < StatSTEMfile
     
     methods
         output = combinedGauss(output, K, L, ind)
+        output = combinedLorenz(output, K, L, ind)
+        output = combinedVoigt(output, K, L, ind)
         atomcounting = fitGMM(obj,minSel)
         strainmapping = getCenCoor(output,input)
         strainmapping = indexColumns(output,input,strainmapping)
@@ -69,13 +72,17 @@ classdef outputStatSTEM < StatSTEMfile
     end
     
     methods
-        function obj = outputStatSTEM(coordinates,rho,eta,zeta,dx,Name,Value,varargin)
+        function obj = outputStatSTEM(coordinates,rho,eta,zeta,dx,peakShape,ratioGL,Name,Value,varargin)
             obj.coordinates = coordinates;
             obj.rho = rho;
             obj.eta = eta;
             obj.zeta = zeta;
             obj.dx = dx;
+            obj.peakShape = peakShape;
             if nargin>6
+                obj.ratioGL = ratioGL;
+            end
+            if nargin>7
                 varargin = [{Name},{Value},varargin];
             end
             if ~isempty(varargin)
@@ -114,10 +121,16 @@ classdef outputStatSTEM < StatSTEMfile
         end
         
         function val = get.volumes(obj)
-            % Calculate volumes under Gaussian peaks
-            val = 2*pi*obj.eta.*obj.rho.^2;
-        end
-        
+            if  obj.peakShape == 1
+                % Calculate volumes under Gaussian peaks
+                val = 2*pi*obj.eta.*obj.rho.^2;
+            elseif obj.peakShape == 2
+                % Calculate volumes under Lorentzian peaks
+                val = 2*pi*obj.eta./obj.rho;
+            elseif obj.peakShape == 3
+                val = 2*pi*obj.eta.*(obj.rho/(2*sqrt(2*log(2)))).^2*obj.ratioGL + (1-obj.ratioGL)*2*pi*obj.eta./(obj.rho/2);
+            end
+        end      
         function val = get.model(obj)
             % Get the image of the Gaussian model
             val = obj.pModel;

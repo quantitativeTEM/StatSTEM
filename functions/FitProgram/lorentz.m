@@ -1,9 +1,9 @@
-function q = gaus(R2,rho)
-% gaus - Gaussian peak
+function q = lorentz(R2,rho)
+% lorentz - Lorentzian peak
 %
-% Determine the value of a gaussian peak
+% Determine the value of a Lorentzian peak
 %
-%   syntax: q = gaus(R2,rho)
+%   syntax: q = lorentz(R2,rho)
 %       R2   - square of radius from center (coordinate)
 %       rho - width
 %       q   - output value
@@ -17,5 +17,5 @@ function q = gaus(R2,rho)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-q = exp(-R2/(2*rho^2));
+q = (rho^2+R2).^(-3/2);
 q(R2 > (3*rho)^2) = 0; %then q contains 99.7% of the original inetnsity

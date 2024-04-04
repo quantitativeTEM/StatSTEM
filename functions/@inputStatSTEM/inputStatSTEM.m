@@ -82,6 +82,7 @@ classdef inputStatSTEM < StatSTEMfile
         output = fitWidth(input, Tol, TolFun, offwait, maxwait)
         obj = flipContrastImage(obj)
         output = getLinFitParam(input,rho,coordinates)
+        output = getLinFitParamLo(input,rho,coordinates)
         obj = importPeaks(obj)
         obj = keepPeaks(obj)
         [input,strainmapping] = loadPUC(input,strainmapping)
