@@ -17,6 +17,8 @@ classdef atomCountStat < atomCount
         estimatedDistributions = []; % The results of the Gaussian mixture model fitting for different components
         mLogLik = []; % The maximum log likelihood for the fitted results for different components
         selMin = []; % The selected minimum in the ICL
+        GMMType = []; % Type of width in GMM
+        dose = []; % for normalised images: incident dose (e- per Å^2)
     end
     
     properties (Dependent)
@@ -76,7 +78,11 @@ classdef atomCountStat < atomCount
             if isempty(obj.selMin)
                 val = [];
             else
-            	val = sqrt(obj.estimatedDistributions{1,obj.selMin}.Sigma);
+                if obj.GMMType == 1
+                	val = sqrt(obj.estimatedDistributions{1,obj.selMin}.Sigma)*ones(length(obj.estimatedLocations),1);
+                else
+                    val = sqrt(obj.estimatedDistributions{1,obj.selMin}.Sigma + obj.estimatedLocations/obj.dose);
+                end
             end
         end
         
@@ -122,7 +128,7 @@ classdef atomCountStat < atomCount
             Pcomp = obj.estimatedProportions;
             for i=1:N
                 for j = 1:obj.selMin
-                    probability(j) = Pcomp(j)*normaldistribution(vol(i),Loc(j),Width);
+                    probability(j) = Pcomp(j)*normaldistribution(vol(i),Loc(j),Width(j));
                 end
                 val(i) = find(probability == max(probability))+obj.offset;
             end
@@ -287,7 +293,7 @@ classdef atomCountStat < atomCount
             Pcomp = obj.estimatedProportions;
             x = obj.x;
             for i = 1:obj.selMin
-               val(i,:) = normaldistribution(x,Loc(i),Width)*Pcomp(i)*obj.N*(max(obj.volumes)-min(obj.volumes))/bins;
+               val(i,:) = normaldistribution(x,Loc(i),Width(i))*Pcomp(i)*obj.N*(max(obj.volumes)-min(obj.volumes))/bins;
             end
         end
         
@@ -303,7 +309,7 @@ classdef atomCountStat < atomCount
             Width = obj.estimatedWidth;
             Pcomp = obj.estimatedProportions;
             for i = 1:obj.selMin
-               val(i,:) = normaldistribution(x,Loc(i),Width)*Pcomp(i);
+               val(i,:) = normaldistribution(x,Loc(i),Width(i))*Pcomp(i);
             end
             val = sum(val);
         end

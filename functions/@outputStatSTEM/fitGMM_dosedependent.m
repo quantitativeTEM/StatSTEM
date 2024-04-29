@@ -1,4 +1,4 @@
-function atomcounting = fitGMM(obj,minSel)
+function atomcounting = fitGMM_dosedependent(obj,minSel)
 % fitGMM - fit a Gaussian mixture model to a data set
 %
 %   syntax: atomcounting = fitGMM(obj)
@@ -27,10 +27,8 @@ mLogLik = zeros(1,obj.n_c);
 [data,ind] = sort(obj.selVol);
 coordinates = obj.selCoor(ind,:);
 
-finish = 0;
 % Create structure for atomcounting
 atomcounting = atomCountStat(coordinates,data,obj.dx,estimatedDistributions,mLogLik);
-atomcounting.GMMType = obj.GMMType;
 
 if isempty(obj.GUI)
     atomcounting.GUI = obj.GUI;
@@ -51,30 +49,7 @@ for k = 1:n_c
         sigmastart  = (max(data)-min(data))/(2*k);
         s = struct('mu', mustart', 'Sigma', sigmastart^2, 'Pcomponents', ones(k,1)/k);
         warning('off','all')
-        if obj.GMMType == 1
-            if v<2017
-                obj_s{k} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
-            else
-                obj_s{k} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
-            end
-        else
-            answer = questdlg('The scattering cross-sections are normalised and the incident dose is known?', ...
-                'Dose dependent Gaussian mixture model', ...
-                'Yes','No','Yes');
-            if isempty(obj.dose)
-                warndlg('Please fill in the incident electron dose in e-/Å^2')
-                break;
-            end
-            switch answer
-                case 'Yes'
-                    atomcounting.dose = obj.dose;
-                    obj_s{k} = gmdistribution_dosedependent.fit_dosedependent(data,k,obj.dose,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
-                case 'No'
-                    warndlg('Please fill in the correct incident electron dose in e-/Å^2 or use the method with the same width for the components in the GMM if the image is not normalised or the dose unavailable')
-                    break;
-            end
-
-        end
+        obj_s{k} = gmdistribution_dosedependent.fit_dosedependent(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
         warning('on','all')
         NlogL_s = obj_s{k}.NlogL;
         % For abort button in StatSTEM interface (if present)
@@ -100,14 +75,10 @@ for k = 1:n_c
 
             s = struct('mu', [atomcounting.estimatedDistributions{1,k-1}.mu' mustartextra]', 'Sigma', atomcounting.estimatedDistributions{k-1}.Sigma, 'Pcomponents', ones(k,1)/k);
             warning('off','all')
-            if obj.GMMType == 1
-                if v<2017
-                    obj_s{i} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
-                else
-                    obj_s{i} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
-                end
+            if v<2017
+                obj_s{i} = gmdistribution.fit(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
             else
-                obj_s{i} = gmdistribution_dosedependent.fit_dosedependent(data,k,obj.dose,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
+                obj_s{i} = fitgmdist(data,k,'Options', options, 'Start', s, 'Replicates', 1, 'CovType', 'diagonal', 'SharedCov', true, 'Regularize', 0);
             end
             warning('on','all')
             NlogL_s(i) = obj_s{i}.NlogL;
@@ -128,14 +99,14 @@ for k = 1:n_c
     atomcounting.estimatedDistributions{1,k}.Sigma = obj_s{best}.Sigma;
     atomcounting.estimatedDistributions{1,k}.PComponents = obj_s{best}.PComponents;
     atomcounting.mLogLik(1,k) = NlogL_s(best);
-
+    
     % Calculate ICL and store it in atomcounting object (For speed)
     atomcounting = setICL(atomcounting,atomcounting.ICL);
-
+    
     % Show ICL
     showICL(atomcounting)
     drawnow
-
+    
     % Update waitbar
     if ~isempty(obj.GUI)
         obj.waitbar.setValue(k/n_c*100)
@@ -151,7 +122,6 @@ for k = 1:n_c
             break
         end
     end
-    finish = 1;
 end
 % Update waitbar
 if ~isempty(obj.GUI)
@@ -165,10 +135,8 @@ atomcounting.estimatedDistributions = atomcounting.estimatedDistributions(1,1:n_
 atomcounting.mLogLik = atomcounting.mLogLik(1,1:n_c);
 
 % Select minimum in ICL curve
-if finish
-    if nargin<2
-        atomcounting = selICLmin(atomcounting);
-    else
-        atomcounting.selMin = minSel;
-    end
+if nargin<2
+    atomcounting = selICLmin(atomcounting);
+else
+    atomcounting.selMin = minSel;
 end

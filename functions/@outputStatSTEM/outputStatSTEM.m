@@ -21,6 +21,8 @@ classdef outputStatSTEM < StatSTEMfile
         selRegion = []; % Selected region to extract coordinates (n x 2) vector with x- and y-coordinates for analysis
         rangeVol = []; % Selected range of volumes of the scattering cross-section for analysis [min, max]
         selType = []; % Select type of atoms for analysis
+        GMMType = 1; % Different types of width in GMM (1 = 'same width', 2 = 'dose dependent width') 
+        dose = []; % for normalised images: incident dose (e- per Å^2)
     end
     
     properties % For atom-counting
