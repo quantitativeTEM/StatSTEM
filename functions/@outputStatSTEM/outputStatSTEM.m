@@ -80,7 +80,9 @@ classdef outputStatSTEM < StatSTEMfile
             obj.eta = eta;
             obj.zeta = zeta;
             obj.dx = dx;
-            obj.peakShape = peakShape;
+            if nargin>5
+                obj.peakShape = peakShape;
+            end
             if nargin>6
                 obj.ratioGL = ratioGL;
             end
