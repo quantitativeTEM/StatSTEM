@@ -75,6 +75,9 @@ classdef atomCountStat < atomCount
         end
         
         function val = get.estimatedWidth(obj)
+            if isempty(obj.GMMType)
+                obj.GMMType = 1;
+            end
             if isempty(obj.selMin)
                 val = [];
             else
