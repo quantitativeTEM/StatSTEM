@@ -23,10 +23,9 @@ x_axis = ((1:size(obj.model,2))-0.5)*obj.dx;
 y_axis = ((1:size(obj.model,1))-0.5)*obj.dx;
 
 % Show observation
-imagesc(x_axis,y_axis,obj.model+obj.zeta+input.zeta);axis equal off;colormap gray
+imagesc(x_axis,y_axis,obj.model+input.zeta);axis equal off;colormap gray
 axis([x_axis(1),x_axis(end),y_axis(1),y_axis(end)]) % Set limits
 
 if nargin>1
     caxis([min(min(input.obs)),max(max(input.obs))])
 end
-    
