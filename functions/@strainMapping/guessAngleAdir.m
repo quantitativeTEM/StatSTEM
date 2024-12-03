@@ -51,7 +51,7 @@ if any( indCa )
     ang(1,1) = atan(aDir(2)/aDir(1));
     addAngle = atan2(aDir(2),aDir(1))-ang(1,1);
 else
-    error('Cannot find a-lattice direction. Select maunally other a-direction of check unit cell parameters');
+    error('Cannot find a-lattice direction. Select maunally other a-direction or check unit cell parameters');
 end
 
 % a-dir - negative
