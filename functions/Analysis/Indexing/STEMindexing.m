@@ -38,7 +38,7 @@ teta_ab = unit.ang;
 Rab = [cos(dirTeta_ab*teta_ab) -sin(dirTeta_ab*teta_ab);sin(dirTeta_ab*teta_ab) cos(dirTeta_ab*teta_ab)];
 aDir = [a,0];
 bDir = (Rab*[b;0])';
-unitCoor = unit.coor2D(:,1)*aDir + unit.coor2D(:,2)*bDir;
+unitCoor = unit.coor2D(:,1)*aDir + unit.coor2D(:,2)*bDir;   % positions atoms in unit cell in Angstrom
 
 % Atoms per unit cell
 n_atoms = size(unitCoor,1);
@@ -46,7 +46,7 @@ n_atoms = size(unitCoor,1);
 ind = find(unitCoor(:,1)==0 & unitCoor(:,2)==0);
 unitType = (1:n_atoms)';
 if ~isempty(ind)
-    if ind~=1
+    if ind~=1   % if (0,0) is not first in proj. unit cell, reorder such that it becomes the first row
         unitCoor = [unitCoor(ind,:); unitCoor(1:ind-1,:); unitCoor(ind+1:end,:)];
         unit.coor2D = [unit.coor2D(ind,:); unit.coor2D(1:ind-1,:); unit.coor2D(ind+1:end,:)];
         unit.atom2D = [unit.atom2D(ind,:); unit.atom2D(1:ind-1,:); unit.atom2D(ind+1:end,:)];
@@ -58,9 +58,9 @@ else
 end
 
 % Calculate minimum distance between 2 atoms, use half of this distance for upperlimit when searching for closest point
-if nargin<8 || space==0
+if nargin<8 || space < 100 %space==0
     if size(unitCoor,1)>1
-        distance = sqrt(unitCoor(2:n_atoms,1).^2 + unitCoor(2:n_atoms,2).^2)/4;
+        distance = sqrt(unitCoor(2:n_atoms,1).^2 + unitCoor(2:n_atoms,2).^2)/2;
     else
         distance = min(a/4,b/4);
     end
@@ -87,7 +87,7 @@ unit_rot = ( R*unitCoor' )';
 % Transpose unit cell to [x;y]
 unitT = unitCoor';
 
-% Construct 2 new vectors
+% Construct new vectors
 s = size(coordinates);
 coor_exp = zeros(s(1),s(2));
 types = zeros(s(1),1);
@@ -106,10 +106,13 @@ fy0 = 1;
 fx0 = 1;
 m=0;
 stop_b=0;
+% figure(10), hold on; axis equal
+% plot(coordinates(:,1),coordinates(:,2),'.')
+
 % Store indices found, for remove double positions
 indFound = zeros(length(coordinates(:,2)),1); 
 while stop_b~=1 && m<layLim
-    v1=v1-Ry0*[0;b*ky];
+    v1 = v1 - Ry0 * [b * ky * cos(teta_ab); b * ky * sin(teta_ab)];
     % In the negative a-direction
     stopLoop = zeros(n_atoms,1);
     for k=1:n_atoms % For each atom in the unit cell will be repeated individually
@@ -123,17 +126,19 @@ while stop_b~=1 && m<layLim
         while stop_a~=1
             % Each time create a new reference atom/point
             v = v-Rx*[a*kx;0];
-            
+            % plot(v(1),v(2), 'ko')
             % Find points
             distance = (coordinates(:,1)-v(1)).^2+(coordinates(:,2)-v(2)).^2;
             if min(distance)<space %Angstrom
                 ind = distance==min(distance);
                 indFound = indFound + ind*1; % Store indices found, to remove double positions
-                coor_exp(ind,:) = [x y] - (R*[a*n;b*m])' + unit_rot(k,:);
+                % coor_exp(ind,:) = [x y] - (R*[a*n;b*m])' + unit_rot(k,:);
+                coor_exp(ind,:) = [x y] - n * [a * cos(teta), a * sin(teta)] ...
+                          - m * [b * cos(teta + teta_ab), b * sin(teta + teta_ab)] + unit_rot(k,:);
+
+                % plot(coor_exp(:,1),coor_exp(:,2), 'rx')
                 types(ind) = k;
                 indices(ind,:) = [-n,-m];
-%                 % plot for checking
-%                 quiver(coor_ref(distance==min(distance),1),coor_ref(distance==min(distance),2),coor_sel(distance==min(distance),1)-coor_ref(distance==min(distance),1),coor_sel(distance==min(distance),2)-coor_ref(distance==min(distance),2),0,'Color','b','MaxHeadSize',1);
                 
                 % Update parameters
                 v2 = v + Rx*[a;0]; 
@@ -208,18 +213,22 @@ while stop_b~=1 && m<layLim
         while stop_a~=1 && stopLoop(k,1)==0
             % Each time create a new reference atom/point
             v = v+Rx*[a;0];
-        
+                        % plot(v(1),v(2), 'go')
+
             % Find points
             distance = (coordinates(:,1)-v(1)).^2+(coordinates(:,2)-v(2)).^2;
             if min(distance)<space %Angstrom
                 ind = distance==min(distance);
                 indFound = indFound + ind*1; % Store indices found, to remove double positions
-                coor_exp(ind,:) = [x y] + (R*[a*n;-b*m])' + unit_rot(k,:);
+                % coor_exp(ind,:) = [x y] + (R*[a*n;-b*m])' + unit_rot(k,:);
+                coor_exp(ind,:) = [x y] + n * [a*cos(teta), a*sin(teta)] ...
+                          - m * [b*cos(teta + teta_ab), b*sin(teta + teta_ab)] ...
+                          + unit_rot(k,:);
+
                 types(ind) = k; 
                 indices(ind,:) = [n,-m];
-%                 % plot for checking
-%                 quiver(coor_ref(distance==min(distance),1),coor_ref(distance==min(distance),2),coor_sel(distance==min(distance),1)-coor_ref(distance==min(distance),1),coor_sel(distance==min(distance),2)-coor_ref(distance==min(distance),2),0,'Color','b','MaxHeadSize',1);
-                
+                                % plot(coor_exp(:,1),coor_exp(:,2), 'rx')
+
                 % Update parameters
                 v2 = v - Rx*[a;0];
                 v = coordinates(ind,:)';
@@ -263,8 +272,8 @@ fy0 = 1;
 stop_b=0;
 m=1;
 while stop_b~=1
-    v1=v1-Ry0*[0;-b];
-
+    % v1=v1-Ry0*[0;-b];
+    v1 = v1 - Ry0 * [-b * ky * cos(teta_ab); -b * ky * sin(teta_ab)];
     % In the negative a-direction
     stopLoop = zeros(n_atoms,1);
     for k=1:n_atoms % For each atom in the unit cell will be repeated individually
@@ -278,17 +287,23 @@ while stop_b~=1
         while stop_a~=1
             % Each time create a new reference atom/point
             v = v-Rx*[a*kx;0];
-            
+                        % plot(v(1),v(2), 'ko')
+
             % Find points
             distance = (coordinates(:,1)-v(1)).^2+(coordinates(:,2)-v(2)).^2;
             if min(distance)<space %Angstrom
                 ind = distance==min(distance);
                 indFound = indFound + ind*1; % Store indices found, to remove double positions
-                coor_exp(ind,:) = [x y] - (R*[a*n;-b*m])' + unit_rot(k,:);
+                % coor_exp(ind,:) = [x y] - (R*[a*n;-b*m])' + unit_rot(k,:);
+                 coor_exp(ind,:) = [x y] - n * [a * cos(teta), a * sin(teta)] ...
+                         + m * [b * cos(teta + teta_ab), b * sin(teta + teta_ab)] ...
+                         + unit_rot(k,:);
+
+
+                % plot(coor_exp(:,1),coor_exp(:,2), 'rx')
+
                 types(ind) = k;
                 indices(ind,:) = [-n,m];
-%                 % plot for checking
-%                 quiver(coor_ref(distance==min(distance),1),coor_ref(distance==min(distance),2),coor_sel(distance==min(distance),1)-coor_ref(distance==min(distance),1),coor_sel(distance==min(distance),2)-coor_ref(distance==min(distance),2),0,'Color','b','MaxHeadSize',1);
                 
                 % Update parameters
                 v2 = v + Rx*[a;0]; 
@@ -366,17 +381,21 @@ while stop_b~=1
         while stop_a~=1 && stopLoop(k,1)==0
             % Each time create a new reference atom/point
             v = v+Rx*[a;0];
-        
+                    plot(v(1),v(2), 'go')
+
             % Find points
             distance = (coordinates(:,1)-v(1)).^2+(coordinates(:,2)-v(2)).^2;
             if min(distance)<space %Angstrom
                 ind = distance==min(distance);
                 indFound = indFound + ind*1; % Store indices found, to remove double positions
-                coor_exp(ind,:) = (R*[a*n;b*m])'+unit_rot(k,:) + [x y];
+                % coor_exp(ind,:) = (R*[a*n;b*m])'+unit_rot(k,:) + [x y];
+                coor_exp(ind,:) = [x y] + n * [a * cos(teta), a * sin(teta)] ...
+                          + m * [b * cos(teta + teta_ab), b * sin(teta + teta_ab)] + unit_rot(k,:);
+                                % plot(coor_exp(:,1),coor_exp(:,2), 'rx')
+
+
                 types(ind) = k; 
                 indices(ind,:) = [n,m];
-%                 % plot for checking
-%                 quiver(coor_ref(distance==min(distance),1),coor_ref(distance==min(distance),2),coor_sel(distance==min(distance),1)-coor_ref(distance==min(distance),1),coor_sel(distance==min(distance),2)-coor_ref(distance==min(distance),2),0,'Color','b','MaxHeadSize',1);
                 
                 % Update parameters
                 v2 = v - Rx*[a;0];
