@@ -58,11 +58,7 @@ else
 end
 
 % Calculate minimum distance between 2 atoms, use half of this distance for upperlimit when searching for closest point
-<<<<<<< HEAD
-if nargin<8 || space == 0
-=======
 if nargin<8 || space == 0 %space<100
->>>>>>> fd88b06fc345bc216dd07f7532c5909a2223359c
     if size(unitCoor,1)>1
         distance = sqrt(unitCoor(2:n_atoms,1).^2 + unitCoor(2:n_atoms,2).^2)/2;
     else
