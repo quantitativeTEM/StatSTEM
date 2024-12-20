@@ -44,11 +44,11 @@ distB = zeros(size(aDir,1),2);
 l_a = sqrt( aDir(1,1)^2 + aDir(1,2)^2 );    % distance between reference coordinate and selected coordinate (cfr a lattice parameter)
 intPosP = (Rab*aDir')'*b/l_a;               % rotate aDir over positive angle of proj unit cell and scale to magnitude of lattice vector b
 intPosP = [intPosP(:,1)+ref(1,1),intPosP(:,2)+ref(1,2)];    % shift to the reference coordinate
-intPosN = (Rab\aDir')'*b/l_a;               % rotate in opposite direction (negative angle)
-intPosN = [intPosN(:,1)+ref(1,1),intPosN(:,2)+ref(1,2)];    % shift to reference coordinate
+% intPosN = (Rab\aDir')'*b/l_a;               % rotate in opposite direction (negative angle)
+% intPosN = [intPosN(:,1)+ref(1,1),intPosN(:,2)+ref(1,2)];    % shift to reference coordinate
 for n=1:size(aDir,1)
     distB(n,1) = min(sqrt( (coordinates(:,1)-intPosP(n,1) ).^2 + (coordinates(:,2)-intPosP(n,2) ).^2 ));
-    distB(n,2) = min(sqrt( (coordinates(:,1)-intPosN(n,1) ).^2 + (coordinates(:,2)-intPosN(n,2) ).^2 ));
+    % distB(n,2) = min(sqrt( (coordinates(:,1)-intPosN(n,1) ).^2 + (coordinates(:,2)-intPosN(n,2) ).^2 ));
 end
 dirB = (distB(:,1)>=distB(:,2))-(distB(:,1)<distB(:,2));
 distB = min(distB(:,1),distB(:,2));

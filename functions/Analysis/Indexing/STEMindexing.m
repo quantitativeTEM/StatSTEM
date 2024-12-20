@@ -58,7 +58,7 @@ else
 end
 
 % Calculate minimum distance between 2 atoms, use half of this distance for upperlimit when searching for closest point
-if nargin<8 || space < 100 %space==0
+if nargin<8 || space == 0
     if size(unitCoor,1)>1
         distance = sqrt(unitCoor(2:n_atoms,1).^2 + unitCoor(2:n_atoms,2).^2)/2;
     else
@@ -79,6 +79,7 @@ if nargin<11
 end
 
 %% Relate coordinates with each other by expanding unit cell per unit cell
+
 % Create rotation matrix to expand unit cell
 R = [cos(teta) -sin(teta);sin(teta) cos(teta)];
 
@@ -100,13 +101,14 @@ ky=0;
 % easily
 teta_x0 = teta;
 teta_y0 = teta;
-Rx0 = [cos(teta) -sin(teta);sin(teta) cos(teta)];
+Rx0 = R;
 Ry0 = Rx0;
 fy0 = 1;
 fx0 = 1;
 m=0;
 stop_b=0;
-% figure(10), hold on; axis equal
+
+% figure(10), hold on; axis equal, set(gca,'YDir', 'reverse')
 % plot(coordinates(:,1),coordinates(:,2),'.')
 
 % Store indices found, for remove double positions
@@ -116,7 +118,7 @@ while stop_b~=1 && m<layLim
     % In the negative a-direction
     stopLoop = zeros(n_atoms,1);
     for k=1:n_atoms % For each atom in the unit cell will be repeated individually
-        v = v1 + Rx0*unitT(:,k);
+        v = v1 - Rx0*unitT(:,k);
         kx=0; % For displacement
         teta_x = teta_x0;
         fx = fx0;
@@ -134,9 +136,9 @@ while stop_b~=1 && m<layLim
                 indFound = indFound + ind*1; % Store indices found, to remove double positions
                 % coor_exp(ind,:) = [x y] - (R*[a*n;b*m])' + unit_rot(k,:);
                 coor_exp(ind,:) = [x y] - n * [a * cos(teta), a * sin(teta)] ...
-                          - m * [b * cos(teta + teta_ab), b * sin(teta + teta_ab)] + unit_rot(k,:);
+                          - m * [b * cos(teta + teta_ab), b * sin(teta + teta_ab)] - unit_rot(k,:);
 
-                % plot(coor_exp(:,1),coor_exp(:,2), 'rx')
+                % plot(coor_exp(ind,1),coor_exp(ind,2), 'rx')
                 types(ind) = k;
                 indices(ind,:) = [-n,-m];
                 
@@ -147,14 +149,14 @@ while stop_b~=1 && m<layLim
                 if n==0
                     v2 = v + Rx*[a;0];
                 end
-                v2 = v - v2;
+                v2 = v2 - v;
                 f_int = sqrt(v2(2)^2+v2(1)^2)/a;
                 fx = (1-up)*fx + up*f_int; %Update parameter
                 
                 % Related angles -pi and pi, update parameter
-                teta_int = atan(v2(2)/v2(1));
-                if abs(teta_x-teta_int)>0.5*pi
-                    teta_x = (1-up)*teta_x + up*(teta_int - sign(teta_int)*pi);
+                teta_int = atan2(v2(2),v2(1));
+                if abs(teta_x-teta_int)> pi
+                    teta_x = (1-up)*teta_x + up*(teta_int - sign(teta_int)*2*pi);
                 else
                     teta_x = (1-up)*teta_x + up*teta_int;
                 end
@@ -175,11 +177,11 @@ while stop_b~=1 && m<layLim
                 % modify rotation matrix for movement to the top
                 v2 = v1 + Ry0*[0;b];
                 v1 = v;                
-                v2 = v1-v2;
+                v2 = v2-v1;
                 % Relate -pi and +pi
-                teta_int = atan(-v2(1)/v2(2));
-                if abs(teta_y0-teta_int)>0.5*pi
-                    teta_y0 = (1-up)*teta_y0 + up*(teta_int - sign(teta_int)*pi);
+                teta_int = atan2(-v2(1),v2(2));
+                if abs(teta_y0-teta_int)>pi
+                    teta_y0 = (1-up)*teta_y0 + up*(teta_int - sign(teta_int)*2*pi);
                 else
                     teta_y0 = (1-up)*teta_y0 + up*teta_int;
                 end
@@ -213,7 +215,7 @@ while stop_b~=1 && m<layLim
         while stop_a~=1 && stopLoop(k,1)==0
             % Each time create a new reference atom/point
             v = v+Rx*[a;0];
-                        % plot(v(1),v(2), 'go')
+            % plot(v(1),v(2), 'go')
 
             % Find points
             distance = (coordinates(:,1)-v(1)).^2+(coordinates(:,2)-v(2)).^2;
@@ -223,11 +225,11 @@ while stop_b~=1 && m<layLim
                 % coor_exp(ind,:) = [x y] + (R*[a*n;-b*m])' + unit_rot(k,:);
                 coor_exp(ind,:) = [x y] + n * [a*cos(teta), a*sin(teta)] ...
                           - m * [b*cos(teta + teta_ab), b*sin(teta + teta_ab)] ...
-                          + unit_rot(k,:);
+                          - unit_rot(k,:);
 
                 types(ind) = k; 
                 indices(ind,:) = [n,-m];
-                                % plot(coor_exp(:,1),coor_exp(:,2), 'rx')
+                % plot(coor_exp(ind,1),coor_exp(ind,2), 'rx')
 
                 % Update parameters
                 v2 = v - Rx*[a;0];
@@ -239,9 +241,9 @@ while stop_b~=1 && m<layLim
                 fx = (1-up)*fx + up*f_int; %Update parameter
                 
                 % Related angles -pi and pi, update parameter
-                teta_int = atan(v2(2)/v2(1));
-                if abs(teta_x-teta_int)>0.5*pi
-                    teta_x = (1-up)*teta_x + up*(teta_int - sign(teta_int)*pi);
+                teta_int = atan2(v2(2),v2(1));
+                if abs(teta_x-teta_int)> pi
+                    teta_x = (1-up)*teta_x + up*(teta_int - sign(teta_int)*2*pi);
                 else
                     teta_x = (1-up)*teta_x + up*teta_int;
                 end
@@ -277,7 +279,7 @@ while stop_b~=1
     % In the negative a-direction
     stopLoop = zeros(n_atoms,1);
     for k=1:n_atoms % For each atom in the unit cell will be repeated individually
-        v = v1 + Rx0*unitT(:,k);
+        v = v1 - Rx0*unitT(:,k);
         kx=0; % For displacement
         teta_x = teta_x0;
         fx = fx0;
@@ -287,7 +289,7 @@ while stop_b~=1
         while stop_a~=1
             % Each time create a new reference atom/point
             v = v-Rx*[a*kx;0];
-                        % plot(v(1),v(2), 'ko')
+            % plot(v(1),v(2), 'ko')
 
             % Find points
             distance = (coordinates(:,1)-v(1)).^2+(coordinates(:,2)-v(2)).^2;
@@ -297,10 +299,10 @@ while stop_b~=1
                 % coor_exp(ind,:) = [x y] - (R*[a*n;-b*m])' + unit_rot(k,:);
                  coor_exp(ind,:) = [x y] - n * [a * cos(teta), a * sin(teta)] ...
                          + m * [b * cos(teta + teta_ab), b * sin(teta + teta_ab)] ...
-                         + unit_rot(k,:);
+                         - unit_rot(k,:);
 
 
-                % plot(coor_exp(:,1),coor_exp(:,2), 'rx')
+                % plot(coor_exp(ind,1),coor_exp(ind,2), 'rx')
 
                 types(ind) = k;
                 indices(ind,:) = [-n,m];
@@ -313,14 +315,14 @@ while stop_b~=1
                 if n==0
                     v2 = v + Rx*[a;0];
                 end
-                v2 = v - v2;
+                v2 = v2 - v;
                 f_int = sqrt(v2(2)^2+v2(1)^2)/a;
                 fx = (1-up)*fx + up*f_int; %Update parameter
                 
-                % To make sure -pi and +pi are related
-                teta_int = atan(v2(2)/v2(1));
-                if abs(teta_x-teta_int)>0.5*pi
-                    teta_x = (1-up)*teta_x + up*(teta_int - sign(teta_int)*pi);
+                % Related angles -pi and pi, update parameter
+                teta_int = atan2(v2(2),v2(1));
+                if abs(teta_x-teta_int)> pi
+                    teta_x = (1-up)*teta_x + up*(teta_int - sign(teta_int)*2*pi);
                 else
                     teta_x = (1-up)*teta_x + up*teta_int;
                 end
@@ -339,14 +341,14 @@ while stop_b~=1
             % Save coordinates for next loop
             if k==1 && n==0
                 % modify rotation matrix for movement to the top
-                v2 = v1 - Ry0*[0;b];
+                v2 = v1 + Ry0*[0;b];
                 v1 = v;                
-                v2 = v1-v2;
+                v2 = v2-v1;
                 
                 % Relate -pi and +pi
-                teta_int = atan(-v2(1)/v2(2));
-                if abs(teta_y0-teta_int)>0.5*pi
-                    teta_y0 = (1-up)*teta_y0 + up*(teta_int - sign(teta_int)*pi);
+                teta_int = atan2(-v2(1),v2(2));
+                if abs(teta_y0-teta_int)>pi
+                    teta_y0 = (1-up)*teta_y0 + up*(teta_int - sign(teta_int)*2*pi);
                 else
                     teta_y0 = (1-up)*teta_y0 + up*teta_int;
                 end
@@ -381,7 +383,7 @@ while stop_b~=1
         while stop_a~=1 && stopLoop(k,1)==0
             % Each time create a new reference atom/point
             v = v+Rx*[a;0];
-                    plot(v(1),v(2), 'go')
+            % plot(v(1),v(2), 'go')
 
             % Find points
             distance = (coordinates(:,1)-v(1)).^2+(coordinates(:,2)-v(2)).^2;
@@ -390,8 +392,8 @@ while stop_b~=1
                 indFound = indFound + ind*1; % Store indices found, to remove double positions
                 % coor_exp(ind,:) = (R*[a*n;b*m])'+unit_rot(k,:) + [x y];
                 coor_exp(ind,:) = [x y] + n * [a * cos(teta), a * sin(teta)] ...
-                          + m * [b * cos(teta + teta_ab), b * sin(teta + teta_ab)] + unit_rot(k,:);
-                                % plot(coor_exp(:,1),coor_exp(:,2), 'rx')
+                          + m * [b * cos(teta + teta_ab), b * sin(teta + teta_ab)] - unit_rot(k,:);
+                % plot(coor_exp(ind,1),coor_exp(ind,2), 'rx')
 
 
                 types(ind) = k; 
@@ -406,10 +408,10 @@ while stop_b~=1
                 f_int = sqrt(v2(2)^2+v2(1)^2)/a;
                 fx = (1-up)*fx + up*f_int; %Update parameter
                 
-                % To make sure -pi and +pi are related
-                teta_int = atan(v2(2)/v2(1));
-                if abs(teta_x-teta_int)>0.5*pi
-                    teta_x = (1-up)*teta_x + up*(teta_int - sign(teta_int)*pi);
+                % Related angles -pi and pi, update parameter
+                teta_int = atan2(v2(2),v2(1));
+                if abs(teta_x-teta_int)> pi
+                    teta_x = (1-up)*teta_x + up*(teta_int - sign(teta_int)*2*pi);
                 else
                     teta_x = (1-up)*teta_x + up*teta_int;
                 end
@@ -437,46 +439,54 @@ end
 if ~any(strcmp({'all','allNoWarn'},method))
     return
 end
+
+
 %% Second method uses neighbouring distances to find the reference coordinate
 R = [cos(teta) -sin(teta);sin(teta) cos(teta)];
 Rinv = [cos(-teta) -sin(-teta);sin(-teta) cos(-teta)];
 R180 = [cos(pi) -sin(pi);sin(pi) cos(pi)];
 
+
+unit_rot = - unit_rot;
 % Reference unit cell is needed in +a,-a,+b and -b direction
-unit_int = zeros(n_atoms*3,3);
-ind_int = zeros(n_atoms*3,2);
+unit_int = zeros(n_atoms*5,3);
+ind_int = zeros(n_atoms*5,2);
 a_ref = R*[a;0];
-b_ref = R*[0;b];
-for n=-1:1
-    unit_int(n_atoms*(n+1)+1:n_atoms*(n+2),:) = [unit_rot(:,1)+n*a_ref(1) unit_rot(:,2)+n*a_ref(2) (1:n_atoms)'];
-    ind_int(n_atoms*(n+1)+1:n_atoms*(n+2),1) = n;
+b_ref = R*Rab*[b;0];
+for n=-2:2
+    unit_int(n_atoms*(n+2)+1:n_atoms*(n+3),:) = [unit_rot(:,1)+n*a_ref(1) unit_rot(:,2)+n*a_ref(2) (1:n_atoms)'];
+    ind_int(n_atoms*(n+2)+1:n_atoms*(n+3),1) = n;
+    % unit_int(n_atoms*(n+1)+1:n_atoms*(n+2),:) = [unit_rot(:,1)+n*a_ref(1) unit_rot(:,2)+n*a_ref(2) (1:n_atoms)'];
+    % ind_int(n_atoms*(n+1)+1:n_atoms*(n+2),1) = n;
 end
-unit_ref = zeros(n_atoms*9,3);
-ind_unit = zeros(n_atoms*9,2);
-for n=-1:1
-    unit_ref(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [unit_int(:,1)+n*b_ref(1) unit_int(:,2)+n*b_ref(2) unit_int(:,3)];
-    ind_unit(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [ind_int(:,1),ind_int(:,2)+n];
+unit_ref = zeros(n_atoms*25,3);
+ind_unit = zeros(n_atoms*25,2);
+for n=-2:2
+    unit_ref(n_atoms*5*(n+2)+1:n_atoms*5*(n+3),:) = [unit_int(:,1)+n*b_ref(1) unit_int(:,2)+n*b_ref(2) unit_int(:,3)];
+    ind_unit(n_atoms*5*(n+2)+1:n_atoms*5*(n+3),:) = [ind_int(:,1),ind_int(:,2)+n];
+    % unit_ref(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [unit_int(:,1)+n*b_ref(1) unit_int(:,2)+n*b_ref(2) unit_int(:,3)];
+    % ind_unit(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [ind_int(:,1),ind_int(:,2)+n];
 end
 
 % Find coordinates which were not found by previous method
 ind = find(coor_exp(:,1)==0);
 Ntotal = length(ind);
-distCoor = zeros(Ntotal,1);
-indCoor = zeros(Ntotal,1);
+% distCoor = zeros(Ntotal,1);
+% indCoor = zeros(Ntotal,1);
 for point=1:Ntotal
     % Select coordinates which were found and which weren't
-    coor_rem = coordinates(ind,:);
-    ind_not = find(coor_exp(:,1)~=0);
-    coor_found = coordinates(ind_not,:);
-    ref_found  = coor_exp(ind_not,:);
-    types_found = types(ind_not);
-    ind_found = indices(ind_not,:);
+    coor_rem = coordinates(ind,:);      % coordinates remaining unfound positions
+    ind_not = find(coor_exp(:,1)~=0);   % indices of found coordinates
+    coor_found = coordinates(ind_not,:);% coordinates found positions
+    ref_found  = coor_exp(ind_not,:);   % expected coordinates for found positions
+    types_found = types(ind_not);       % types for found positions
+    ind_found = indices(ind_not,:);     % indices for found positions
     
     % Find coordinate closest to another coordinate, repeat process to
     % include also points found by this procedure
     ind_as=0;
     dist = Inf;
-    while ind_as<length(ind) && sqrt(min(dist))>sqrt(space)+min(a,b);
+    while ind_as<length(ind) && sqrt(min(dist))>sqrt(space)+min(a,b)
         ind_as=ind_as+1;
         dist = (coor_found(:,1)-coor_rem(ind_as,1)).^2 + (coor_found(:,2)-coor_rem(ind_as,2)).^2;
     end
@@ -521,24 +531,36 @@ for point=1:Ntotal
         R_int = [cos(teta_add) -sin(teta_add);sin(teta_add) cos(teta_add)];
         unit_int = (R_int*(unit_rot'*f))';
         a_int = (R_int*R*[a*f;0])';
-        b_int = (R_int*R*[0;b*f])';
+        b_int = (R_int*R*Rab*[b*f;0])';
 
         % Repeat unit cell
-        unit_temp = zeros(n_atoms*3,2);
-        for n=-1:1
-            unit_temp(n_atoms*(n+1)+1:n_atoms*(n+2),:) = [unit_int(:,1)+n*a_int(1) unit_int(:,2)+n*a_int(2)];
+        unit_temp = zeros(n_atoms*5,2);
+        for n=-2:2
+            unit_temp(n_atoms*(n+2)+1:n_atoms*(n+3),:) = [unit_int(:,1)+n*a_int(1) unit_int(:,2)+n*a_int(2)];
         end
-        unit_comp = zeros(n_atoms*9,2);
-        for n=-1:1
-            unit_comp(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [unit_temp(:,1)+n*b_int(1) unit_temp(:,2)+n*b_int(2)];
+        unit_comp = zeros(n_atoms*25,2);
+        for n=-2:2
+            unit_comp(n_atoms*5*(n+2)+1:n_atoms*5*(n+3),:) = [unit_temp(:,1)+n*b_int(1) unit_temp(:,2)+n*b_int(2)];
         end
+
+    
 
         % Now correct for location in unit cell
         unit_comp = [unit_comp(:,1)-unit_int(types_found(ind_ref),1) unit_comp(:,2)-unit_int(types_found(ind_ref),2)];
 
+        % Shift to reference location
+        unit_comp = [unit_comp(:,1)+coor_found(ind_ref,1) unit_comp(:,2)+coor_found(ind_ref,2)];
+
+
+        %     hold on
+        % plot(unit_comp(:,1), unit_comp(:,2), 'c.', 'MarkerSize', 20)
+        % plot(coor_rem(ind_as,1), coor_rem(ind_as,2),'k+')
+        % plot(coor_found(ind_ref,1), coor_found(ind_ref,2), 'm+')
+
         % Now compare dist with distances of unit cell
-        distUnit = coor_rem(ind_as,:)-coor_found(ind_ref,:);
-        dif = (unit_comp(:,1)-distUnit(1,1)).^2 + (unit_comp(:,2)-distUnit(1,2)).^2;
+        dif = (unit_comp(:,1)-coor_rem(ind_as,1)).^2 + (unit_comp(:,2)-coor_rem(ind_as,2)).^2;
+        % distUnit = coor_rem(ind_as,:)-coor_found(ind_ref,:);
+        % dif = (unit_comp(:,1)-distUnit(1,1)).^2 + (unit_comp(:,2)-distUnit(1,2)).^2;
         int_typ = unit_ref(dif==min(dif),3);
         int_ind = ind_found(ind_ref,:) + ind_unit(dif==min(dif),:);
         % Check for double coordinates
@@ -716,7 +738,7 @@ for point=1:Ntotal
                     coorFin2 = coorDouble2;
                     avDifFin2 = avDifSel;
                     avIndFin2 = avIndSel;
-                    if any(indDouble2) && sum(coorFin2Old-coorDouble2)<eps;
+                    if any(indDouble2) && sum(coorFin2Old-coorDouble2)<eps
                         % Use best second option
                         if min(avDifFin2Old)<min(avDifFin2) %Keep old value, update latest found values
                             avDif = avDifFin2;
@@ -789,6 +811,9 @@ for n=1:n_atoms
     types(ind,:) = -unitType(n);
 end
 types = -types;
+
+figure(11), scatter(coordinates(:,1), coordinates(:,2), 20, indices(:,1), 'filled'); axis equal; colormap jet; set(gca,'YDir','reverse')
+figure(12), scatter(coordinates(:,1), coordinates(:,2), 20, indices(:,2), 'filled'); axis equal; colormap jet; set(gca,'YDir','reverse')
 
 function [teta_add,f] = retrieveRotExp(ind_ref,ref_found,coor_found,a,b,R,R180,Rinv,space)
 
