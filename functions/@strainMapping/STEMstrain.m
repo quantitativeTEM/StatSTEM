@@ -45,7 +45,7 @@ coorExp = zeros(N,2);
 types = strainmapping.typesN;
 for i=1:N
     if types(i,1)~=0
-        coorExp(i,:) = refCoor + LattPar(1,:)*indices(i,1) + LattPar(2,:)*indices(i,2) + unit_rot(types(i,1),:);
+        coorExp(i,:) = refCoor + LattPar(1,:)*indices(i,1) + LattPar(2,:)*indices(i,2) - unit_rot(types(i,1),:);
     end
 end
 
@@ -63,7 +63,7 @@ omg_xy = zeros(n1,2);
 
 for n=1:n1  % loop over all atoms
 
-    if types(:,1)~=0
+    if types(n,1)~=0
         % Find indices of neighbors
         % Find points in a direction
         neighbors = indices(:,1)==(indices(n,1)+1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1);
