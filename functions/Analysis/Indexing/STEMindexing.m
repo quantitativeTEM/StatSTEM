@@ -812,8 +812,8 @@ for n=1:n_atoms
 end
 types = -types;
 
-figure(11), scatter(coordinates(:,1), coordinates(:,2), 20, indices(:,1), 'filled'); axis equal; colormap jet; set(gca,'YDir','reverse')
-figure(12), scatter(coordinates(:,1), coordinates(:,2), 20, indices(:,2), 'filled'); axis equal; colormap jet; set(gca,'YDir','reverse')
+% figure(11), scatter(coordinates(:,1), coordinates(:,2), 20, indices(:,1), 'filled'); axis equal; colormap jet; set(gca,'YDir','reverse')
+% figure(12), scatter(coordinates(:,1), coordinates(:,2), 20, indices(:,2), 'filled'); axis equal; colormap jet; set(gca,'YDir','reverse')
 
 function [teta_add,f] = retrieveRotExp(ind_ref,ref_found,coor_found,a,b,R,R180,Rinv,space)
 
