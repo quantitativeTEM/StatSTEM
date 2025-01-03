@@ -446,24 +446,25 @@ R = [cos(teta) -sin(teta);sin(teta) cos(teta)];
 Rinv = [cos(-teta) -sin(-teta);sin(-teta) cos(-teta)];
 R180 = [cos(pi) -sin(pi);sin(pi) cos(pi)];
 
+numbExpand = 5;     % odd number, number of unit cells that is expanded to index remaining coordinates
 
 unit_rot = - unit_rot;
 % Reference unit cell is needed in +a,-a,+b and -b direction
-unit_int = zeros(n_atoms*5,3);
-ind_int = zeros(n_atoms*5,2);
+unit_int = zeros(n_atoms*numbExpand,3);
+ind_int = zeros(n_atoms*numbExpand,2);
 a_ref = R*[a;0];
 b_ref = R*Rab*[b;0];
-for n=-2:2
-    unit_int(n_atoms*(n+2)+1:n_atoms*(n+3),:) = [unit_rot(:,1)+n*a_ref(1) unit_rot(:,2)+n*a_ref(2) (1:n_atoms)'];
-    ind_int(n_atoms*(n+2)+1:n_atoms*(n+3),1) = n;
+for n=-floor(numbExpand/2):floor(numbExpand/2)
+    unit_int(n_atoms*(n+floor(numbExpand/2))+1:n_atoms*(n+floor(numbExpand/2)+1),:) = [unit_rot(:,1)+n*a_ref(1) unit_rot(:,2)+n*a_ref(2) (1:n_atoms)'];
+    ind_int(n_atoms*(n+floor(numbExpand/2))+1:n_atoms*(n+floor(numbExpand/2)+1),1) = n;
     % unit_int(n_atoms*(n+1)+1:n_atoms*(n+2),:) = [unit_rot(:,1)+n*a_ref(1) unit_rot(:,2)+n*a_ref(2) (1:n_atoms)'];
     % ind_int(n_atoms*(n+1)+1:n_atoms*(n+2),1) = n;
 end
-unit_ref = zeros(n_atoms*25,3);
-ind_unit = zeros(n_atoms*25,2);
-for n=-2:2
-    unit_ref(n_atoms*5*(n+2)+1:n_atoms*5*(n+3),:) = [unit_int(:,1)+n*b_ref(1) unit_int(:,2)+n*b_ref(2) unit_int(:,3)];
-    ind_unit(n_atoms*5*(n+2)+1:n_atoms*5*(n+3),:) = [ind_int(:,1),ind_int(:,2)+n];
+unit_ref = zeros(n_atoms*numbExpand^2,3);
+ind_unit = zeros(n_atoms*numbExpand^2,2);
+for n=-floor(numbExpand/2):floor(numbExpand/2)
+    unit_ref(n_atoms*numbExpand*(n+floor(numbExpand/2))+1:n_atoms*numbExpand*(n+floor(numbExpand/2)+1),:) = [unit_int(:,1)+n*b_ref(1) unit_int(:,2)+n*b_ref(2) unit_int(:,3)];
+    ind_unit(n_atoms*numbExpand*(n+floor(numbExpand/2))+1:n_atoms*numbExpand*(n+floor(numbExpand/2)+1),:) = [ind_int(:,1),ind_int(:,2)+n];
     % unit_ref(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [unit_int(:,1)+n*b_ref(1) unit_int(:,2)+n*b_ref(2) unit_int(:,3)];
     % ind_unit(n_atoms*3*(n+1)+1:n_atoms*3*(n+2),:) = [ind_int(:,1),ind_int(:,2)+n];
 end
@@ -534,13 +535,13 @@ for point=1:Ntotal
         b_int = (R_int*R*Rab*[b*f;0])';
 
         % Repeat unit cell
-        unit_temp = zeros(n_atoms*5,2);
+        unit_temp = zeros(n_atoms*numbExpand,2);
         for n=-2:2
-            unit_temp(n_atoms*(n+2)+1:n_atoms*(n+3),:) = [unit_int(:,1)+n*a_int(1) unit_int(:,2)+n*a_int(2)];
+            unit_temp(n_atoms*(n+floor(numbExpand/2))+1:n_atoms*(n+floor(numbExpand/2)+1),:) = [unit_int(:,1)+n*a_int(1) unit_int(:,2)+n*a_int(2)];
         end
-        unit_comp = zeros(n_atoms*25,2);
+        unit_comp = zeros(n_atoms*numbExpand^2,2);
         for n=-2:2
-            unit_comp(n_atoms*5*(n+2)+1:n_atoms*5*(n+3),:) = [unit_temp(:,1)+n*b_int(1) unit_temp(:,2)+n*b_int(2)];
+            unit_comp(n_atoms*numbExpand*(n+floor(numbExpand/2))+1:n_atoms*numbExpand*(n+floor(numbExpand/2)+1),:) = [unit_temp(:,1)+n*b_int(1) unit_temp(:,2)+n*b_int(2)];
         end
 
     
@@ -563,6 +564,7 @@ for point=1:Ntotal
         % dif = (unit_comp(:,1)-distUnit(1,1)).^2 + (unit_comp(:,2)-distUnit(1,2)).^2;
         int_typ = unit_ref(dif==min(dif),3);
         int_ind = ind_found(ind_ref,:) + ind_unit(dif==min(dif),:);
+
         % Check for double coordinates
         ind_double = ind_found(:,1)==int_ind(1,1) & ind_found(:,2)==int_ind(1,2) & types_found == int_typ;
         if sum(ind_double)>0
