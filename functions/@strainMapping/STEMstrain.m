@@ -77,23 +77,49 @@ for n=1:n1  % loop over all atoms
         numberNeighbors = sum(neighbors);
 
 
-
         ref_disp = coorExp(neighbors,:) - coorExp(n,:);
         def_disp = coordinates(neighbors,1:2) - coordinates(n,1:2);
 
-        % Compute deformation gradient F : F*solve def_disp = ref_disp
-        F =  ref_disp \ def_disp;
+        % Store the current warning state
+        warning('error', 'MATLAB:singularMatrix');
+        warning('error', 'MATLAB:nearlySingularMatrix');
 
-        % Compute strain tensors
-        % GreenLagrangeStrain = 0.5 *  0.5 * (F' * F - eye(2)); % valid for very large deformations
-        CauchyStrain = 0.5 * (F + F' - 2 * eye(2));
+        try
+            % Suppress the specific warning
+            warning('off', 'MATLAB:singularMatrix');
+            warning('off', 'MATLAB:nearlySingularMatrix');
 
-        eps_xx(n) = CauchyStrain(1,1);
-        eps_yy(n) = CauchyStrain(2,2);
-        eps_xy(n) = CauchyStrain(2,1);
-        % Compute the rotation component (antisymmetric part of F)
-        R = 0.5 * (F - F');  % Rotation tensor
-        omg_xy(n) = R(1,2);
+
+            % Compute deformation gradient F : F*solve def_disp = ref_disp
+            F = ref_disp \ def_disp;
+
+            % Compute strain tensors
+            % GreenLagrangeStrain = 0.5 *  0.5 * (F' * F - eye(2)); % valid for very large deformations
+            CauchyStrain = 0.5 * (F + F' - 2 * eye(2));
+
+            eps_xx(n) = CauchyStrain(1,1);
+            eps_yy(n) = CauchyStrain(2,2);
+            eps_xy(n) = CauchyStrain(2,1);
+            % Compute the rotation component (antisymmetric part of F)
+            R = 0.5 * (F - F');  % Rotation tensor
+            omg_xy(n) = R(1,2);
+
+        catch ME
+            % Check if the error is related to a (nearly) singular matrix
+            if strcmp(ME.identifier, 'MATLAB:singularMatrix') || strcmp(ME.identifier, 'MATLAB:nearlySingularMatrix')
+                eps_xx(n) = NaN;
+                eps_yy(n) = NaN;
+                eps_xy(n) = NaN;
+                omg_xy(n) = NaN;
+            else
+                % Re-throw the error if it's not related to a singular matrix
+                rethrow(ME);
+            end
+        end
+        % Re-enable the warning
+        warning('on', 'MATLAB:singularMatrix');
+        warning('on', 'MATLAB:nearlySingularMatrix');
+
 
         if numberNeighbors == 1
             eps_xx(n) = NaN;
@@ -106,7 +132,7 @@ for n=1:n1  % loop over all atoms
         eps_yy(n) = NaN;
         eps_xy(n) = NaN;
         omg_xy(n) = NaN;
-    end
+        end
 end
 
 strainmapping.eps_xxP = eps_xx;
