@@ -101,7 +101,11 @@ for n=1:n1  % loop over all atoms
             eps_xy(n) = NaN;
             omg_xy(n) = NaN;
         end
-
+    else
+        eps_xx(n) = NaN;
+        eps_yy(n) = NaN;
+        eps_xy(n) = NaN;
+        omg_xy(n) = NaN;
     end
 end
 
