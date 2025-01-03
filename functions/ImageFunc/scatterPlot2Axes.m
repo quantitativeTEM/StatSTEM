@@ -63,7 +63,7 @@ set(h,'Userdata',{dataText,data}) % For data cursor in StatSTEM
 % active axes for colors
 plot(ax2,[],[],'Tag',nameTag)
 colormap(ax2,'jet')
-caxis(ax2,range);
+clim(ax2,range);
 
 % Check if underscore is present
 loc = strfind(nameTag,'_');
