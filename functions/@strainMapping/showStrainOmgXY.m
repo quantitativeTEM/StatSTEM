@@ -33,7 +33,7 @@ ind = ~isnan(obj.omg_xy(:,1));
 data = obj.omg_xy(ind,1);
 [~,L,U,~] = isoutlier(data);
 % range = max( [max(data),-min(data)] );
-range = max([L,U]);
+range = max([-L,U]);
 range = [-range,range];
 
 scatterPlot2Axes(ax,ax2,obj.coordinates(ind,1:2),data,range,nameTag,scaleMarker,'Strain %g')
