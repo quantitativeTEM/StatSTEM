@@ -31,8 +31,9 @@ nameTag = [char(949),'_aa'];
 scaleMarker = obj.mscale;
 ind = ~isnan(obj.eps_aa(:,1));
 data = obj.eps_aa(ind,1);
-range = max( [max(data),-min(data)] );
-range = [-range,range];
+[~,L,U,~] = isoutlier(data);
+% range = max( [max(data),-min(data)] );
+range = max([L,U]);range = [-range,range];
 
 scatterPlot2Axes(ax,ax2,obj.coordinates(ind,1:2),data,range,nameTag,scaleMarker,'Strain %g')
 
