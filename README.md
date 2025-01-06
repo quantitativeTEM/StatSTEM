@@ -7,7 +7,7 @@ In StatSTEM, electron microscopy images are modelled by a superposition of Gauss
 The software is developed by the team of Sandra Van Aert at EMAT, University of Antwerp, Belgium.
 
 Matlab Toolboxes needed:
-- Parallel computing Toolbox
+- Parallel Computing Toolbox
 - Statistics and Machine Learning Toolbox
 - Optimization Toolbox
 - Image Processing Toolbox
