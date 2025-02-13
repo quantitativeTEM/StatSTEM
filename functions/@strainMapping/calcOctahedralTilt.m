@@ -24,11 +24,19 @@ end
 
 unit = obj.projUnit;
 dirTeta_ab = obj.dirTeta;
+teta = obj.teta(1);
 
 % Crystal parameters
 teta_ab = unit.ang;
-Rab = [cos(-dirTeta_ab*teta_ab) -sin(-dirTeta_ab*teta_ab);sin(-dirTeta_ab*teta_ab) cos(-dirTeta_ab*teta_ab)];
+
+% define rotation matrices
+% rotate over -teta to align coordinates with x-axis
 Ra = [cos(-obj.teta(1)) -sin(-obj.teta(1));sin(-obj.teta(1)) cos(-obj.teta(1))];
+
+% rotate over -teta_ab (angle between projected lattice vectors ab
+Rab = [cos(-dirTeta_ab*teta_ab) -sin(-dirTeta_ab*teta_ab);sin(-dirTeta_ab*teta_ab) cos(-dirTeta_ab*teta_ab)];
+% combined to rotate over -teta-teta_ab to align b-direction with respect
+% to x-axis
 Rb = Ra*Rab;
 
 % Find per unit cell the octahedral tilt
@@ -90,7 +98,7 @@ else
     shiftB = -1;
 end
 
-figure, plot(obj.coordinates(:,1), obj.coordinates(:,2),'.'), axis equal, hold on
+% figure, plot(obj.coordinates(:,1), obj.coordinates(:,2),'.'), axis equal, hold on
 
 if nO==2
     obj.message = '[100]-direction indentified, octahedral tilt calculate per unit cell by using oxygen atoms at the left,right,top, and bottom.';
@@ -98,18 +106,22 @@ if nO==2
         for j=1:(maxIndB-minIndB+1)
             % Find the 4 (or 2) coordinates
             indCor = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==1;
-            indL = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type2;
-            indR = obj.indices(:,1)==IndA(i)+1 & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type2;
-            indB = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type1;
+            % indL = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type2;
+            % indR = obj.indices(:,1)==IndA(i)+1 & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type2;
+            % indB = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type1;
+            % indT = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==type1;
+            indL = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)+1 & obj.typesN==type2;
+            indR = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==type2;
+            indB = obj.indices(:,1)==IndA(i)+1 & obj.indices(:,2)==IndB(j) & obj.typesN==type1;
             indT = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==type1;
             
             if sum(indL)==1 && sum(indR)==1 && sum(indB)==1 && sum(indT)==1
 
-                plot(obj.coordinates(indCor,1), obj.coordinates(indCor,2), 'ro')
-plot(obj.coordinates(indL,1), obj.coordinates(indL,2), 'go')
-plot(obj.coordinates(indR,1), obj.coordinates(indR,2), 'go')
-plot(obj.coordinates(indT,1), obj.coordinates(indT,2), 'go')
-plot(obj.coordinates(indB,1), obj.coordinates(indB,2), 'go')
+                % plot(obj.coordinates(indCor,1), obj.coordinates(indCor,2), 'ro')
+                % plot(obj.coordinates(indL,1), obj.coordinates(indL,2), 'go')
+                % plot(obj.coordinates(indR,1), obj.coordinates(indR,2), 'go')
+                % plot(obj.coordinates(indT,1), obj.coordinates(indT,2), 'go')
+                % plot(obj.coordinates(indB,1), obj.coordinates(indB,2), 'go')
 
                 %coorCor = obj.coordinates(indCor,1:2);
                 % Angle in a-direction
@@ -134,8 +146,8 @@ elseif nO==1
         for j=1:(maxIndB-minIndB+1)
             % Find the 4 (or 2) coordinates
             indCor = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==1;
-            indL = obj.indices(:,1)==IndA(i)-1 & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type1;
-            indR = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j)-dirTeta_ab & obj.typesN==type1;
+            indL = obj.indices(:,1)==IndA(i)+1 & obj.indices(:,2)==IndB(j) & obj.typesN==type1; 
+            indR = obj.indices(:,1)==IndA(i) & obj.indices(:,2)==IndB(j) & obj.typesN==type1;
             
             if sum(indL)==1 && sum(indR)==1
                 %coorCor = obj.coordinates(indCor,1:2);
