@@ -131,6 +131,7 @@ classdef strainMapping < StatSTEMfile
         plotRefCoor(obj)
         obj = shiftAtomCentre(obj)
         showABlattice(obj)
+        showOctahedralTilt(obj)
         showDisplacementMap(obj)
         showMeanLatticeA_dirA(obj)
         showMeanLatticeA_dirB(obj)

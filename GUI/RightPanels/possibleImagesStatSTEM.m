@@ -11,7 +11,7 @@ function out = possibleImagesStatSTEM()
 % This file is part of StatSTEM
 %
 % Copyright: 2018, EMAT, University of Antwerp
-% Author: K.H.W. van den Bos
+% Author: K.H.W. van den Bos, Annick De Backer
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
@@ -27,6 +27,7 @@ out.option1 = addFigOpt(out.option1,'Lib Counts','plotAtomCounts','libcounting.C
 out.option1 = addFigOpt(out.option1,'Ref strainmapping','plotRefCoor','strainmapping.refCoor');
 out.option1 = addFigOpt(out.option1,'a & b lattice','showABlattice','strainmapping.a');
 out.option1 = addFigOpt(out.option1,'Displacement map','showDisplacementMap','strainmapping.coorExpected');
+out.option1 = addFigOpt(out.option1,'Octahedral tilt','showOctahedralTilt','strainmapping.octahedralTilt');
 out.option1 = addFigOpt(out.option1,'Shift central atom','showShiftCenAtom','strainmapping.shiftCenAtom');
 out.option1 = addFigOpt(out.option1,'Lattice','makeLatticeFig','strainmapping.latticeA');
 out.option1 = addFigOpt(out.option1,[char(949),'_xx'],'showStrainEpsXX','strainmapping.eps_xx');
@@ -54,6 +55,7 @@ out.option2 = addFigOpt(out.option2,'Lib Counts','plotAtomCounts','libcounting.C
 out.option2 = addFigOpt(out.option2,'Ref strainmapping','plotRefCoor','strainmapping.refCoor');
 out.option2 = addFigOpt(out.option2,'a & b lattice','showABlattice','strainmapping.a');
 out.option2 = addFigOpt(out.option2,'Displacement map','showDisplacementMap','strainmapping.coorExpected');
+out.option2 = addFigOpt(out.option2,'Octahedral tilt','showOctahedralTilt','strainmapping.octahedralTilt');
 out.option2 = addFigOpt(out.option2,'Shift central atom','showShiftCenAtom','strainmapping.shiftCenAtom');
 out.option2 = addFigOpt(out.option2,'Lattice','makeLatticeFig','strainmapping.latticeA');
 out.option2 = addFigOpt(out.option2,[char(949),'_xx'],'showStrainEpsXX','strainmapping.eps_xx');

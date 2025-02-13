@@ -5,7 +5,7 @@ function showHideFigOptions(tab,option,state,out)
 %       tab     - reference to the selected tab
 %       value   - Selected figure (number)
 %       option  - The selected figure option
-%       state   - Logical, indicate whether option should be shown or hiden
+%       state   - Logical, indicate whether option should be shown or hidden
 %       out     - structure with figure options
 %
 
