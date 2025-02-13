@@ -34,6 +34,7 @@ end
 
 nameTag = 'Octahedral tilt';
 
+
 %% compute parameters for plotting
 coordAngle = zeros(size(obj.octahedralTilt,1),2);
 coordL = zeros(size(obj.octahedralTilt,1),2);
@@ -153,12 +154,13 @@ for i = 1: length(obj.octahedralTilt)
 
     % Create a second axes for the color-coded line and points
 
+    h = plot(ax, [coordL(i,1) coordT(i,1) coordR(i,1) coordB(i,1) coordL(i,1)],...
+        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)],'-', 'LineWidth', 2, 'Color', dotColor, 'Tag', nameTag);
     plot(ax, [coordL(i,1) coordT(i,1) coordR(i,1) coordB(i,1) coordL(i,1)],...
-        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)],'-', 'LineWidth', 2, 'Color', dotColor);
-    plot(ax, [coordL(i,1) coordT(i,1) coordR(i,1) coordB(i,1) coordL(i,1)],...
-        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)],'r.', 'MarkerSize', 5);
+        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)],'r.', 'MarkerSize', 5, 'Tag',nameTag);
     fill(ax, [coordL(i,1) coordT(i,1) coordR(i,1) coordB(i,1) coordL(i,1)],...
-        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)], dotColor, 'FaceAlpha', 0.5, 'EdgeColor','none');
+        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)], dotColor, 'FaceAlpha', 0.5, 'EdgeColor','none', 'Tag', nameTag);
+plot(ax2,[],[],'Tag',nameTag)
 
 
 end
@@ -187,9 +189,9 @@ h1 = colorbar(ax);
 set(h1,'Visible','off','HitTest','off')
 pos = get(h1,'Position');
 h2 = colorbar(ax2,'Position',pos);
-ylabel(h2,'Octahedral tilt (degrees)')
+ylabel(h2, nameTag, 'Tag','Colorbar')
 
-hold(ax,'off')
+% hold(ax,'off')
 % % Create UIMenu for colors
 % createUIMenu2Axes(ax2,h2,h,obj.octahedralTilt(:,3), [minAngles maxAngles])
 % axes(ax); % Make axes 1 current axis
