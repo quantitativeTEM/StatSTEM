@@ -66,27 +66,29 @@ end
 N = counting.N;
 NatInCol = zeros(N,1);
 for i=1:N
-    zInfo = strainmapping.projUnit.zInfo{types(i,1)};
-    nAtCol = atomsPerCol(types(i,1),1);
-    coorInt = zeros(Counts(i,1)*nAtCol,3);
-    typeInt = cell(Counts(i,1)*nAtCol,1);
-    coorInt(:,1) = coor(i,1);
-    coorInt(:,2) = coor(i,2);
-    if Counts(i,1)<3
-    end
-    for j=1:nAtCol
-        coorInt( ((j-1)*Counts(i,1)+1):(j*Counts(i,1)) ,3) = ( (1:Counts(i,1))' - ceil( (Counts(i,1)+1)/2 ) + flipSgn*zInfo{j*2})*c;
-        typeInt( ((j-1)*Counts(i,1)+1):(j*Counts(i,1)) ,1) = repmat(zInfo(j*2-1),Counts(i,1),1);
-    end
-    coorTypePerCol{i,1} = coorInt;
-    coorTypePerCol{i,2} = typeInt;
-    NatInCol(i,1) = Counts(i,1)*nAtCol;
-    if ~isempty(counting.GUI)
-        counting.waitbar.setValue(i/N*100)
-        % For aborting function
-        drawnow
-        if get(counting.GUI,'Userdata')==0
-            error('Calculation of 3D model is cancelled')
+    if types(i,1)~=0
+        zInfo = strainmapping.projUnit.zInfo{types(i,1)};
+        nAtCol = atomsPerCol(types(i,1),1);
+        coorInt = zeros(Counts(i,1)*nAtCol,3);
+        typeInt = cell(Counts(i,1)*nAtCol,1);
+        coorInt(:,1) = coor(i,1);
+        coorInt(:,2) = coor(i,2);
+        if Counts(i,1)<3
+        end
+        for j=1:nAtCol
+            coorInt( ((j-1)*Counts(i,1)+1):(j*Counts(i,1)) ,3) = ( (1:Counts(i,1))' - ceil( (Counts(i,1)+1)/2 ) + flipSgn*zInfo{j*2})*c;
+            typeInt( ((j-1)*Counts(i,1)+1):(j*Counts(i,1)) ,1) = repmat(zInfo(j*2-1),Counts(i,1),1);
+        end
+        coorTypePerCol{i,1} = coorInt;
+        coorTypePerCol{i,2} = typeInt;
+        NatInCol(i,1) = Counts(i,1)*nAtCol;
+        if ~isempty(counting.GUI)
+            counting.waitbar.setValue(i/N*100)
+            % For aborting function
+            drawnow
+            if get(counting.GUI,'Userdata')==0
+                error('Calculation of 3D model is cancelled')
+            end
         end
     end
 end
@@ -112,4 +114,3 @@ rad = mean([radMin,radMin,maxLat]); % Take the average
 % Create 3D model
 model = mod3D(coordinates(:,1:2),coordinates(:,3),types,rad);
 
-    
