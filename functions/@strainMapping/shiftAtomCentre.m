@@ -60,9 +60,9 @@ for i=1:nAt
         indI = obj.indices(i,1:2);
         % Find surrounding coordinates
         indInt00 = indT00(:,1)==indI(1) & indT00(:,2)==indI(2);
-        indInt10 = indT00(:,1)==(indI(1)+1) & indT00(:,2)==indI(2);
-        indInt01 = indT00(:,1)==indI(1) & indT00(:,2)==(indI(2)+1);
-        indInt11 = indT00(:,1)==(indI(1)+1) & indT00(:,2)==(indI(2)+1);
+        indInt10 = indT00(:,1)==(indI(1)-1) & indT00(:,2)==indI(2);
+        indInt01 = indT00(:,1)==indI(1) & indT00(:,2)==(indI(2)-1);
+        indInt11 = indT00(:,1)==(indI(1)-1) & indT00(:,2)==(indI(2)-1);
         % Only find expected coordinate if 4 surrounding coordinates are
         % present
         coorSur = zeros(4,2);
