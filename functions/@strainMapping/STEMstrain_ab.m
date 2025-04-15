@@ -116,7 +116,7 @@ for n=1:n1  % loop over all atoms
             eps_bb(n) = CauchyStrain_ab(2,2);
             eps_ab(n) = CauchyStrain_ab(2,1);
             % Compute the rotation component (antisymmetric part of F)
-            R = 0.5 * (F_ab - F_ab');  % Rotation tensor
+            R = 0.5 * (F - F');  % Rotation tensor
             omg_ab(n) = R(1,2);
 
         catch ME
