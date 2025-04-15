@@ -95,7 +95,7 @@ for n=1:n1  % loop over all atoms
 
             % Compute strain tensors
             % GreenLagrangeStrain = 0.5 *  0.5 * (F' * F - eye(2)); % valid for very large deformations
-            CauchyStrain = 0.5 * (F + F' - 2 * eye(2));
+            CauchyStrain = 0.5 * (F + F') - eye(2);
 
             eps_xx(n) = CauchyStrain(1,1);
             eps_yy(n) = CauchyStrain(2,2);
