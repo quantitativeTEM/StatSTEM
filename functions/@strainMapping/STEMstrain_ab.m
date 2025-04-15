@@ -8,200 +8,145 @@ function strainmapping = STEMstrain_ab(strainmapping)
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
-% Copyright: 2018, EMAT, University of Antwerp
-% Author: K.H.W. van den Bos
+% Copyright: 2025, EMAT, University of Antwerp
+% Author: A. De Backer
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
- warndlg(['The strain is computed along the a-direction of the projected unit cell' ...
-     ' and the direction perpendicular to it. This perpendicular direction only correpsonds' ...
-     ' to the b-direction in case of an angle of 90 degrees between the a- and b-direction in the projected unit cell.']);
+indices = strainmapping.indices;
+if isempty(indices)
+    return
+end
 
+%% With the found angle find the relaxed coordinates
+coor = strainmapping.coordinates(:,1:2);
+refCoor = strainmapping.refCoor(:,1:2);
+unit = strainmapping.projUnit;
+teta = strainmapping.teta(1);
+a = strainmapping.a(1);
+b = strainmapping.b(1);
+dirTeta_ab = strainmapping.dirTeta;
+
+% Crystal parameters
+teta_ab = unit.ang;
+Rab = [cos(dirTeta_ab*teta_ab) -sin(dirTeta_ab*teta_ab);sin(dirTeta_ab*teta_ab) cos(dirTeta_ab*teta_ab)];
+aDir = [a,0];
+bDir = (Rab*[b;0])';
+unitCoor = unit.coor2D(:,1)*aDir + unit.coor2D(:,2)*bDir;
+
+% Create rotation matrix to expand unit cell
+R = [cos(teta) -sin(teta);sin(teta) cos(teta)];
+unit_rot = ( R*unitCoor' )';
+LattPar = [(R*[a;0])';(R*Rab*[b;0])'];  % LattPar vectors on rows
+
+N = length(coor(:,1));
+coorExp = zeros(N,2);
+types = strainmapping.typesN;
+for i=1:N
+    if types(i,1)~=0
+        coorExp(i,:) = refCoor + LattPar(1,:)*indices(i,1) + LattPar(2,:)*indices(i,2) - unit_rot(types(i,1),:);
+    end
+end
+
+strainmapping.coorExpectedP = coorExp;
 
 coordinates = strainmapping.coordinates;
-teta = strainmapping.teta(1);
-R1 = [cos(-teta) -sin(-teta);sin(-teta) cos(-teta)];
-coordinates = R1*[coordinates(:,1) coordinates(:,2)]';
-coordinates = coordinates';
-
 indices = strainmapping.indices;
-types = strainmapping.typesN;
-a = strainmapping.a;
-error_a = strainmapping.errAP;
-if isnan(error_a)
-    error_a = 0;
-end
-b = strainmapping.b;
-error_b = strainmapping.errBP;
-if isnan(error_b)
-    error_b = 0;
-end
-unit = strainmapping.projUnit;
-% teta = strainmapping.teta(1);
-teta = 0;
-dirTeta_ab = strainmapping.dirTeta;
-teta_ab = unit.ang;
-
-% Rotation matrix
-R = [cos(teta) -sin(teta);sin(teta) cos(teta)];
-
-% Strain will be calculated in x- and y-direction of the image. For this
-% calculation the a and b direction of the sample in view will be used.
-% To calculate the strain components per individual atomic column the
-% displacement with respect to the first columns in the a and b directions 
-% will be used. Both positive and negative a and b directions are used to
-% calculate a sort of average strain per point
-Rab = [cos(dirTeta_ab*teta_ab) -sin(dirTeta_ab*teta_ab);sin(dirTeta_ab*teta_ab) cos(dirTeta_ab*teta_ab)];
-Vstrain = [(R*[a;0])';(R*Rab*[b;0])'];
-
-% Calculate error on strain matrix
-Verror = [(R*[error_a;0])';(R*[0;error_b])'];
-ad_bc = Vstrain(1,1)*Vstrain(2,2)-Vstrain(1,2)*Vstrain(2,1);
-Errad_bc = sqrt(Vstrain(1,1)^2*Verror(2,2)^2 + Vstrain(2,2)^2*Verror(1,1)^2 + ...
-    Vstrain(1,2)^2*Verror(2,1)^2 + Vstrain(2,1)^2*Verror(1,2)^2);
-
-invad_bc = 1/ad_bc;
-Errinvad_bc = sqrt( (-1/(ad_bc^2))^2*Errad_bc^2 );
-
-Vstrain_re = [Vstrain(2,2) -Vstrain(1,2);-Vstrain(2,1) Vstrain(1,1)];
-Verror_re = [Verror(2,2) -Verror(1,2);-Verror(2,1) Verror(1,1)];
-
-% Error on inverse strain matrix
-INVV = invad_bc*Vstrain_re;
-ErrINVV = sqrt( (invad_bc^2*Verror_re.^2) + Vstrain_re.^2*Errinvad_bc^2 );
 
 n1 = size(coordinates,1);
-eps_xx = zeros(n1,2);
-eps_xy = zeros(n1,2);
-eps_yy = zeros(n1,2);
-omg_xy = zeros(n1,2);
-doubleInd = false(n1,1);
-for n=1:n1
-    u = zeros(2,2);
-    e_u = zeros(2,2);
-    v = zeros(2,2);
-    e_v = zeros(2,2);
-    
+eps_aa = zeros(n1,2);
+eps_ab = zeros(n1,2);
+eps_bb = zeros(n1,2);
+omg_ab = zeros(n1,2);
+
+
+% Define the rotation angles and tranformation to a-b
+% teta: angle between a-direction and global x-axis
+% teta_ab: angle between a and b lattice vectors
+
+R = [cos(teta) -sin(teta);sin(teta) cos(teta)];
+Rab = [cos(dirTeta_ab*teta_ab) -sin(dirTeta_ab*teta_ab);sin(dirTeta_ab*teta_ab) cos(dirTeta_ab*teta_ab)];
+
+T = [(R*[1;0])';(R*Rab*[1;0])']'; % a and b vectors on columns
+
+
+
+for n=1:n1  % loop over all atoms
+
     if types(:,1)~=0
+        % Find indeces of neighbors
         % Find points in a direction
-        ind = indices(:,1)==(indices(n,1)+1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1);
-        if sum(ind)==1
-            % Reference point exist
-            u(1,:) = coordinates(ind,1:2) - coordinates(n,1:2) - Vstrain(1,:);
-            e_u(1,:) = sqrt( Verror(1,:).^2 );
-        else
-            u(1,:) = [NaN;NaN];
-            e_u(1,:)  = [NaN;NaN];
-            % Store double coordinates
-            if sum(ind)>1
-                doubleInd(n,1) = true;
-            end
-        end
-
+        neighbors = indices(:,1)==(indices(n,1)+1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1);
         % Find points in -a direction
-        ind = indices(:,1)==(indices(n,1)-1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1);
-        if sum(ind)==1
-            % Reference point exist
-            u(2,:) = coordinates(n,1:2) - coordinates(ind,1:2) - Vstrain(1,:);
-            e_u(2,:) = sqrt( Verror(1,:).^2 );
-        else
-            u(2,:) = [NaN;NaN];
-            e_u(2,:)  = [NaN;NaN];
-            % Store double coordinates
-            if sum(ind)>1
-                doubleInd(n,1) = true;
-            end
-        end
-
-        % If possible, average both displacements
-        if any(isnan(u))
-            u = u(~isnan(u(:,1)),:);
-            e_u = e_u(~isnan(e_u(:,1)),:);
-        else
-            e_u = [sqrt( 1/2*u(1,1)^2*e_u(1,2)^2 + 1/2*u(1,2)^2*e_u(1,1)^2) sqrt( 1/2*u(2,1)^2*e_u(2,2)^2 + 1/2*u(2,2)^2*e_u(2,1)^2)];
-            u = [mean(u(:,1)) mean(u(:,2))];
-        end
-
-
-        % Dind points in b direction
-        ind = indices(:,1)==indices(n,1) & indices(:,2)==(indices(n,2)+1) & types(:,1)==types(n,1);
-        if sum(ind)==1
-            % Reference point exist
-            v(1,:) = coordinates(ind,1:2) - coordinates(n,1:2) - Vstrain(2,:);
-            e_v(1,:) = sqrt( Verror(2,:).^2 );
-        else
-            v(1,:) = [NaN;NaN];
-            e_v(1,:)  = [NaN;NaN];
-            % Store double coordinates
-            if sum(ind)>1
-                doubleInd(n,1) = true;
-            end
-        end
-
+        neighbors = neighbors + (indices(:,1)==(indices(n,1)-1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1));
+        % Find points in b direction
+        neighbors = neighbors + (indices(:,1)==indices(n,1) & indices(:,2)==(indices(n,2)+1) & types(:,1)==types(n,1));
         % Find points in -b direction
-        ind = indices(:,1)==indices(n,1) & indices(:,2)==(indices(n,2)-1) & types(:,1)==types(n,1);
-        if sum(ind)==1
-            % Reference point exist
-            v(2,:) = coordinates(n,1:2) - coordinates(ind,1:2) - Vstrain(2,:);
-            e_v(2,:) = sqrt( Verror(2,:).^2 );
-        else
-            v(2,:) = [NaN;NaN];
-            e_v(2,:)  = [NaN;NaN];
-            % Store double coordinates
-            if sum(ind)>1
-                doubleInd(n,1) = true;
+        neighbors = neighbors + (indices(:,1)==indices(n,1) & indices(:,2)==(indices(n,2)-1) & types(:,1)==types(n,1));
+        neighbors = logical(neighbors);
+
+        numberNeighbors = sum(neighbors);
+
+
+        ref_disp = coorExp(neighbors,:) - coorExp(n,:);
+        def_disp = coordinates(neighbors,1:2) - coordinates(n,1:2);
+
+        % Store the current warning state
+        warning('error', 'MATLAB:singularMatrix');
+        warning('error', 'MATLAB:nearlySingularMatrix');
+
+        try
+            % Suppress the specific warning
+            warning('off', 'MATLAB:singularMatrix');
+            warning('off', 'MATLAB:nearlySingularMatrix');
+
+            % Compute deformation gradient F : F*solve def_disp = ref_disp
+            F = ref_disp \ def_disp;
+
+            % Transform deformation gradient tensor to the local a, b directions
+            % F_ab = T * F * T';
+            F_ab = T \ F * T;
+
+            % Compute strain tensors
+            % GreenLagrangeStrain = 0.5 *  0.5 * (F' * F - eye(2)); % valid for very large deformations
+            CauchyStrain_ab = 0.5 * (F_ab + F_ab') - eye(2);
+
+            eps_aa(n) = CauchyStrain_ab(1,1);
+            eps_bb(n) = CauchyStrain_ab(2,2);
+            eps_ab(n) = CauchyStrain_ab(2,1);
+            % Compute the rotation component (antisymmetric part of F)
+            R = 0.5 * (F - F');  % Rotation tensor
+            omg_ab(n) = R(1,2);
+
+        catch ME
+            % Check if the error is related to a (nearly) singular matrix
+            if strcmp(ME.identifier, 'MATLAB:singularMatrix') || strcmp(ME.identifier, 'MATLAB:nearlySingularMatrix')
+                eps_xx(n) = NaN;
+                eps_yy(n) = NaN;
+                eps_xy(n) = NaN;
+                omg_xy(n) = NaN;
+            else
+                % Re-throw the error if it's not related to a singular matrix
+                rethrow(ME);
             end
         end
+        % Re-enable the warning
+        warning('on', 'MATLAB:singularMatrix');
+        warning('on', 'MATLAB:nearlySingularMatrix');
 
-        % If possible, average both displacements
-        if any(isnan(v))
-            v = v(~isnan(v(:,1)),:);
-            e_v = e_v(~isnan(e_v(:,1)),:);
-        else
-            e_v = [sqrt( 1/2*v(1,1)^2*e_v(1,2)^2 + 1/2*v(1,2)^2*e_v(1,1)^2) sqrt( 1/2*v(2,1)^2*e_v(2,2)^2 + 1/2*v(2,2)^2*e_v(2,1)^2)];
-            v = [mean(v(:,1)) mean(v(:,2))];
-        end
-    else
-        u = [];
-        v = [];
-    end
-    if ~isempty(u) && ~isempty(v)
-        D = INVV*[u;v];
-        Eerr = [sqrt( u(1)^2*ErrINVV(1,1)^2 + INVV(1,1)^2*e_u(1)^2 + v(1)^2*ErrINVV(1,2)^2 + INVV(1,2)^2*e_v(1)^2 ),...
-            sqrt( u(2)^2*ErrINVV(1,1)^2 + INVV(1,1)^2*e_u(2)^2 + v(2)^2*ErrINVV(1,2)^2 + INVV(1,2)^2*e_v(2)^2 );...
-            sqrt( u(1)^2*ErrINVV(2,1)^2 + INVV(2,1)^2*e_u(1)^2 + v(1)^2*ErrINVV(2,2)^2 + INVV(2,2)^2*e_v(1)^2 ),...
-            sqrt( u(2)^2*ErrINVV(2,1)^2 + INVV(2,1)^2*e_u(2)^2 + v(2)^2*ErrINVV(2,2)^2 + INVV(2,2)^2*e_v(2)^2 )];
-    else
-        D = [NaN NaN;NaN NaN];
-        Eerr = [NaN NaN;NaN NaN];
-    end
-    E = 1/2*(D+D');
-    O = 1/2*(D-D');
-    eps_xx(n,1) = E(1,1);
-    eps_xy(n,1) = E(2,1);
-    eps_yy(n,1) = E(2,2);
-    omg_xy(n,1) = O(2,1);
-    eps_xx(n,2) = Eerr(1,1);
-    eps_xy(n,2) = sqrt( 0.5*Eerr(2,1).^2 + 0.5*Eerr(1,2).^2 );
-    omg_xy(n,2) = Eerr(1,2);
-    eps_yy(n,2) = Eerr(2,2);
-end
-if any(doubleInd)
-    dI = find(doubleInd);
-    str = '';
-    for n=1:length(dI)
-        str = [str,'(',num2str(coordinates(dI(n),1)),',',num2str(coordinates(dI(n),2)),')'];
-        if n<length(dI)-1
-            str = [str,', '];
-        elseif n<length(dI)
-            str = [str,' and '];
-        end
-    end
-    warndlg(['Double coordinates found at: ',str]);
-end
 
-strainmapping.eps_aaP = eps_xx;
-strainmapping.eps_bbP = eps_yy;
-strainmapping.eps_abP = eps_xy;
-strainmapping.omg_abP = omg_xy;
+        if numberNeighbors == 1
+            eps_aa(n) = NaN;
+            eps_bb(n) = NaN;
+            eps_ab(n) = NaN;
+            omg_ab(n) = NaN;
+        end
+
+    end
+
+end
+strainmapping.eps_aaP = eps_aa;
+strainmapping.eps_bbP = eps_bb;
+strainmapping.eps_abP = eps_ab;
+strainmapping.omg_abP = omg_ab;
