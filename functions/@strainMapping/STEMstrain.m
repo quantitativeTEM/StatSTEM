@@ -52,7 +52,6 @@ end
 strainmapping.coorExpectedP = coorExp;
 
 coordinates = strainmapping.coordinates;
-indices = strainmapping.indices;
 
 n1 = size(coordinates,1);
 eps_xx = zeros(n1,2);
@@ -60,22 +59,16 @@ eps_xy = zeros(n1,2);
 eps_yy = zeros(n1,2);
 omg_xy = zeros(n1,2);
 
-
 for n=1:n1  % loop over all atoms
 
     if types(n,1)~=0
         % Find indices of neighbors
-        % Find points in a direction
-        neighbors = indices(:,1)==(indices(n,1)+1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1);
-        % Find points in -a direction
-        neighbors = neighbors + (indices(:,1)==(indices(n,1)-1) & indices(:,2)==indices(n,2) & types(:,1)==types(n,1));
-        % Find points in b direction
-        neighbors = neighbors + (indices(:,1)==indices(n,1) & indices(:,2)==(indices(n,2)+1) & types(:,1)==types(n,1));
-        % Find points in -b direction
-        neighbors = neighbors + (indices(:,1)==indices(n,1) & indices(:,2)==(indices(n,2)-1) & types(:,1)==types(n,1));
-        neighbors = logical(neighbors);
-        numberNeighbors = sum(neighbors);
+        r_cutoff = 1.1*max([a b]);  % Set radius based on lattice spacing
+        distances = vecnorm(coorExp - coorExp(n,:), 2, 2);  % Euclidean distances
+        neighbors = find(distances < r_cutoff);
+        neighbors(neighbors == n) = [];  % remove self
 
+        numberNeighbors = sum(neighbors);
 
         ref_disp = coorExp(neighbors,:) - coorExp(n,:);
         def_disp = coordinates(neighbors,1:2) - coordinates(n,1:2);
@@ -89,20 +82,23 @@ for n=1:n1  % loop over all atoms
             warning('off', 'MATLAB:singularMatrix');
             warning('off', 'MATLAB:nearlySingularMatrix');
 
-
-            % Compute deformation gradient F : F*solve def_disp = ref_disp
+            % Compute deformation gradient F: F*solve def_disp = ref_disp
             F = ref_disp \ def_disp;
 
-            % Compute strain tensors
-            % GreenLagrangeStrain = 0.5 *  0.5 * (F' * F - eye(2)); % valid for very large deformations
-            CauchyStrain = 0.5 * (F + F') - eye(2);
 
-            eps_xx(n) = CauchyStrain(1,1);
-            eps_yy(n) = CauchyStrain(2,2);
-            eps_xy(n) = CauchyStrain(2,1);
+            % Compute strain tensors
+            % Strain = 0.5 * (F' * F - eye(2)); % valid for very large deformations: GreenLagrangeStrain
+            Strain = 0.5 * (F + F') - eye(2); % Cauchy strain
+
+            eps_xx(n) = Strain(1,1);
+            eps_yy(n) = Strain(2,2);
+            eps_xy(n) = Strain(2,1);
+
             % Compute the rotation component (antisymmetric part of F)
             R = 0.5 * (F - F');  % Rotation tensor
             omg_xy(n) = R(1,2);
+            % omg_xy(n) = rad2deg(omg_xy(n));     % if needed in degrees
+
 
         catch ME
             % Check if the error is related to a (nearly) singular matrix
@@ -132,10 +128,14 @@ for n=1:n1  % loop over all atoms
         eps_yy(n) = NaN;
         eps_xy(n) = NaN;
         omg_xy(n) = NaN;
-        end
+    end
 end
 
 strainmapping.eps_xxP = eps_xx;
 strainmapping.eps_yyP = eps_yy;
 strainmapping.eps_xyP = eps_xy;
 strainmapping.omg_xyP = omg_xy;
+
+
+
+end
