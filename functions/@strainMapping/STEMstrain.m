@@ -85,7 +85,6 @@ for n=1:n1  % loop over all atoms
             % Compute deformation gradient F: F*solve def_disp = ref_disp
             F = ref_disp \ def_disp;
 
-
             % Compute strain tensors
             % Strain = 0.5 * (F' * F - eye(2)); % valid for very large deformations: GreenLagrangeStrain
             Strain = 0.5 * (F + F') - eye(2); % Cauchy strain
