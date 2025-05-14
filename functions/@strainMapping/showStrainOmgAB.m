@@ -34,6 +34,9 @@ data = obj.omg_ab(ind,1);
 [~,L,U,~] = isoutlier(data);
 % range = max( [max(data),-min(data)] );
 range = max([-L,U]);
+if range == 0
+    range = 0.001;
+end
 range = [-range,range];
 
 scatterPlot2Axes(ax,ax2,obj.coordinates(ind,1:2),data,range,nameTag,scaleMarker,'Strain %g')
