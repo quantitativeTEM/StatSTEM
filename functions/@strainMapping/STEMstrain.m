@@ -98,7 +98,6 @@ for n=1:n1  % loop over all atoms
             omg_xy(n) = R(1,2);
             % omg_xy(n) = rad2deg(omg_xy(n));     % if needed in degrees
 
-
         catch ME
             % Check if the error is related to a (nearly) singular matrix
             if strcmp(ME.identifier, 'MATLAB:singularMatrix') || strcmp(ME.identifier, 'MATLAB:nearlySingularMatrix')
