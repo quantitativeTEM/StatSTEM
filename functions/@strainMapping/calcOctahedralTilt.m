@@ -97,9 +97,9 @@ if dirTeta_ab==1
 else
     shiftB = -1;
 end
-
+% 
 % figure, plot(obj.coordinates(:,1), obj.coordinates(:,2),'.'), axis equal, hold on
-
+% set(gca, 'YDir','reverse')
 if nO==2
     obj.message = '[100]-direction indentified, octahedral tilt calculate per unit cell by using oxygen atoms at the left,right,top, and bottom.';
     for i=1:(maxIndA-minIndA+1)
@@ -120,17 +120,17 @@ if nO==2
                 % plot(obj.coordinates(indCor,1), obj.coordinates(indCor,2), 'ro')
                 % plot(obj.coordinates(indL,1), obj.coordinates(indL,2), 'go')
                 % plot(obj.coordinates(indR,1), obj.coordinates(indR,2), 'go')
-                % plot(obj.coordinates(indT,1), obj.coordinates(indT,2), 'go')
-                % plot(obj.coordinates(indB,1), obj.coordinates(indB,2), 'go')
+                % plot(obj.coordinates(indT,1), obj.coordinates(indT,2), 'bo')
+                % plot(obj.coordinates(indB,1), obj.coordinates(indB,2), 'bo')
 
                 %coorCor = obj.coordinates(indCor,1:2);
                 % Angle in a-direction
-                dirA = obj.coordinates(indR,1:2)-obj.coordinates(indL,1:2);
+                dirA = obj.coordinates(indB,1:2)-obj.coordinates(indT,1:2);
                 dirA = Ra*dirA';
                 angA = atan2(dirA(2),dirA(1));
 
                 % Angle in b-direction
-                dirB = obj.coordinates(indT,1:2)-obj.coordinates(indB,1:2);
+                dirB = obj.coordinates(indL,1:2)-obj.coordinates(indR,1:2);
                 dirB = Rb*dirB';
                 angB = atan2(dirB(2),dirB(1));
 
@@ -180,7 +180,7 @@ mean2 = mean(ind2(~isnan(ind2)));
 if isnan(mean2)
     mean2 = 0;
 end
-% Reverse octahedral tilt as clock - counter-clock wise pattern is espected
+% Reverse octahedral tilt as clock - counter-clock wise pattern is expected
 ang(1:2:end,2:2:end) = -ang(1:2:end,2:2:end);
 ind3 = ang(1:2:end,2:2:end);
 mean3 = mean(ind3(~isnan(ind3)));
