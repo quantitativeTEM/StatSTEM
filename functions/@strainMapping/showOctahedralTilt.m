@@ -1,4 +1,4 @@
-function showOctahedralTilt(obj)
+function showOctahedralTilt(obj,lwidth)
 % showOctahedralTilt - make a octahedral tilt map in image
 %
 %   syntax - showOctahedralTilt(obj)
@@ -24,12 +24,23 @@ if ~isempty(obj.GUI)
 else
     ax = gca;
 end
+
 if isempty(obj.ax2)
     img = get(ax,'Parent');
     ax2 = axes('Parent',img,'units','normalized');
     axes(ax)
 else
     ax2 = obj.ax2;
+end
+
+if nargin<2
+    if isempty(obj.mscale)
+        scaleMarker = 1;
+    else
+        scaleMarker = obj.mscale;
+    end
+else
+    scaleMarker = lwidth;
 end
 
 nameTag = 'Octahedral tilt';
@@ -117,7 +128,7 @@ if vM<2015
             obs = get(child(i),'CData');
             if size(obs,3)==1
                 minplaneimg = min(min(obs));
-                obs = (floor(((obs - minplaneimg) ./ (max(max(obs)) - minplaneimg)) * 255)); 
+                obs = (floor(((obs - minplaneimg) ./ (max(max(obs)) - minplaneimg)) * 255));
                 obs = ind2rgb(obs,gray(256));
                 set(child(i),'CData',obs);
             end
@@ -127,43 +138,53 @@ if vM<2015
 end
 
 %%
+% Assume: coordL, coordT, coordR, coordB are N x 2 matrices
+N = size(obj.octahedralTilt, 1);
+
+% Vertices: each quad has 4 points, total = N*4 vertices
+vertices = zeros(N*4, 2);
+faces = zeros(N, 4);  % Each face has 4 indices into vertices
+
+for i = 1:N
+    idx = (i-1)*4 + (1:4);  % indices for the i-th quad
+    vertices(idx, :) = [coordL(i,:); coordT(i,:); coordR(i,:); coordB(i,:)];
+    faces(i, :) = idx;  % the i-th face
+end
+
+%% 1. Define color range
+angles = obj.octahedralTilt(:,3);
+range = [min(angles), max(angles)];
+
+%% 2. Create custom colormap
+cmap = jet(512);                 % More precision
+c_x = linspace(range(1), range(2), size(cmap, 1));
+
+%% 3. Map angles to RGB colors using your helper
+RGBvec = getRGBvec(cmap, c_x, angles, 'exact');  % size = [N x 3]
+
+%% 4. Expand face colors to match patch vertices (4 vertices per face)
+RGBvecP = repelem(RGBvec, 4, 1);  % size = [4N x 3]
 
 
-
-minAngles = min(obj.octahedralTilt(:,3)); % Set the minimum angle for scaling
-maxAngles = max(obj.octahedralTilt(:,3)); % Set the maximum angle for scaling
-
-% Define a colormap (e.g., jet)
-% xC = linspace(0,1,33);
-% cmap = [xC',zeros(33,1),ones(33,1)];
-% xC = linspace(1,0,33);
-% cmap = [cmap;[ones(32,1),zeros(32,1),xC(2:end)']];
-% cmap = cool(256);
-cmap = jet(65);
-
+% Plot all patches at once
 hold(ax, 'on')
 
-for i = 1: length(obj.octahedralTilt)
+% Patch command with edge coloring:
+cr = caxis(ax);
+hPatch = patch(ax, 'Faces', faces, 'Vertices', vertices, ...
+               'FaceVertexCData', RGBvecP, ...
+               'FaceColor', 'flat', ...
+               'EdgeColor', 'none', ...
+               'FaceAlpha', 0.75, ...
+               'LineWidth', scaleMarker, ...
+               'Visible', 'on',...
+               'Tag', nameTag);
 
-    % Normalize the distance to scale between 1 and 256
-    clippedAngles = min(max(obj.octahedralTilt(i,3), minAngles), maxAngles);
-    normalizedAngle = round(((clippedAngles - minAngles) / (maxAngles - minAngles)) * 64) + 1;
-
-    % Get the color from the colormap for the line
-    dotColor = cmap(normalizedAngle, :);
-
-    % Create a second axes for the color-coded line and points
-
-    h(1) = plot(ax, [coordL(i,1) coordT(i,1) coordR(i,1) coordB(i,1) coordL(i,1)],...
-        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)],'-', 'LineWidth', 2, 'Color', dotColor, 'Tag', nameTag);
-    h(2) = plot(ax, [coordL(i,1) coordT(i,1) coordR(i,1) coordB(i,1) coordL(i,1)],...
-        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)],'r.', 'MarkerSize', 5, 'Tag',nameTag);
-    h(3) = fill(ax, [coordL(i,1) coordT(i,1) coordR(i,1) coordB(i,1) coordL(i,1)],...
-        [coordL(i,2) coordT(i,2) coordR(i,2) coordB(i,2) coordL(i,2)], dotColor, 'FaceAlpha', 0.5, 'EdgeColor','none', 'Tag', nameTag);
-plot(ax2,[],[],'Tag',nameTag)
-
-
-end
+% Plot corner dots (optional, if still desired)
+cornerCoords = [coordL; coordT; coordR; coordB];  % 4N x 2
+hDots = plot(ax, cornerCoords(:,1), cornerCoords(:,2), ...
+             'r.', 'MarkerSize', scaleMarker*2.5, 'Tag', nameTag);
+caxis(ax,cr)
 
 % Link the axes and make the second axes transparent
 linkaxes([ax, ax2]); % Synchronize the axes
@@ -178,8 +199,9 @@ hold(ax, 'off')
 
 
 % Add a colorbar for the distance visualization
+plot(ax2,[],[],'Tag',nameTag)
 colormap(ax2, cmap); % Apply the jet colormap to the second axes
-caxis(ax2, [minAngles maxAngles]); % Scale the colorbar to the distance range
+caxis(ax2, range); % Scale the colorbar to the distance range
 % c=colorbar(ax2, 'Position', [0.85, 0.15, 0.03, 0.7], 'FontSize',20, 'FontWeight', 'bold'); % Adjust colorbar position
 % ylabel(c, 'octahedral tilt (degrees)', 'FontSize', 20)
 
@@ -192,7 +214,6 @@ h2 = colorbar(ax2,'Position',pos);
 ylabel(h2, nameTag, 'Tag','Colorbar')
 
 % hold(ax,'off')
-% % Create UIMenu for colors
-% createUIMenu2Axes(ax2,h2,h,obj.octahedralTilt(:,3), [minAngles maxAngles])
-% axes(ax); % Make axes 1 current axis
-
+% Create UIMenu for colors
+createUIMenu2Axes(ax2,h2,hPatch,angles, range, 'quiver')
+axes(ax); % Make axes 1 current axis
