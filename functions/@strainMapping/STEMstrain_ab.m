@@ -78,7 +78,7 @@ for n=1:n1  % loop over all atoms
         neighbors = find(distances < r_cutoff);
         neighbors(neighbors == n) = [];  % remove self
 
-        numberNeighbors = sum(neighbors);
+        numberNeighbors = length(neighbors);
 
         ref_disp = coorExp(neighbors,:) - coorExp(n,:);
         def_disp = coordinates(neighbors,1:2) - coordinates(n,1:2);
