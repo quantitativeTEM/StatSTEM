@@ -169,22 +169,38 @@ RGBvecP = repelem(RGBvec, 4, 1);  % size = [4N x 3]
 % Plot all patches at once
 hold(ax, 'on')
 
-% Patch command with edge coloring:
+% Plot all patches at once with transparent faces but no edges
+hold(ax, 'on')
+
 cr = caxis(ax);
 hPatch = patch(ax, 'Faces', faces, 'Vertices', vertices, ...
                'FaceVertexCData', RGBvecP, ...
                'FaceColor', 'flat', ...
                'EdgeColor', 'none', ...
-               'FaceAlpha', 0.75, ...
+               'FaceAlpha', 0.5, ...
                'LineWidth', scaleMarker, ...
-               'Visible', 'on',...
+               'Visible', 'on', ...
                'Tag', nameTag);
 
-% Plot corner dots (optional, if still desired)
+% Preallocate line handles array
+hEdges = gobjects(N,1);
+
+% Draw edges as colored lines matching faces, save handles
+for i = 1:N
+    faceVerts = vertices(faces(i,:), :);  % 4x2 vertices for face i
+    faceColor = RGBvec(i, :);              % RGB color for this face
+    edgeCoords = [faceVerts; faceVerts(1,:)];  % close loop
+    
+    hEdges(i) = plot(ax, edgeCoords(:,1), edgeCoords(:,2), ...
+                     '-', 'Color', faceColor, 'LineWidth', scaleMarker, 'Tag', nameTag);
+end
+
+% Plot corner dots (optional)
 cornerCoords = [coordL; coordT; coordR; coordB];  % 4N x 2
 hDots = plot(ax, cornerCoords(:,1), cornerCoords(:,2), ...
              'r.', 'MarkerSize', scaleMarker*2.5, 'Tag', nameTag);
-caxis(ax,cr)
+
+caxis(ax, cr)
 
 % Link the axes and make the second axes transparent
 linkaxes([ax, ax2]); % Synchronize the axes
@@ -215,5 +231,15 @@ ylabel(h2, nameTag, 'Tag','Colorbar')
 
 % hold(ax,'off')
 % Create UIMenu for colors
-createUIMenu2Axes(ax2,h2,hPatch,angles, range, 'quiver')
+% createUIMenu2Axes(ax2,h2,hPatch,angles, range, 'quiver',hEdges)
+createUIMenu2Axes(ax2, h2, hPatch, angles, range, 'quiver', ...
+    @(RGBvec) updateEdgeColorsLines(hEdges, RGBvec));
 axes(ax); % Make axes 1 current axis
+
+function updateEdgeColorsLines(hEdges, RGBvec)
+    for k = 1:numel(hEdges)
+        if isgraphics(hEdges(k))
+            set(hEdges(k), 'Color', RGBvec(k,:));
+        end
+    end
+

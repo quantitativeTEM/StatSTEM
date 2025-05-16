@@ -170,5 +170,7 @@ else
     ylabel(h2,['Lattice parameter (',char(197),')'])
 end
 % Create UIMenu for colors
-createUIMenu2Axes(ax2,h2,h,usrData,range,'quiver')
+% createUIMenu2Axes(ax2,h2,h,usrData,range,'quiver')
+createUIMenu2Axes(ax2, h2, h, usrData, range, 'quiver', true);
+
 axes(ax); % Make axes 1 current axis
