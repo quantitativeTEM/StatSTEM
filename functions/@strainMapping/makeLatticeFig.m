@@ -18,6 +18,9 @@ function makeLatticeFig(obj,type,lwidth)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
+delete(findall(gca, 'Tag', 'Octahedral tilt'))  % Remove tilt graphics
+
+
 if isempty(obj.latticeA)
     return
 end
