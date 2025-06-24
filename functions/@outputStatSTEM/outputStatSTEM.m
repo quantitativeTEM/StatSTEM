@@ -165,7 +165,7 @@ classdef outputStatSTEM < StatSTEMfile
                 val = val & obj.volumes>=obj.rangeVol(1) & obj.volumes<=obj.rangeVol(2);
             end
             if ~isempty(obj.selType)
-                val = val & obj.coordinates(:,3)==obj.selType;
+                val = val & logical(sum(obj.coordinates(:,3)==obj.selType,2));
             end
         end
         
