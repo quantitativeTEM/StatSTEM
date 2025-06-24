@@ -40,7 +40,7 @@ if state
     set(0,'defaultfigureposition',figpos);
     
     % Select atom type for atomcounting
-    [type,output] = listdlg('ListString',types,'SelectionMode','Single','Name','Select atom type',...
+    [type,output] = listdlg('ListString',types,'SelectionMode','Multiple','Name','Select atom type',...
         'PromptString','Select atom type for atomcounting:');
     drawnow; pause(0.05); % MATLAB hang 2013 version
     
