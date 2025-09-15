@@ -31,9 +31,9 @@ nameTag = [char(969),'_xy'];
 scaleMarker = obj.mscale;
 ind = ~isnan(obj.omg_xy(:,1));
 data = obj.omg_xy(ind,1);
-[~,L,U,~] = isoutlier(data);
-% range = max( [max(data),-min(data)] );
-range = max([-L,U]);
+% [~,L,U,~] = isoutlier(data);
+range = max( [max(data),-min(data)] );
+% range = max([-L,U]);
 if range == 0
     range = 0.001;
 end

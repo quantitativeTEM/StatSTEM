@@ -31,9 +31,9 @@ nameTag = [char(949),'_bb'];
 scaleMarker = obj.mscale;
 ind = ~isnan(obj.eps_bb(:,1));
 data = obj.eps_bb(ind,1);
-[~,L,U,~] = isoutlier(data);
-% range = max( [max(data),-min(data)] );
-range = max([-L,U]);
+% [~,L,U,~] = isoutlier(data);
+range = max( [max(data),-min(data)] );
+% range = max([-L,U]);
 if range == 0
     range = 0.001;
 end
