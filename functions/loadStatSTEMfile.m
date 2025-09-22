@@ -29,20 +29,30 @@ addpath([p,filesep,'LoadFiles']);
 if nargin<1
     % Check default path
     PathName = getDefaultPath();
+
     % Let the user select an input file
     supFiles = {'*.mat;*.ser;*.dm3;*.dm4;*.txt;*.TXT','Supported Files (*.mat,*.ser,*.dm3,*.dm4,*.txt)';...
         '*.mat','MATLAB Files (*.mat)';'*.ser','SER Files (*.ser)';...
         '*.dm3;*.dm4','DM Files (*.dm3,*dm4)';...
         '*.txt;*.TXT','TXT Files (*.txt)';'*.*',  'All Files (*.*)'};
-    [FileName,PathName] = uigetfile(supFiles,'Select a file',PathName);
-    if FileName==0
+
+    [fShort,pShort] = uigetfile(supFiles,'Select a file',PathName);
+    if isequal(fShort,0)
         file = [];
         message = 'Loading new file cancelled';
         return
     end
-    updatePath(PathName)
-    FileName = [PathName,filesep,FileName];
+
+    % ---- NEW: convert any 8.3 short names to full long path ----
+    fullShort = fullfile(pShort,fShort);
+    % Use Java to get the canonical (long) path
+    FileName  = char(java.io.File(fullShort).getCanonicalPath());
+    updatePath(fileparts(FileName));
+else
+    % If user passed a name, also normalize it
+    FileName = char(java.io.File(FileName).getCanonicalPath());
 end
+
 [~, ~, ext] = fileparts(FileName);
 switch ext
     case '.mat'
