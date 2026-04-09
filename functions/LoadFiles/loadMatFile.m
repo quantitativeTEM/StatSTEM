@@ -126,7 +126,7 @@ elseif sum(double(ind_HMM))>0
 else
     % loaded matlab file must be an image
     if length(fNames)==1 && ~isa(file.(fNames{1}),'struct') && size(file.(fNames{1}),1)>1 && size(file.(fNames{1}),2)>1
-        file.input = inputStatSTEM(file.(fNames{1}));
+        file.input = inputStatSTEM(double(file.(fNames{1})));
         pUC = file.input.projUnit;
         
         % Update filename
