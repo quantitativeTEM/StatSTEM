@@ -73,7 +73,8 @@ set(tab,'Title',tabName)
 
 %% The empty tab will be used to load the file to
 % Create listboxs for selecting which figure is shown
-usr.figOptions.selImg.listbox = uicontrol('Parent',usr.figOptions.selImg.main,'Style','listbox','units','normalized','Position',[0 0 1 1],'String',{},'CallBack',{@imageChanged,tab,h});
+usr.figOptions.selImg.listbox = uicontrol('Parent',usr.figOptions.selImg.main,'Style','listbox','units','normalized','Position',[0 0 1 1],'String',{});
+set(usr.figOptions.selImg.listbox,'CallBack',@(src,evt) imageChanged(src,evt,tab,h));
 
 % Update userdata of tab
 set(tab,'Userdata',usr);

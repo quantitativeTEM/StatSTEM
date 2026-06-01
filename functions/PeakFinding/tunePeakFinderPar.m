@@ -49,19 +49,19 @@ hpf.fig = figure('units','pixels','outerposition',[screensize(3)/2-s(1)/2 screen
 
 % Create two panels, one for showing the image and one for tuning the
 % parameters
-hpf.image.pan = uipanel('Parent',hpf.fig,'units','pixels','Position',[5 5 550 412],'ShadowColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
+hpf.image.pan = uipanel('Parent',hpf.fig,'units','pixels','Position',[5 5 550 412],'BorderColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
 hpf.image.ax = axes('Parent',hpf.image.pan);
 hpf.image.title = uicontrol('Parent',hpf.fig,'Style','text','String','Image','units','pixels','Position',[10 406 40 18],'FontSize',10,'BackgroundColor',[0.8 0.8 0.8]);
 % set(hpf.image.pan,'units','normalized')
 % set(hpf.image.title,'units','normalized')
 
-hpf.par.pan = uipanel('Parent',hpf.fig,'units','pixels','Position',[560 35 230 382],'ShadowColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
+hpf.par.pan = uipanel('Parent',hpf.fig,'units','pixels','Position',[560 35 230 382],'BorderColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
 hpf.par.title = uicontrol('Parent',hpf.fig,'Style','text','String','Parameters','units','pixels','Position',[565 406 70 18],'FontSize',10,'BackgroundColor',[0.8 0.8 0.8]);
 % set(hpf.par.pan,'units','normalized')
 % set(hpf.par.title,'units','normalized')
 
 % Create panel to indicate the purpose of the program
-hpf.help.pan = uipanel('Parent',hpf.fig,'units','pixels','Position',[5 427 785 38],'ShadowColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
+hpf.help.pan = uipanel('Parent',hpf.fig,'units','pixels','Position',[5 427 785 38],'BorderColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
 str = 'In order to help the peak finder program to find the correct local maxima, noise should be removed from the image. Select one or multiple filters to make the image smooth. A threshold value can be added to remove background noise.';
 hpf.help.text = uicontrol('Parent',hpf.help.pan,'Style','text','String',str,'units','normalized','Position',[0 0 1 1],'FontSize',10,'BackgroundColor',[0.8 0.8 0.8],'horizontalAlignment', 'left');
 % set(hpf.help.pan,'units','normalized')

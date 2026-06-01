@@ -80,10 +80,12 @@ data = [types,colors];
 
 % First create a new figure
 addPix = 17.8;
-if Ntypes>10
-    Ntypes = 10;
+NtypesDisplay = Ntypes;
+if NtypesDisplay>10
+    NtypesDisplay = 10;
     addPix = 0;
 end
+Ntypes = NtypesDisplay;
 
 %check if input is in char a rgb format
 if size(colors,2)==1
@@ -91,28 +93,30 @@ if size(colors,2)==1
     cnames = {'Type','Color'};
     cedit = [false true];
     cformat = {'char','char'};
-    cwidth = {70 120+addPix};
+    cwidth = {80 (300+addPix)/3 (300+addPix)/3 (300+addPix)/3};
 elseif size(colors,2)==3
     RGB = 1;
     cnames = {'Type','R','G','B'};
     cedit = [false true true true];
     cformat = {'char','numeric','numeric','numeric'};
-    cwidth = {70 (120+addPix)/3 (120+addPix)/3 (120+addPix)/3};
+    cwidth = {80 (300+addPix)/3 (300+addPix)/3 (300+addPix)/3};
 else
     error('Invalid input structure of colors argument')
 end
 
-s = [234 145+18.25*Ntypes];
-hfig = figure('units','pixels','outerposition',[cent(1)-s(1)/2 cent(2)-s(2)/2 s(1) s(2)],'Name','Edit marker colors','NumberTitle','off','Visible','on','Resize','off','DeleteFCN',@deleteFigure,'MenuBar','none','Color',[0.94,0.94,0.94]);
-text = uicontrol('Parent',hfig,'Style','Text','String','Used marker colors for each atom type','Position',[10 90+18.25*Ntypes 193 22],'BackgroundColor',[0.94,0.94,0.94]);
-colortext = uicontrol('Parent',hfig,'Style','Text','String','Color Mode:','Position',[10 65+18.25*Ntypes 64 22],'BackgroundColor',[0.94,0.94,0.94]);
-colorSTR = uicontrol('Parent',hfig,'Style','togglebutton','String','String','Position',[90 70+18.25*Ntypes 64 22],'Value',~RGB);
-colorRGB = uicontrol('Parent',hfig,'Style','togglebutton','String','RGB','Position',[154 70+18.25*Ntypes 64 22],'Value',RGB);
-table = uitable('Parent',hfig,'Position',[10 45 209 18*Ntypes+22],'ColumnFormat',cformat,'Data',data,'ColumnEditable',cedit,'RowName',[],'ColumnName',cnames,...
+tableW = 395;
+tableH = max(100, 32*Ntypes+50);
+s = [tableW+50, tableH+200];
+hfig = figure('units','pixels','outerposition',[cent(1)-s(1)/2 cent(2)-s(2)/2 s(1) s(2)],'Name','Edit marker colors','NumberTitle','off','Visible','on','Resize','on','DeleteFCN',@deleteFigure,'MenuBar','none','Color',[0.94,0.94,0.94]);
+text = uicontrol('Parent',hfig,'Style','Text','String','Used marker colors for each atom type','Position',[10 tableH+100 tableW-20 22],'BackgroundColor',[0.94,0.94,0.94]);
+colortext = uicontrol('Parent',hfig,'Style','Text','String','Color Mode:','Position',[10 tableH+70 64 22],'BackgroundColor',[0.94,0.94,0.94]);
+colorSTR = uicontrol('Parent',hfig,'Style','togglebutton','String','String','Position',[90 tableH+70 80 22],'Value',~RGB);
+colorRGB = uicontrol('Parent',hfig,'Style','togglebutton','String','RGB','Position',[175 tableH+70 80 22],'Value',RGB);
+table = uitable('Parent',hfig,'Position',[10 45 tableW tableH],'ColumnFormat',cformat,'Data',data,'ColumnEditable',cedit,'RowName',[],'ColumnName',cnames,...
     'ColumnWidth',cwidth);
 
-saveBut = uicontrol('Parent',hfig,'Style','pushbutton','String','OK','Position',[10 10 100 22],'Callback',{@storeColor,hfig});
-cancelBut = uicontrol('Parent',hfig,'Style','pushbutton','String','Cancel','Position',[120 10 100 22],'Callback',{@cancelColor,hfig});
+saveBut = uicontrol('Parent',hfig,'Style','pushbutton','String','OK','Position',[10 10 140 22],'Callback',{@storeColor,hfig});
+cancelBut = uicontrol('Parent',hfig,'Style','pushbutton','String','Cancel','Position',[160 10 140 22],'Callback',{@cancelColor,hfig});
 
 set(colorSTR,'Callback',{@rgb2str,colorRGB})
 set(colorRGB,'Callback',{@str2rgb,colorSTR})

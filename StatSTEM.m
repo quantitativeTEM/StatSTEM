@@ -1,3 +1,4 @@
+%% 
 function StatSTEM()
 % StatSTEM is a interactive program to evaluate HAADF STEM images
 % 
@@ -38,8 +39,13 @@ v = version('-release');
 v = str2double(v(1:4));
 if ispc
     warning off all
-    opengl hardware
     warning on all
+end
+
+% Set OpenGL hardware rendering for MATLAB versions that support it
+v = str2double(version('-release'));
+if v < 2026
+    opengl hardware
 end
 
 % The structure 'h' will be the main structure containing all the
@@ -75,7 +81,7 @@ h = panelMaker(h,'Fit Model',isdeployed);
 h = panelMaker(h,'Analysis',isdeployed);
 
 % Create panel for loading and storing files
-h.left.loadStore.panel = uipanel('Parent',h.left.main,'units','normalized','Position',[0 0 1 0.1],'Title','Load/save files','FontSize',10);%,'ShadowColor',[0.95 0.95 0.95],'ForegroundColor',[0.95 0.95 0.95],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.95 0.95 0.95]);
+h.left.loadStore.panel = uipanel('Parent',h.left.main,'units','normalized','Position',[0 0 1 0.1],'Title','Load/save files','FontSize',10);%,'BorderColor',[0.95 0.95 0.95],'ForegroundColor',[0.95 0.95 0.95],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.95 0.95 0.95]);
 h.left.loadStore.load = uicontrol('Parent',h.left.loadStore.panel,'units','normalized','Position',[0.02 0.2 0.47 0.75],'String','Load','FontSize',10);
 h.left.loadStore.save = uicontrol('Parent',h.left.loadStore.panel,'units','normalized','Position',[0.49 0.2 0.47 0.75],'String','Save','FontSize',10,'Enable','off');
 
@@ -140,6 +146,12 @@ end
 % After the addition of panels, check figure size
 h.fig_size = get(h.fig,'Position');
 
+guidata(h.fig, h);
+t = timer('ExecutionMode','fixedRate','Period',0.25,'Tag','StatSTEM_resizeTimer',...
+    'StartDelay', 1, ...
+    'TimerFcn',@(t,e) statStemResizeCheck(t,h.fig));
+start(t);
+
 %% Create calllback functions
 createCallbacks(h,true)
 
@@ -150,23 +162,39 @@ updateLeftPanels(h)
 % Limit minimum size and make window appear on full screen
 % set(h.fig,'Position',[1 1 screen(3) screen(4)])
 set(h.fig,'Visible','on')
+
 if ~isdeployed
 	close(spl) % Close splash window
 end
+% waitfor(h.fig,'Visible','on')
+% warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
+% jFrame = get(handle(h.fig), 'JavaFrame');
+% % Change icon of window
+% splashImg = im2java(splashImg);
+% jicon=javax.swing.ImageIcon(splashImg);
+% jFrame.setFigureIcon(jicon);
+% jProx = [];
+% while isempty(jProx)
+%     pause(0.01)
+%     if v<2015
+%         jProx = jFrame.fHG1Client.getWindow();
+%     else
+%         jProx = jFrame.fHG2Client.getWindow();
+%     end
+% end
+% jProx.setMinimumSize(java.awt.Dimension(800, 600));
+
 waitfor(h.fig,'Visible','on')
-warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
-jFrame = get(handle(h.fig), 'JavaFrame');
-% Change icon of window
-splashImg = im2java(splashImg);
-jicon=javax.swing.ImageIcon(splashImg);
-jFrame.setFigureIcon(jicon);
-jProx = [];
-while isempty(jProx)
-    pause(0.01)
-    if v<2015
-        jProx = jFrame.fHG1Client.getWindow();
-    else
-        jProx = jFrame.fHG2Client.getWindow();
-    end
+% JavaFrame, im2java and minimum size enforcement removed for MATLAB 2022b+ compatibility
+set(h.fig, 'SizeChangedFcn', @(src,~) enforceMinSize(src, 800, 600));
+
+function enforceMinSize(fig, minW, minH)
+    pos = get(fig, 'Position');
+    changed = false;
+    if pos(3) < minW; pos(3) = minW; changed = true; end
+    if pos(4) < minH; pos(4) = minH; changed = true; end
+    if changed; set(fig, 'Position', pos); end
 end
-jProx.setMinimumSize(java.awt.Dimension(800, 600));
+
+
+end

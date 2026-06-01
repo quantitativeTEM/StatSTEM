@@ -1,10 +1,9 @@
 function scrollDown(h)
 % scrollDown - Scroll message panel to latest message
 %
-%   syntax: scrollDown(h)
-%       h       - structure holding references to GUI interface
+% syntax: scrollDown(h)
+%   h - structure holding references to GUI interface
 %
-
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
@@ -12,6 +11,7 @@ function scrollDown(h)
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
-
-val = h.right.message.text.getDocument().getLength;
-h.right.message.text.setCaretPosition(val)
+n = numel(get(h.right.message.text, 'String'));
+if n > 0
+    set(h.right.message.text, 'Value', n);
+end

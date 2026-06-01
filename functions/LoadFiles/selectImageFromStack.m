@@ -15,7 +15,7 @@ hf = figure('units','pixels','outerposition',[cent(1)*0.05 cent(2)*0.05 cent(1)*
     'NumberTitle','off','Color',[0.8 0.8 0.8],'DeleteFCN',@deleteFigure,'Visible','off');
 set(hf,'units','normalized')
 % Insert two panels
-hp1 = uipanel('Parent',hf,'units','normalized','Position',[0,0,1,0.05],'ShadowColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'Title','Select image');
+hp1 = uipanel('Parent',hf,'units','normalized','Position',[0,0,1,0.05],'BorderColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'Title','Select image');
 Slider = uicontrol('Parent',hp1,'Style','slider','units','normalized','Position',[0.005 0.05 0.395 0.9],'Min',1,'Max',Nmax,'Value',1,'SliderStep', [1/(Nmax-1) 1]);
 e1 = uicontrol('Parent',hp1,'Style','Edit','String','1','Units','Normalized','Position',[0.4 0.05 0.05 0.9]);
 

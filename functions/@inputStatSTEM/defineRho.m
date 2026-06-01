@@ -72,16 +72,16 @@ if Nt>10
     Nt = 10;
     addPix = 0;
 end
-s = [234 125+18.25*Nt];
-hfig = figure('units','pixels','outerposition',[cent(1)-s(1)/2 cent(2)-s(2)/2 s(1) s(2)],'Name','Edit column width','NumberTitle','off','Visible','on','Resize','off','DeleteFCN',@deleteFigure,'MenuBar','none');
+tableW = 300;
+tableH = max(60, 32*Nt+50);
+s = [tableW+50, tableH+150];
+hfig = figure('units','pixels','outerposition',[cent(1)-s(1)/2 cent(2)-s(2)/2 s(1) s(2)],'Name','Edit column width','NumberTitle','off','Visible','on','Resize','on','DeleteFCN',@deleteFigure,'MenuBar','none');
 
-text = uicontrol('Parent',hfig,'Style','Text','String','Modify the width of each atom type:','Position',[10 65+18.25*Nt 175 22]);
-table = uitable('Parent',hfig,'Position',[10 45 209 18*Nt+22],'ColumnFormat',{'char','numeric'},'Data',data,'ColumnEditable',[false true],'RowName',[],'ColumnName',{'Type',['Width (',char(197),')']},...
-    'ColumnWidth',{70 120+addPix});
-
-saveBut = uicontrol('Parent',hfig,'Style','pushbutton','String','OK','Position',[10 10 100 22],'Callback',{@storeRho,hfig});
-cancelBut = uicontrol('Parent',hfig,'Style','pushbutton','String','Cancel','Position',[120 10 100 22],'Callback',{@cancelRho,hfig});
-
+text = uicontrol('Parent',hfig,'Style','Text','String','Modify the width of each atom type:','Position',[10 tableH+95 tableW 22]);
+table = uitable('Parent',hfig,'Position',[10 45 tableW tableH],'ColumnFormat',{'char','numeric'},'Data',data,'ColumnEditable',[false true],'RowName',[],'ColumnName',{'Type',['Width (',char(197),')']},...
+    'ColumnWidth',{100 180+addPix});
+saveBut = uicontrol('Parent',hfig,'Style','pushbutton','String','OK','Position',[10 10 140 22],'Callback',{@storeRho,hfig});
+cancelBut = uicontrol('Parent',hfig,'Style','pushbutton','String','Cancel','Position',[160 10 140 22],'Callback',{@cancelRho,hfig});
 uiwait(hfig)
 
     function storeRho(hObject,~,hfig)

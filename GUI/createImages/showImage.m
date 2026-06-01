@@ -60,7 +60,7 @@ if isfield(usr,'images')
         delete(usr.images.img)
     end
 end
-usr.images.img = uipanel('Parent',usr.images.main,'units','normalized','Position',[0 0 1 1],'ShadowColor',[0.8 0.8 0.8],'ForegroundColor',[0.8 0.8 0.8],'HighlightColor',[0.8 0.8 0.8],'BackgroundColor',[0.8 0.8 0.8]);
+usr.images.img = uipanel('Parent',usr.images.main,'units','normalized','Position',[0 0 1 1],'BorderColor',[0.8 0.8 0.8],'ForegroundColor',[0.8 0.8 0.8],'HighlightColor',[0.8 0.8 0.8],'BackgroundColor',[0.8 0.8 0.8]);
 usr.images.ax2 = axes('Parent',usr.images.img,'units','normalized');axis off
 usr.images.ax = axes('Parent',usr.images.img,'units','normalized');
 

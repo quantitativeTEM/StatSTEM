@@ -37,13 +37,13 @@ usr = get(tab,'Userdata');
 value = get(usr.figOptions.selImg.listbox,'Value');
 % Now enable or disable the listbox and figure options
 if state
-    set(usr.figOptions.selImg.listbox,'Callback',{@imageChanged,tab,h},'Enable','on')
-    set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'CellSelectionCallback',{@optionSelected,tab},'Enable','on')
+    set(usr.figOptions.selImg.listbox,'Callback',@(src,evt) imageChanged(src,evt,tab,h),'Enable','on')
+    set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'CellEditCallback',{@optionSelected,tab},'Enable','on')
     set(usr.figOptions.optFig.scaleVal,'Enable','on','ButtonDownFcn',[])
     set(usr.figOptions.optFig.msval,'Enable','on','ButtonDownFcn',[])
 else
     set(usr.figOptions.selImg.listbox,'Callback',[],'Enable','inactive');
-    set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'CellSelectionCallback',[],'Enable','inactive')
+    set(usr.figOptions.selOpt.(['optionsImage',num2str(value)]),'CellEditCallback',[],'Enable','inactive')
     set(usr.figOptions.optFig.scaleVal,'Enable','inactive','ButtonDownFcn',{@pressEsc,h.right.tabgroup})
     set(usr.figOptions.optFig.msval,'Enable','inactive','ButtonDownFcn',{@pressEsc,h.right.tabgroup})
 end

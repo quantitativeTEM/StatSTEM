@@ -44,12 +44,12 @@ function obj = tfm_PeakFinder2(obj)
     
     % Create two sub-panels
     % Image Panel & Axis
-    hpf.image.pan = uipanel('Parent',hpf.fig,'units','normalized','Position',[br v_sec 1-br*2 1-br*2-v_sec],'ShadowColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
+    hpf.image.pan = uipanel('Parent',hpf.fig,'units','normalized','Position',[br v_sec 1-br*2 1-br*2-v_sec],'BorderColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
     hpf.image.ax1 = subplot(1,2,1,'Parent',hpf.image.pan);
     hpf.image.ax2 = subplot(1,2,2,'Parent',hpf.image.pan);
    
     % Parameter Panel
-    hpf.par.pan = uipanel('Parent',hpf.fig,'units','normalized','Position',[br br*2 1-br*2 v_sec-br],'ShadowColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
+    hpf.par.pan = uipanel('Parent',hpf.fig,'units','normalized','Position',[br br*2 1-br*2 v_sec-br],'BorderColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
     hpf.par.wb = axes('Parent',hpf.par.pan,'Position',[1-0.38 br*6 .38-br .15]);
         % Makeshift Waitbar
         gr_cm = [linspace(0,0.1,64)' linspace(0,0.5,64)' linspace(0,1,64)' ];
@@ -62,7 +62,7 @@ function obj = tfm_PeakFinder2(obj)
         end
 
         % Info panel
-        hpf.help.pan = uipanel('Parent',hpf.par.pan,'units','normalized','Position',[0.62 0.3 0.38-br 0.6],'ShadowColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
+        hpf.help.pan = uipanel('Parent',hpf.par.pan,'units','normalized','Position',[0.62 0.3 0.38-br 0.6],'BorderColor',[0 0 0],'ForegroundColor',[0 0 0],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.8 0.8 0.8]);
         str = 'To help the peak finder program to detect the correct local maxima, set the approximate radius and minimum distance of the atomic columns in pixel units. Further, you can filter the peaks by a threshold value (normalized). The radius value alters the noise filter and is the most critical parameter. Rerun the Peak finder manually after changing this value!';
         hpf.help.text = uicontrol('Parent',hpf.help.pan,'Style','text','String',str,'units','normalized','Position',[0 0 1 1],'FontSize',10,'BackgroundColor',[0.8 0.8 0.8],'horizontalAlignment', 'left');
 

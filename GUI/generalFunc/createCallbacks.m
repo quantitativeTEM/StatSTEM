@@ -31,13 +31,12 @@ if state
     
     % For GUI main frame
     if v<2015
-        set(h.fig,'ResizeFcn',{@Resize_figure,h});
-        set(h.right.tabgroup,'SelectionChangeFcn',{@fileChanged,h});
+        set(h.fig,'ResizeFcn',@(src,evt) Resize_figure(src,evt,h));
+        set(h.right.tabgroup,'SelectionChangeFcn',@(src,evt) fileChanged(src,evt,h));
     else
-        set(h.fig,'SizeChangedFcn',{@Resize_figure,h});
-        set(h.right.tabgroup,'SelectionChangedFcn',{@fileChanged,h});
+        set(h.fig,'SizeChangedFcn',@(src,evt) Resize_figure(src,evt,h));
+        set(h.right.tabgroup,'SelectionChangedFcn',@(src,evt) fileChanged(src,evt,h));
     end
-    
     set(tabs(length(tabs)),'ButtonDownFcn',{@loadFile,h})
     
     % Load and save files
@@ -54,8 +53,9 @@ if state
     callbackMaker(h,'Analysis');
     
     % Callback for closing StatSTEM
-    set(h.fig,'CloseRequestFcn',{@deleteFigure,h})
-    set(h.fig,'DeleteFCN',{@deleteFigure,h})
+    hClose = h;
+    set(h.fig,'CloseRequestFcn',@(src,evt) deleteFigure(src,evt,hClose))
+    set(h.fig,'DeleteFCN',@(src,evt) deleteFigure(src,evt,hClose))
 else
     % Calllback figure 
     set(h.colorbar,'ClickedCallback',[])

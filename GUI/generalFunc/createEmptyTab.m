@@ -37,10 +37,10 @@ scale_x = userdata.dim_x/pos_r(3);
 scale_y = [userdata.dim_y;pos_r(4)-sum(userdata.dim_y)]/pos_r(4);
 
 % Create panels on tab
-handle.images.main = uipanel('Parent',tab,'units','normalized','Position',[0 0 1-scale_x(1) 1],'ShadowColor',[0.8 0.8 0.8],'ForegroundColor',[0.8 0.8 0.8],'HighlightColor',[0.8 0.8 0.8],'BackgroundColor',[0.8 0.8 0.8]);
+handle.images.main = uipanel('Parent',tab,'units','normalized','Position',[0 0 1-scale_x(1) 1],'BorderColor',[0.8 0.8 0.8],'ForegroundColor',[0.8 0.8 0.8],'HighlightColor',[0.8 0.8 0.8],'BackgroundColor',[0.8 0.8 0.8]);
 
 % Create figure options panel
-% handle.figOptions.title.main = uipanel('Parent',tab,'units','normalized','Position',[1-scale_x(1) scale_y(2)+scale_y(3) scale_x(1) scale_y(1)],'ShadowColor',[0.95 0.95 0.95],'ForegroundColor',[0.95 0.95 0.95],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.95 0.95 0.95]);
+% handle.figOptions.title.main = uipanel('Parent',tab,'units','normalized','Position',[1-scale_x(1) scale_y(2)+scale_y(3) scale_x(1) scale_y(1)],'BorderColor',[0.95 0.95 0.95],'ForegroundColor',[0.95 0.95 0.95],'HighlightColor',[0.95 0.95 0.95],'BackgroundColor',[0.95 0.95 0.95]);
 % handle.figOptions.title.text = uicontrol('Parent',handle.figOptions.title.main,'units','normalized','Position',[0 0 1 0.9],'Style','Text','String','Figure Options','FontSize',9,'FontWeight','bold','HorizontalAlignment','Center','BackgroundColor',[0.95 0.95 0.95]);
 % handle.figOptions.title.but = minimizeButton('Parent',handle.figOptions.title.main,'Position',[0.87 0.05 0.13 0.95],'BackgroundColor',[1,1,1],'Parent2',handle.figOptions.title.text);
 

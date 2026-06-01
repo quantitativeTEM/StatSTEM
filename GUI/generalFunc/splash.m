@@ -6,93 +6,98 @@ classdef splash
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
+% Modified: replaced Java/im2java implementation with native MATLAB figure
 
     properties
-        image % The shown image (in matrix format)
-        window % The window showing the image
-        pos = [];% The location of the window in pixels (x,y)
-        maxTime = 60; % Maximum time a splash screen can be shown
+        image       % The shown image (in matrix format)
+        window      % The figure handle showing the image
+        pos = [];   % The location of the window in pixels (x,y)
+        maxTime = 60;
     end
 
     methods
-        function obj = splash(img,pos,t)
-            % splash - create a splash screen
-            %
-            %   syntax: obj = splash(img,pos)
-            %       img - image (in matlab format)
-            %       pos - position on screen (pixels)
-            %       obj - reference to splash screen
-            %       t   - maximum time splash screen will be shown (standard 60 second)
-            %
-            
-            if nargin>2
+        function obj = splash(img, pos, t)
+            if nargin > 2
                 obj.maxTime = t;
             end
-            
             obj.image = img;
-            
-            % First convert to java
-            splashImg = im2java(obj.image);
-            
-            % Create window with splash image
-            obj.window = javax.swing.JWindow;
-            icon = javax.swing.ImageIcon(splashImg);
-            label = javax.swing.JLabel(icon);
-            obj.window.getContentPane.add(label);
-            obj.window.setAlwaysOnTop(false);
-            obj.window.pack;
-            
-            if nargin==2
-                if length(pos)~=2
-                    obj.pos = pos;
-                else
-                    error('Wrong input argument, position must be a 1*2 vector')
-                end
+
+            % Get screen size and image size
+            screen = get(0, 'ScreenSize');
+            imgH = size(img, 1);
+            imgW = size(img, 2);
+
+            if nargin >= 2 && length(pos) == 2
+                obj.pos = pos;
+                x = pos(1) - imgW/2;
+                y = pos(2) - imgH/2;
+            else
+                x = screen(3)/2 - imgW/2;
+                y = screen(4)/2 - imgH/2;
             end
-            
-            % Set location of window
-            updateLocation(obj)
-            show(obj)
-            obj.window.repaint(1,4000,400,10,10)
+
+            % Create borderless figure
+            obj.window = figure( ...
+                'MenuBar',      'none', ...
+                'ToolBar',      'none', ...
+                'NumberTitle',  'off', ...
+                'Name',         '', ...
+                'Resize',       'off', ...
+                'Units',        'pixels', ...
+                'Position',     [x, y, imgW, imgH], ...
+                'WindowStyle',  'normal');
+
+            % Show image filling the whole figure
+            ax = axes('Parent', obj.window, ...
+                      'Units', 'normalized', ...
+                      'Position', [0 0 1 1]);
+            imshow(img, 'Parent', ax);
+            drawnow;
         end
-        
+
         function delete(obj)
-            obj.window.dispose
+            if ishandle(obj.window)
+                close(obj.window);
+            end
         end
-        
+
         function close(obj)
-            obj.window.dispose
+            if ishandle(obj.window)
+                close(obj.window);
+            end
         end
-        
+
         function show(obj)
-            obj.window.show
+            if ishandle(obj.window)
+                figure(obj.window);
+            end
         end
-        
+
         function out = get.pos(obj)
             if isempty(obj.pos)
-                screen = get(0,'ScreenSize');
-                out = [screen(3)/2,screen(4)/2];
+                screen = get(0, 'ScreenSize');
+                out = [screen(3)/2, screen(4)/2];
             else
                 out = obj.pos;
             end
         end
-        
-        function obj = set.pos(obj,pos)
-            if length(pos)==2
+
+        function obj = set.pos(obj, pos)
+            if length(pos) == 2
                 obj.pos = pos;
             else
                 error('Wrong input argument, position must be a 1 x 2 vector')
             end
         end
-        
+
         function updateLocation(obj)
-            % Set location of window
-            imgHeight = size(obj.image,1)/2;
-            imgWidth  = size(obj.image,2)/2;
-            win = obj.window;
-            p = obj.pos;
-            win.setLocation(p(1)-imgWidth,p(2)-imgHeight);
+            if ishandle(obj.window)
+                screen = get(0, 'ScreenSize');
+                imgH = size(obj.image, 1);
+                imgW = size(obj.image, 2);
+                p = obj.pos;
+                set(obj.window, 'Position', [p(1)-imgW/2, p(2)-imgH/2, imgW, imgH]);
+            end
         end
     end
-    
 end

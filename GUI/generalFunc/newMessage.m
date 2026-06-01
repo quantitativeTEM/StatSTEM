@@ -1,11 +1,10 @@
-function newMessage(message,h)
+function newMessage(message, h)
 % newMessage - Update the message shown in the StatSTEM interface
 %
-%   syntax: newMessage(message,h)
-%       message - message (string)
-%       h       - structure holding references to GUI interface
+% syntax: newMessage(message,h)
+%   message - message (string)
+%   h       - structure holding references to GUI interface
 %
-
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
@@ -13,12 +12,12 @@ function newMessage(message,h)
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
-% Get old message
-oldMessage = h.right.message.text.getText;
-newMessage = java.lang.String(sprintf(['\n',message])); %Convert to java
-
-% Display new message
-str = concat(oldMessage,newMessage);
-h.right.message.text.setText(str)
+% Get current messages and append new one
+current = get(h.right.message.text, 'String');
+if ischar(current)
+    current = {current};
+end
+current{end+1} = message;
+set(h.right.message.text, 'String', current);
 pause(0.2)
 scrollDown(h)

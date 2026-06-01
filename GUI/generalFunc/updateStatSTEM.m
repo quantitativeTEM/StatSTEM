@@ -95,7 +95,7 @@ for n=1:length(imgNames)
         end
         usr.figOptions.selOpt.(['optionsImage',num2str(n)]) = uitable('Parent',usr.figOptions.selOpt.main,'units','normalized',...
             'Position',[0 0 1 1],'ColumnFormat',columnformat,'ColumnEditable',[true false],'RowName',[],'ColumnName',[],...
-            'ColumnWidth',{15 110},'CellSelectionCallback',{@optionSelected,tab});
+            'ColumnWidth',{15 110},'CellEditCallback',{@optionSelected,tab});
     end
     updFO = 0;
     if n==valN

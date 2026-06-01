@@ -24,7 +24,9 @@ if (userdata.callbackrunning)
     if isfield(userdata,'function')
         if isfield(userdata.function,'closing')
             if userdata.function.closing{1} == 1 && toc(userdata.function.closing{2})>2.5
-                % Remove callbacks for memory leakage
+                % Remove callbacks for memory leakage% Stop resize timer if running
+                t = timerfind('Tag','StatSTEM_resizeTimer');
+                if ~isempty(t); stop(t); delete(t); end
                 createCallbacks(h,false)
                 clear h
                 delete(hObject)
@@ -63,8 +65,10 @@ for i=1:length(tabs)
     end
 end
 
+% Stop resize timer if running
+t = timerfind('Tag','StatSTEM_resizeTimer');
+if ~isempty(t); stop(t); delete(t); end
 % Remove callbacks for memory leakage
 createCallbacks(h,false)
-
 clear h
 delete(hObject)
