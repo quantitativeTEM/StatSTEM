@@ -6,12 +6,12 @@ angle_ab	90
 
 atoms	x	y
 Sr	0	0
+Ti	0.5	0.5
 O	0	0.5
 O	0.5	0
-Ti	0.5	0.5
 
 zInfo
 Sr	0
+Ti	0.5
 O	0.5
 O	0.5
-Ti	0.5	O	0
