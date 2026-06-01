@@ -20,6 +20,7 @@ if isempty(indices)
 end
 
 %% With the found angle find the relaxed coordinates
+
 coor = strainmapping.coordinates(:,1:2);
 refCoor = strainmapping.refCoor(:,1:2);
 unit = strainmapping.projUnit;
@@ -42,6 +43,7 @@ LattPar = [(R*[a;0])';(R*Rab*[b;0])'];  % LattPar vectors on rows
 
 N = length(coor(:,1));
 coorExp = zeros(N,2);
+% types = strainmapping.typesN(indT);
 types = strainmapping.typesN;
 for i=1:N
     if types(i,1)~=0
@@ -53,6 +55,7 @@ strainmapping.coorExpectedP = coorExp;
 coordinates = strainmapping.coordinates;
 
 n1 = size(coordinates,1);
+
 eps_aa = zeros(n1,2);
 eps_ab = zeros(n1,2);
 eps_bb = zeros(n1,2);
@@ -138,7 +141,12 @@ for n=1:n1  % loop over all atoms
             eps_ab(n) = NaN;
             omg_ab(n) = NaN;
         end
-
+    else
+        eps_aa(n) = NaN;
+        eps_bb(n) = NaN;
+        eps_ab(n) = NaN;
+        omg_ab(n) = NaN;
+        
     end
 
 end
