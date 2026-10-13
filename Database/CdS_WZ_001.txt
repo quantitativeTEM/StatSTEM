@@ -1,0 +1,17 @@
+Database file for StatSTEM
+length_a	4.15
+length_b	7.188
+length_c	6.737
+angle_ab	90
+
+atoms	x	y
+Cd	0.0000	0.0
+Cd	0.0000	0.3333
+Cd	0.5000	0.8333
+Cd	0.5000	0.5
+
+zInfo
+Cd	0.0000
+Cd	0.5000
+Cd	0.5000
+Cd	0.0000
