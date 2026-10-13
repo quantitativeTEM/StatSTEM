@@ -1,76 +1,68 @@
 classdef checkbox < StatSTEMbutton
-    
+
     properties
-        name = ''; % Name of the radiobutton
-        func = ''; % Function linked to radiobutton
-        enable = 1; % Button active or inactive (internal for StatSTEM GUI)
-        equalTo = {''}; % Modify specific variable to value (true/false)
-        selected = 1; % Is button selected (true, false)
-        selWhen = {}; % Specify the input value in the StatSTEM file that must be true/false to select button {value, 'input....'}
+        name        = ''; % Name shown on checkbox
+        func        = ''; % Function linked to checkbox
+        enable      = 1;  % Active or inactive
+        equalTo     = {''}; % Variable to update (true/false)
+        selected    = 1;  % Is box checked
+        selWhen     = {};
+        keepName    = 0;
+        selOptInput = '';
+        optN        = 1;
     end
-    
+
     methods
-        function obj = checkbox(name,value,varargin)
-            if nargin>0
-                varargin = [{name},{value},varargin];
+        function obj = checkbox(name, value, varargin)
+            if nargin > 0
+                varargin = [{name},{value}, varargin];
             end
-            obj.button = javax.swing.JCheckBox;
-            obj.height = 18;
+            obj@StatSTEMbutton;
+            obj.button = uicontrol('Style','checkbox', ...
+                'Visible','off', ...
+                'Enable','on');
+            obj.height    = 18;
             obj.Focusable = false;
-            obj.button.setFont(obj.font);
             N = length(varargin);
-            for n=1:N/2
+            for n = 1:N/2
                 obj.(varargin{2*n-1}) = varargin{2*n};
             end
         end
-        
-        function obj = set.name(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.name = value;
-            else
-                error('StatSTEMbutton: Name should be a string')
-            end
-            set(obj.button,'Text',value)
-        end
-        
-        function obj = set.func(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.func = value;
+
+        function obj = set.name(obj, value)
+            if ischar(value), obj.name = value;
+            else, error('StatSTEMbutton: Name should be a string'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'String', value);
             end
         end
-        
-        function obj = set.enable(obj,value)
-            % Make sure the value is a logical
-            if value==1 || value==0
-                obj.enable = value==true;
-            else
-                error('StatSTEMbutton: Enable should be a logical value')
-            end
-            obj.setEnabled(value);
+        function obj = set.func(obj, value)
+            if ischar(value), obj.func = value; end
         end
-        
-        function obj = set.equalTo(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.equalTo = {value};
-            elseif isa(value,'cell')
-                obj.equalTo = value;
-            else
-                error('StatSTEMbutton: equalTo should be a string or a cell structure with strings')
+        function obj = set.enable(obj, value)
+            if value==1 || value==0, obj.enable = value==true;
+            else, error('StatSTEMbutton: Enable should be a logical value'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'Enable', checkbox.onoff(value));
             end
         end
-        
-        function obj = set.selected(obj,value)
-            % Make sure the value is a logical
-            if value==1 || value==0
-                obj.selected = value==true;
-            else
-                error('StatSTEMbutton: selected should be a logical value')
+        function obj = set.equalTo(obj, value)
+            if ischar(value), obj.equalTo = {value};
+            elseif iscell(value), obj.equalTo = value;
+            else, error('StatSTEMbutton: equalTo should be a string or cell'); end
+        end
+        function obj = set.selected(obj, value)
+            if value==1 || value==0, obj.selected = value==true;
+            else, error('StatSTEMbutton: selected should be a logical value'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'Value', double(value==1));
             end
-            obj.button.setSelected(value==1);
+        end
+    end
+
+    methods (Static, Access = private)
+        function str = onoff(val)
+            if val, str = 'on'; else, str = 'off'; end
         end
     end
 end
-    

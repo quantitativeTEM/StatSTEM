@@ -39,4 +39,4 @@ options = [options;{st 'Minimum ICL'}];
 set(usr.figOptions.selOpt.(['optionsImage',num2str(val)]),'Data',options);
 
 % Enable select minimum in ICL button
-h.left.ana.panel.atomAdv.minICL.setEnabled(true)
+set(h.left.ana.panel.atomAdv.minICL, 'Enable', 'on')

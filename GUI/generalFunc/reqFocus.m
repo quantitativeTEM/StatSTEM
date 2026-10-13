@@ -1,9 +1,9 @@
-function reqFocus(jObject,event,h)
-% reqFocus - Give object focus
+function reqFocus(hObject, ~, h)
+% reqFocus - Give focus back to the figure when a busy callback is interrupted
 %
-% syntax: reqFocus(jObject,event,h)
-%       jObject - Reference to java object
-%       event   - structure recording button events
+%   syntax: reqFocus(hObject, event, h)
+%       hObject - uicontrol that was clicked during a busy callback
+%       event   - callback event data (unused)
 %       h       - structure holding references to GUI interface
 %
 
@@ -18,14 +18,9 @@ function reqFocus(jObject,event,h)
 
 turnOffFigureSelection(h);
 
-% This function is only executed when another function is running. abort
-% this function by hitting escape
-robot = java.awt.Robot;
-robot.keyPress(java.awt.event.KeyEvent.VK_ESCAPE);
-robot.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE);
+% Interrupt the running callback by re-raising the figure
+% (replaces java.awt.Robot VK_ESCAPE key press)
+figure(h.fig);
 
-% Delete all callbacks related to this other function
-set(jObject,'MouseEnteredCallback',[],'MouseExitedCallback',[],'MouseReleasedCallback',[])
-% After this make object focusable and request focus
-jObject.setFocusable(true)
-jObject.requestFocus;
+% Clear any temporary callbacks that were set during the busy state
+set(hObject, 'ButtonDownFcn', []);

@@ -1,14 +1,12 @@
-function popupPressed(jObject,event,func,h,button)
-% popupPressed - Change callback function of java popupmenu
+function popupPressed(hObject, event, func, h, button)
+% popupPressed - Handle selection from a popupmenu
 %
-% This function gathers information and passes this to the 
-%
-%   syntax: popupPressed(jObject,event,func,h,button)
-%       jObject - Reference to button
-%       event   - structure recording button events
-%       func    - name of the function
+%   syntax: popupPressed(hObject, event, func, h, button)
+%       hObject - uicontrol handle that triggered the callback
+%       event   - callback event data
+%       func    - name of the function (empty = update variable directly)
 %       h       - structure holding references to StatSTEM interface
-%       button  - Matlab reference to button
+%       button  - StatSTEM popupmenu object
 %
 
 %--------------------------------------------------------------------------
@@ -20,40 +18,39 @@ function popupPressed(jObject,event,func,h,button)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-% Check which item is selected
-option = char(get(jObject,'SelectedObjects'));
+% Get the selected option string
+opts   = get(hObject, 'String');
+idx    = get(hObject, 'Value');
+if iscell(opts)
+    option = opts{idx};
+else
+    option = opts(idx,:);
+    option = strtrim(option);
+end
 
-%% Ensure that old results are removed
 name = mfilename;
-[tab,usr] = newFuncCheck(jObject,event,func,h,button,name);
+[tab, usr] = newFuncCheck(hObject, event, func, h, button, name);
 if isempty(tab) || isempty(usr)
     tab = loadTab(h);
     if ~isempty(tab)
-        % Load file
-        usr = get(tab,'Userdata');
+        usr  = get(tab, 'Userdata');
         file = usr.file;
-        % Update StatSTEM to restore index if necessary
-        updateStatSTEM(h,file);
+        updateStatSTEM(h, file);
     end
     return
 end
 file = usr.file;
 
-%% Run function
 if isempty(func)
     in1 = button.selOptInput;
     loc = strfind(in1,'.');
-    if ~isempty(loc) % A variable can be updated
+    if ~isempty(loc)
         in2 = in1(loc(1)+1:end);
         in1 = in1(1:loc(1)-1);
         file.(in1).(in2) = option;
     end
-
-    % Update StatSTEM
-    updateStatSTEM(h,file);
-    
-    % Make sure correct figure is shown
-    showFigureWithOption(h,button.figEnd,button.figOptEnd,button.reshowFigEnd)
+    updateStatSTEM(h, file);
+    showFigureWithOption(h, button.figEnd, button.figOptEnd, button.reshowFigEnd)
 else
-    initiateFunction(func,button,h,option);
+    initiateFunction(func, button, h, option);
 end

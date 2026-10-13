@@ -51,6 +51,11 @@ updateLeftPanels(h,file,~isa(button,'editfield'))
 % Make field unfocusable
 focusFields(h,false)
 
+% Normalise button string properties to cell arrays
+if ischar(button.input),    button.input    = {button.input};    end
+if ischar(button.optInput), button.optInput = {button.optInput}; end
+if ischar(button.output),   button.output   = {button.output};   end
+
 % Start function
 runFunc = [func,'('];
 if size(button.input,1)~=1

@@ -1,24 +1,19 @@
-function javaCallback(h,varargin)
-% javaCallback - Creates a callback function for a java object
+function javaCallback(~, varargin) %#ok<VANUS>
+% javaCallback - Stub retained for backwards compatibility.
 %
-%   syntax: javaCallback(h,varargin)
-%       h        - structure holding references to java object
-%       varargin - callback structure and functions
+%   This function previously wired Java/Swing event callbacks.
+%   It is no longer needed since all controls are now native MATLAB
+%   uicontrols.  Calls to this function are silently ignored.
+%
+%   See also: callbackMaker, callbackUndoer
 %
 
 %--------------------------------------------------------------------------
 % This file is part of StatSTEM
 %
-% Copyright: 2016, EMAT, University of Antwerp
+% Copyright: 2020, EMAT, University of Antwerp
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-% First check version MATLAB
-v = version('-release');
-v = str2double(v(1:4));
-
-if v<2015
-    h = handle(h,'callbackproperties');
-end
-set(h,varargin{:})
+% No-op: Java callback wiring is no longer required.

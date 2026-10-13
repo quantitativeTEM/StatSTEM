@@ -1,12 +1,12 @@
-function updateTextVal(jObject,event,func,h,button)
-% updateTextVal - Run function or update StatSTEM file
+function updateTextVal(hObject, event, func, h, button)
+% updateTextVal - Run function or update StatSTEM file from an editfield
 %
-% syntax: updateTextVal(jObject,event,func,h,button)
-%       jObject - Reference to button
-%       event   - event of java button
-%       func    - name of the function
+%   syntax: updateTextVal(hObject, event, func, h, button)
+%       hObject - uicontrol handle that triggered the callback
+%       event   - callback event data
+%       func    - name of the function (empty = update variable directly)
 %       h       - structure holding references to StatSTEM interface
-%       button  - Matlab reference to button
+%       button  - StatSTEM editfield object
 %
 
 %--------------------------------------------------------------------------
@@ -18,36 +18,29 @@ function updateTextVal(jObject,event,func,h,button)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-str = get(jObject,'Text');
+str = get(hObject, 'String');
 num = str2double(str);
 
-%% Ensure that old results are removed
 name = mfilename;
-[tab,usr] = newFuncCheck(jObject,event,func,h,button,name);
+[tab, usr] = newFuncCheck(hObject, event, func, h, button, name);
 if isempty(tab) || isempty(usr)
     return
 end
 file = usr.file;
 
-%% Update variables (equalTo variables)
-% If function is present, execute it otherwise update variables
 if isempty(func)
     var = button.equalTo;
-    for n=1:length(var)
+    for n = 1:length(var)
         in1 = var{n};
         loc = strfind(in1,'.');
-        if ~isempty(loc) % A variable can be updated
+        if ~isempty(loc)
             in2 = in1(loc(1)+1:end);
             in1 = in1(1:loc(1)-1);
             file.(in1).(in2) = num;
         end
     end
-
-    % Update StatSTEM
-    updateStatSTEM(h,file);
-    
-    % Make sure correct figure is shown
-    showFigureWithOption(h,button.figEnd,button.figOptEnd,button.reshowFigEnd)
+    updateStatSTEM(h, file);
+    showFigureWithOption(h, button.figEnd, button.figOptEnd, button.reshowFigEnd)
 else
-    initiateFunction(func,button,h,num)
+    initiateFunction(func, button, h, num)
 end

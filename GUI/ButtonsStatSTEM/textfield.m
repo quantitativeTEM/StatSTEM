@@ -1,92 +1,70 @@
 classdef textfield < StatSTEMbutton
-    
+% textfield - Static label widget. Despite being read-only it accepts the
+%   same property set as other button types so panel definition files can
+%   pass any key without error.
+
     properties
-        name = ''; % Name shown in field
-        alignment = 'leading'; %options: leading = leading, l = left, c = center, r = right
-        border = 'none'; % options; none, or color triplet [R,G,B] (relative)
+        name        = ''; % Text shown in label
+        alignment   = 'leading'; % 'leading'|'l'|'c'|'r'
+        func        = ''; % Not used for textfields; kept for API parity
+        enable      = 1;  % Not used; kept for API parity
+        equalTo     = {''}; % Variable to keep in sync (read-only display)
+        selected    = 1;
+        selWhen     = {};
+        keepName    = 0;
+        selOptInput = '';
+        optN        = 1;
     end
-    
-    properties (Constant)
-        func = '';
-    end
-    
+
     methods
-        function obj = textfield(name,value,varargin)
-            if nargin>0
-                varargin = [{name},{value},varargin];
+        function obj = textfield(name, value, varargin)
+            if nargin > 0
+                varargin = [{name},{value}, varargin];
             end
-            obj.button = javax.swing.JTextField;
-            obj.button.setEnabled(true);
+            obj@StatSTEMbutton;
+            obj.button = uicontrol('Style','text', ...
+                'Visible','off', ...
+                'Enable','inactive', ...
+                'BackgroundColor', [0.94 0.94 0.94]);
+            obj.height    = 18;
             obj.Focusable = false;
-            obj.height = 20;
-            obj.margin = [0,0,0,0];
-            obj.button.setFont(obj.font);
             N = length(varargin);
-            for n=1:N/2
+            for n = 1:N/2
                 obj.(varargin{2*n-1}) = varargin{2*n};
             end
         end
-        
-        function obj = set.name(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.name = value;
-            else
-                error('StatSTEMbutton: Name should be a string')
+
+        function obj = set.name(obj, value)
+            if ischar(value), obj.name = value;
+            else, error('StatSTEMbutton: Name should be a string'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'String', value);
             end
-            set(obj.button,'Text',value)
         end
-        
-        function obj = set.alignment(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                options = {'leading','l','c','r'};
-                if any(strcmp(options,value))
-                    obj.alignment = value;
-                else
-                    error('StatSTEMbutton: alignment should be a leading, l (left), c (center) or r (right')
+        function obj = set.func(obj, value)
+            if ischar(value), obj.func = value; end
+        end
+        function obj = set.enable(obj, value)
+            % textfields are always inactive; absorb silently
+            if value==1 || value==0, obj.enable = value==true; end
+        end
+        function obj = set.equalTo(obj, value)
+            if ischar(value), obj.equalTo = {value};
+            elseif iscell(value), obj.equalTo = value;
+            else, error('StatSTEMbutton: equalTo should be a string or cell'); end
+        end
+        function obj = set.alignment(obj, value)
+            options = {'leading','l','c','r'};
+            if ischar(value) && any(strcmp(options,value)), obj.alignment = value;
+            else, error('StatSTEMbutton: alignment should be leading, l, c, or r'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                switch value
+                    case {'leading','l'}, set(obj.button,'HorizontalAlignment','left');
+                    case 'c',            set(obj.button,'HorizontalAlignment','center');
+                    case 'r',            set(obj.button,'HorizontalAlignment','right');
                 end
-            else
-                error('StatSTEMbutton: alignment should be a string')
             end
-            switch value
-                case 'leading'
-                    obj.button.setHorizontalAlignment(javax.swing.JTextField.LEADING);
-                case 'l'
-                    obj.button.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-                case 'c'
-                    obj.button.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-                case 'r'
-                    obj.button.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-            end
-        end
-        
-        function obj = set.border(obj,value)
-            % Make sure the name is a string or double
-            if isa(value,'char') && strcmp(value,'none')
-                obj.border = value;
-            elseif isa(value,'double') && max(value)<=1 && min(value)>=0 && (all(size(value)==[1 3]) || all(size(value)==[3 1]))
-                obj.border = value;
-            else
-                error('StatSTEMbutton: border should be a 3x1 vector with relative colors (between 0 and 1)')
-            end
-            updateBorder(obj)
-        end
-        
-        function updateBorder(obj)
-            % Make sure the name is a string
-            if isa(obj.border,'char') && strcmp(obj.border,'none')
-                bgc = obj.button.getBackground;
-            else
-                bgc = java.awt.Color(value(1),value(2),value(3));
-            end
-            set(obj.button,'Border',javax.swing.border.LineBorder(bgc,1,false))
-        end
-        
-        function updateBGColor(obj)
-            updateBGColor@StatSTEMbutton(obj)
-            updateBorder(obj)
         end
     end
 end
-    
+

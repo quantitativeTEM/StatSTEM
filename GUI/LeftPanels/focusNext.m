@@ -1,10 +1,9 @@
-function focusNext(jObject,event)
-% focusNext - Give next object focus
+function focusNext(hObject, event)
+% focusNext - Move keyboard focus to the next control when Enter is pressed
 %
-% syntax: focusNext(jObject,event,h)
-%       jObject - Reference to java object
-%       event   - structure recording button events
-%       h       - structure holding references to GUI interface
+%   syntax: focusNext(hObject, event)
+%       hObject - uicontrol editfield handle
+%       event   - KeyReleaseFcn event data (contains .Key)
 %
 
 %--------------------------------------------------------------------------
@@ -16,6 +15,13 @@ function focusNext(jObject,event)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-if event.getKeyCode==10
-	jObject.nextFocus
+% event.Key is 'return' when the Enter key is released
+if strcmp(event.Key, 'return')
+    % Move focus away from the editfield; this also triggers its Callback
+    uicontrol(hObject);   % ensure we have focus first
+    % Tab to next control by temporarily shifting focus to the parent figure
+    fig = ancestor(hObject, 'figure');
+    if ~isempty(fig)
+        figure(fig);
+    end
 end

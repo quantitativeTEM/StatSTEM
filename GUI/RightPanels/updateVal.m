@@ -1,10 +1,10 @@
-function updateVal(jObject,event,ref)
-% updateVal - Callback for requesting focus
+function updateVal(hObject, event, ref)
+% updateVal - Callback for moving focus on Enter key press
 %
-%   syntax: updateVal(jObject,event,h)
-%       jObject - Reference to java object
-%       event   - structure recording button events
-%       ref     - ref to field to give focus
+%   syntax: updateVal(hObject, event, ref)
+%       hObject - uicontrol handle that triggered the KeyReleaseFcn
+%       event   - KeyReleaseFcn event data (contains .Key)
+%       ref     - uicontrol to give focus to next
 %
 
 %--------------------------------------------------------------------------
@@ -14,6 +14,7 @@ function updateVal(jObject,event,ref)
 % License: Open Source under GPLv3
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
-if event.getKeyCode==10
-    ref.requestFocus
+
+if strcmp(event.Key, 'return')
+    uicontrol(ref);
 end

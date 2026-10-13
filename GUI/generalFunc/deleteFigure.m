@@ -44,9 +44,6 @@ if (userdata.callbackrunning)
         userdata.function.closing = {1,tic};
     end
     set(h.right.tabgroup,'Userdata',userdata)
-    robot = java.awt.Robot;
-    robot.keyPress(java.awt.event.KeyEvent.VK_ESCAPE);
-    robot.keyRelease(java.awt.event.KeyEvent.VK_ESCAPE);
     return
 end
 

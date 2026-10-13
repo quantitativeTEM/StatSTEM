@@ -1,97 +1,87 @@
 classdef editfield < StatSTEMbutton
-    
+
     properties
-        name = ''; % Name shown in editfield
-        func = ''; % Function coupled to editfield
-        enable = 1; % Make editfield active or inactive
-        equalTo = {''}; % Make value equal to a specific property
-        alignment = 'leading'; %options: leading = leading, l = left, c = center, r = right
+        name        = ''; % Text shown in field
+        func        = ''; % Function coupled to field
+        enable      = 1;  % Active or inactive
+        equalTo     = {''}; % Variable to keep in sync
+        alignment   = 'leading'; % 'leading'|'l'|'c'|'r'
+        selected    = 1;
+        selWhen     = {};
+        keepName    = 0;
+        selOptInput = '';
+        optN        = 1;
     end
-    
+
     methods
-        function obj = editfield(name,value,varargin)
-            if nargin>0
-                varargin = [{name},{value},varargin];
+        function obj = editfield(name, value, varargin)
+            if nargin > 0
+                varargin = [{name},{value}, varargin];
             end
-            obj.button = javax.swing.JTextField;
-            obj.height = 18;
+            obj@StatSTEMbutton;
+            obj.button = uicontrol('Style','edit', ...
+                'Visible','off', ...
+                'Enable','on', ...
+                'BackgroundColor',[1 1 1]);
+            obj.height  = 18;
             obj.bgcolor = [1,1,1];
-            obj.button.setFont(obj.font);
             N = length(varargin);
-            for n=1:N/2
+            for n = 1:N/2
                 obj.(varargin{2*n-1}) = varargin{2*n};
             end
         end
-        
-        function obj = set.name(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.name = value;
-            else
-                error('StatSTEMbutton: Name should be a string')
-            end
-            set(obj.button,'Text',value)
-        end
-        
-        function obj = set.func(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.func = value;
+
+        function obj = set.name(obj, value)
+            if ischar(value), obj.name = value;
+            else, error('StatSTEMbutton: Name should be a string'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'String', value);
             end
         end
-        
-        function obj = set.enable(obj,value)
-            % Make sure the value is a logical
-            if value==1 || value==0
-                obj.enable = value==true;
-            else
-                error('StatSTEMbutton: Enable should be a logical value')
-            end
-            obj.button.setEnabled(value);
+        function obj = set.func(obj, value)
+            if ischar(value), obj.func = value; end
         end
-        
-        function obj = set.equalTo(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.equalTo = {value};
-            elseif isa(value,'cell')
-                obj.equalTo = value;
-            else
-                error('StatSTEMbutton: equalTo should be a string or a cell structure with strings')
+        function obj = set.enable(obj, value)
+            if value==1 || value==0, obj.enable = value==true;
+            else, error('StatSTEMbutton: Enable should be a logical value'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'Enable', editfield.onoff(value));
             end
         end
-        
-        function obj = set.alignment(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                options = {'leading','l','c','r'};
-                if any(strcmp(options,value))
-                    obj.alignment = value;
-                else
-                    error('StatSTEMbutton: alignment should be a leading, l (left), c (center) or r (right')
+        function obj = set.equalTo(obj, value)
+            if ischar(value), obj.equalTo = {value};
+            elseif iscell(value), obj.equalTo = value;
+            else, error('StatSTEMbutton: equalTo should be a string or cell'); end
+        end
+        function obj = set.alignment(obj, value)
+            options = {'leading','l','c','r'};
+            if ischar(value) && any(strcmp(options,value)), obj.alignment = value;
+            else, error('StatSTEMbutton: alignment should be leading, l, c, or r'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                switch value
+                    case {'leading','l'}, set(obj.button,'HorizontalAlignment','left');
+                    case 'c',            set(obj.button,'HorizontalAlignment','center');
+                    case 'r',            set(obj.button,'HorizontalAlignment','right');
                 end
-            else
-                error('StatSTEMbutton: alignment should be a string')
-            end
-            switch value
-                case 'leading'
-                    obj.button.setHorizontalAlignment(javax.swing.JTextField.LEADING);
-                case 'l'
-                    obj.button.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-                case 'c'
-                    obj.button.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-                case 'r'
-                    obj.button.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
             end
         end
     end
-    
+
     methods (Hidden)
         function delete(obj)
-            delete@StatSTEMbutton(obj)
-            set(obj.button,'KeyReleasedCallback',[])
-            set(obj.button,'FocusLostCallback',[])
+            delete@StatSTEMbutton(obj);
+            if ~isempty(obj.button) && ishandle(obj.button)
+                try
+                    set(obj.button, 'Callback', [], 'KeyReleaseFcn', []);
+                catch
+                end
+            end
+        end
+    end
+
+    methods (Static, Access = private)
+        function str = onoff(val)
+            if val, str = 'on'; else, str = 'off'; end
         end
     end
 end
-    

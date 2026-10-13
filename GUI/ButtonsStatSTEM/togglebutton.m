@@ -1,99 +1,68 @@
 classdef togglebutton < StatSTEMbutton
-    
+
     properties
-        name = ''; % Name shown in button
-        func = ''; % Function linked to button
-        enable = 1; % Make button active/inactive (internal for StatSTEM GUI)
-        state = 1; % Turn button on/off
-        equalTo = {''}; % Specifiy variable to see whether button should be on/off (empty variable = off, not empty = on)
+        name     = ''; % Text shown on button
+        func     = ''; % Function linked to button
+        enable   = 1;  % Active or inactive
+        state    = 0;  % Current toggle state (0=off, 1=on)
+        equalTo  = {''}; % Variable to keep in sync
+        selWhen  = {};
+        selected = 1;
+        keepName = 0;
+        selOptInput = '';
+        optN     = 1;
     end
-    
+
     methods
-        function obj = togglebutton(name,value,varargin)
-            if nargin>0
-                varargin = [{name},{value},varargin];
+        function obj = togglebutton(name, value, varargin)
+            if nargin > 0
+                varargin = [{name},{value}, varargin];
             end
-            obj.button = javax.swing.JButton;
-            obj.margin = [0,0,0,0];
+            obj@StatSTEMbutton;
+            obj.button = uicontrol('Style','togglebutton', ...
+                'Visible','off', ...
+                'Enable','on');
             obj.Focusable = false;
-            obj.button.setFont(obj.font);
             N = length(varargin);
-            for n=1:N/2
+            for n = 1:N/2
                 obj.(varargin{2*n-1}) = varargin{2*n};
             end
         end
-        
-        function obj = set.name(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.name = value;
-            else
-                error('StatSTEMbutton: Name should be a string')
-            end
-            set(obj.button,'Text',value)
-        end
-        
-        function obj = set.func(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.func = value;
+
+        function obj = set.name(obj, value)
+            if ischar(value), obj.name = value;
+            else, error('StatSTEMbutton: Name should be a string'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'String', value);
             end
         end
-        
-        function obj = set.enable(obj,value)
-            % Make sure the value is a logical
-            if value==1 || value==0
-                obj.enable = value==true;
-            else
-                error('StatSTEMbutton: Enable should be a logical value')
-            end
-            obj.setEnabled(value);
+        function obj = set.func(obj, value)
+            if ischar(value), obj.func = value; end
         end
-        
-        function obj = set.state(obj,value)
-            % Make sure the value is a logical
-            if value==1 || value==0
-                obj.state = value==true;
-            else
-                error('StatSTEMbutton: Enable should be a logical value')
-            end
-            if value==1
-                obj.button.setForeground(javax.swing.plaf.ColorUIResource(0,0,0))
-            else
-                obj.button.setForeground(java.awt.Color(1,0,0))
+        function obj = set.enable(obj, value)
+            if value==1 || value==0, obj.enable = value==true;
+            else, error('StatSTEMbutton: Enable should be a logical value'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'Enable', togglebutton.onoff(value));
             end
         end
-        
-        function val = get.state(obj)
-            fg = get(obj.button,'Foreground');
-            v = version('-release');
-            v = str2double(v(1:4));
-            if v<2015
-                r = fg(1);
-                g = fg(2);
-                b = fg(3);
-            else
-                r = fg.getRed;
-                g = fg.getGreen;
-                b = fg.getBlue;
-            end
-            if r==0 && g==0 && b==0
-                val = 1;
-            else
-                val = 0;
+        function obj = set.state(obj, value)
+            if value==1 || value==0, obj.state = value==true;
+            else, error('StatSTEMbutton: state should be a logical value'); end
+            if ~isempty(obj.button) && ishandle(obj.button)
+                set(obj.button, 'Value', double(value==1));
             end
         end
-        
-        function obj = set.equalTo(obj,value)
-            % Make sure the name is a string
-            if isa(value,'char')
-                obj.equalTo = {value};
-            elseif isa(value,'cell')
-                obj.equalTo = value;
-            else
-                error('StatSTEMbutton: equalTo should be a string or a cell structure with strings')
-            end
+        function obj = set.equalTo(obj, value)
+            if ischar(value), obj.equalTo = {value};
+            elseif iscell(value), obj.equalTo = value;
+            else, error('StatSTEMbutton: equalTo should be a string or cell'); end
+        end
+    end
+
+    methods (Static, Access = private)
+        function str = onoff(val)
+            if val, str = 'on'; else, str = 'off'; end
         end
     end
 end
-    

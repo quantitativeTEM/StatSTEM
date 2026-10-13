@@ -1,10 +1,10 @@
-function showAdvPanel(jObject,event,panel)
+function showAdvPanel(hObject, ~, panel)
 % showAdvPanel - Show or hide panel with advanced options
 %
-%   syntax: showAdvPanel(jObject,event,panel)
-%       jObject  - Reference to button
-%       event    - structure recording button events
-%       panel    - structure containing references to panels
+%   syntax: showAdvPanel(hObject, event, panel)
+%       hObject - Reference to the 'Show options' checkbox (uicontrol)
+%       event   - callback event data (unused)
+%       panel   - structure containing references to panels
 %
 
 %--------------------------------------------------------------------------
@@ -16,27 +16,22 @@ function showAdvPanel(jObject,event,panel)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-% Check value of button
-val = jObject.isSelected;
+val = get(hObject, 'Value');   % 1 = checked (show), 0 = unchecked (hide)
 
-% Set border
-head = any(strcmp(fieldnames(panel),'header')); % is header present
-set(panel.panel,'Border',javax.swing.border.MatteBorder(~head,1,~val,1,java.awt.Color(0.3,0.3,0.3)))
-dim = panel.panel.getSize;
-width = dim.getWidth;
-height = dim.getHeight;
-if val
-    height = height - 1;
-else
-    height = height + 1;
+if ~isfield(panel, 'advanced')
+    return
 end
-dim = java.awt.Dimension(width,height);
-panel.panel.setSize(dim);
-panel.panel.setMaximumSize(dim);
-panel.panel.setPreferredSize(dim);
 
-% Show or hide advanced panels
-N = sum(strncmp(fieldnames(panel.advanced),'panel',5));
-for n=1:N
-    panel.advanced.(['panel',num2str(n)]).panel.setVisible(val);
+% Show or hide all advanced sub-panels (stored as panel.advanced.panel1, .panel2 ...)
+fNames = fieldnames(panel.advanced);
+advNames = fNames(strncmp(fNames, 'panel', 5));
+for n = 1:length(advNames)
+    h = panel.advanced.(advNames{n}).panel;
+    if ishandle(h)
+        if val
+            set(h, 'Visible', 'on');
+        else
+            set(h, 'Visible', 'off');
+        end
+    end
 end
