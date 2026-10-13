@@ -18,9 +18,11 @@ function obj = selColumnAtom(obj,state)
 % Contact: sandra.vanaert@uantwerpen.be
 %--------------------------------------------------------------------------
 
-if nargin<2
-    state = 1;
-end
+% if nargin<2
+%     state = 1;
+% end
+
+state = 1;
 
 if state
     if obj.GUI==0
@@ -30,15 +32,19 @@ if state
         plotFitCoordinates(obj)   
     end
     
-    %% Select axis
-    ax = gca;
-    axis(ax);
+    %% Select axis -- use obj.ax directly to avoid gca unreliability in GUI
+    if ~isempty(obj.ax) && ishandle(obj.ax)
+        ax = obj.ax;
+    else
+        ax = gca;
+    end
+    axes(ax);
     hold on;
 
     %% Select region
     title(ax,'Select region, press ESC to exit')
-    % Get coordinates
-    coor = gregion_AxInFig();
+    % Pass ax explicitly so gregion_AxInFig uses the correct axes
+    coor = gregion_AxInFig(ax);
     title(ax,'')
     obj.selRegion = coor;
 else

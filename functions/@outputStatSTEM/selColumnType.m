@@ -23,6 +23,8 @@ if nargin<2
     state = 1;
 end
 
+state = 1;
+
 if state
     types = obj.types;
     if ~isempty(obj.GUI)

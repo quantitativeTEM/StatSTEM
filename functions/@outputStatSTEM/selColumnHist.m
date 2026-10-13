@@ -23,23 +23,29 @@ if nargin<2
     state = 1;
 end
 
+state = 1;
+
 if state
     if obj.GUI==0
         figure;
         showHistogramSCS(obj);  
     end
     
-    %% Select axis
-    ax = gca;
-    axis(ax);
+    %% Select axis -- use obj.ax directly to avoid gca unreliability in GUI
+    if ~isempty(obj.ax) && ishandle(obj.ax)
+        ax = obj.ax;
+    else
+        ax = gca;
+    end
+    axes(ax);
     hold on;
     
     %% Select interval
     % Let user select a minimum
     title(ax,'Select lower boundary, press ESC to exit')
 
-    % Get minimum
-    [minVol,y] = ginput_AxInFig();
+    % Get minimum -- pass ax explicitly
+    [minVol,y] = ginput_AxInFig(ax);
     if ~isempty(minVol)
         % Continue
         hold(ax,'on')
@@ -48,7 +54,7 @@ if state
         title(ax,'Select upper boundary, press ESC to exit')
         
         % Get maximum
-        [maxVol,~] = ginput_AxInFig();
+        [maxVol,~] = ginput_AxInFig(ax);
         delete(h_min)
     else
         maxVol = [];
